@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">ChatRoom</string>
+    <string name="app_name" translatable="false">ChatRoom</string>
+    <string name="chats_title">Чаты</string>
+    <string name="groups_title">Группы</string>
+    <string name="profile_title">Профиль</string>
+    <string name="more_title">Ещё</string>
+    <string name="add_friend">Добавить Друга</string>
+    <string name="add_group">Создать Группу</string>
 </resources>

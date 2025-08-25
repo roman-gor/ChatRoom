@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chats_title">Chats</string>
+    <string name="groups_title">Groups</string>
+    <string name="profile_title">Profile</string>
+    <string name="more_title">More</string>
+    <string name="add_friend">Add Friend</string>
+    <string name="add_group">Create Group</string>
+</resources>

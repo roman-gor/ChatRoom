@@ -38,7 +38,7 @@ fun MainScreen(navController: NavHostController){
             Screen.bItems.forEach { bItem ->
                 composable(bItem.bRoute) {
                     when (bItem) {
-                        Screen.BottomNavItem.Chats -> ChatsScreen()
+                        Screen.BottomNavItem.Chats -> ChatsScreen(onItemClick = {})
                         Screen.BottomNavItem.Groups -> GroupsScreen()
                         Screen.BottomNavItem.Profile -> ProfileScreen()
                         Screen.BottomNavItem.More -> MoreScreen()

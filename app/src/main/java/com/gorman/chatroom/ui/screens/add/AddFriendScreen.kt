@@ -11,15 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
 import com.gorman.chatroom.R
 
 @Composable
-fun AddFriendScreen(onBack: () -> Unit, navController: NavHostController){
-
+fun AddFriendScreen(onBack: () -> Unit){
     Scaffold (
         modifier = Modifier.fillMaxSize(),
-        topBar = {  }
+        topBar = { AppTopBar(title = R.string.add_friend, onBack = { onBack() }) }
     ){ innerPaddings ->
         Column (modifier = Modifier.fillMaxSize().padding(innerPaddings),
             horizontalAlignment = Alignment.CenterHorizontally,

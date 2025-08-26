@@ -19,9 +19,7 @@ fun AppNavigation(){
         Screen.aItems.forEach { aItem ->
             composable(aItem.aRoute) {
                 when (aItem) {
-                    Screen.AddScreenItem.Friend -> AddFriendScreen(
-                        navController = navController,
-                        onBack =  { navController.popBackStack() })
+                    Screen.AddScreenItem.Friend -> AddFriendScreen { navController.popBackStack() }
                     Screen.AddScreenItem.Group -> CreateGroupScreen { navController.popBackStack() }
                 }
             }

@@ -1,5 +1,6 @@
 package com.gorman.chatroom.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +42,7 @@ fun BottomNavigationBar(
         shape = RoundedCornerShape(24.dp)
     ){
         NavigationBar (
+            modifier = Modifier.background(color = Color.Transparent),
             containerColor = Color.Transparent,
             windowInsets = NavigationBarDefaults.windowInsets
         ) {

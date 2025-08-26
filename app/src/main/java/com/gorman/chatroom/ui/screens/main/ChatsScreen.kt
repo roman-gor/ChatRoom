@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import com.gorman.chatroom.R
 
 @Composable
-fun ChatsScreen(modifier: Modifier = Modifier){
-    Column (modifier = modifier.fillMaxSize(),
+fun ChatsScreen(){
+    Column (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Text(stringResource(R.string.chats_title),

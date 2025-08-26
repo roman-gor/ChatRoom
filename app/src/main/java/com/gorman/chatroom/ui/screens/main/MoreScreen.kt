@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import com.gorman.chatroom.R
 
 @Composable
-fun MoreScreen(modifier: Modifier = Modifier){
-    Column (modifier = modifier.fillMaxSize(),
+fun MoreScreen(){
+    Column (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Text(stringResource(R.string.more_title),

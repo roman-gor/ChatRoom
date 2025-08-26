@@ -102,6 +102,7 @@ fun TopBar(navController: NavHostController){
 @Composable
 fun RotatingPlusIcon(navController: NavHostController) {
     var expanded by remember { mutableStateOf(false) }
+    val items = Screen.aItems
     var selectedColor by remember { mutableStateOf(Color.Transparent) }
 
     val rotation by animateFloatAsState(
@@ -145,19 +146,21 @@ fun RotatingPlusIcon(navController: NavHostController) {
         offset = DpOffset(x = 0.dp, y = 10.dp),
         containerColor = Color.White
     ) {
-        AddScreenItem.items.forEach { item ->
+        items.forEach { item ->
             DropdownMenuItem(
-                text = { Text(text = stringResource(item.title),
+                text = { Text(text = stringResource(item.aTitle),
                     fontStyle = FontStyle.Normal,
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(start = 6.dp)) },
-                onClick = { navController.navigate(item.route) },
+                onClick = {
+                    navController.navigate(item.aRoute)
+                    expanded = !expanded},
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(item.icon),
-                        contentDescription = stringResource(item.title),
+                        painter = painterResource(item.aIcon),
+                        contentDescription = stringResource(item.aTitle),
                         modifier = Modifier.size(24.dp),
                         tint = colorResource(R.color.unselected_item_color)
                     )

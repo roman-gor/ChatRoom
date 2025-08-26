@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import com.gorman.chatroom.R
 
 @Composable
-fun GroupsScreen(modifier: Modifier = Modifier) {
-    Column (modifier = modifier.fillMaxSize(),
+fun GroupsScreen() {
+    Column (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Text(stringResource(R.string.groups_title),

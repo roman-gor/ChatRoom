@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import com.gorman.chatroom.R
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier){
-    Column (modifier = modifier.fillMaxSize(),
+fun ProfileScreen(){
+    Column (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
         Text(stringResource(R.string.profile_title),

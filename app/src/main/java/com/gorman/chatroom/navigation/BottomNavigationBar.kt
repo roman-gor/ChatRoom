@@ -1,11 +1,13 @@
-package com.gorman.chatroom.navigation.bottom
+package com.gorman.chatroom.navigation
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
@@ -17,14 +19,15 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.gorman.chatroom.R
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController){
-    val items = BottomNavItem.items
+fun BottomNavigationBar(
+    navController: NavController,
+    items: List<Screen.BottomNavItem>) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -32,16 +35,18 @@ fun BottomNavigationBar(navController: NavHostController){
         modifier = Modifier.fillMaxWidth()
             .padding(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(5.dp)
+        elevation = CardDefaults.cardElevation(5.dp),
+        shape = RoundedCornerShape(24.dp)
     ){
         NavigationBar (
-            containerColor = Color.Transparent
+            containerColor = Color.Transparent,
+            windowInsets = NavigationBarDefaults.windowInsets
         ) {
             items.forEach { item ->
                 NavigationBarItem(
-                    icon = { Icon(painter = painterResource(item.icon), contentDescription = stringResource(item.name)) },
-                    label = { Text(stringResource(item.name)) },
-                    selected = currentRoute == item.route,
+                    icon = { Icon(painter = painterResource(item.bIcon), contentDescription = stringResource(item.bTitle)) },
+                    label = { Text(stringResource(item.bTitle)) },
+                    selected = currentRoute == item.bRoute,
                     colors = NavigationBarItemColors(
                         selectedIconColor = Color.White,
                         selectedTextColor = Color.Black,
@@ -52,10 +57,8 @@ fun BottomNavigationBar(navController: NavHostController){
                         disabledTextColor = Color.Transparent
                     ),
                     onClick = {
-                        val startDestinationId = navController.graph.findStartDestination().id
-
-                        navController.navigate(item.route) {
-                            popUpTo(startDestinationId) {
+                        navController.navigate(item.bRoute) {
+                            popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
                             launchSingleTop = true

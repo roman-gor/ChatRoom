@@ -18,11 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.gorman.chatroom.R
+import com.gorman.chatroom.ui.fonts.mulishFont
 
 @Composable
 fun BottomNavigationBar(
@@ -45,7 +47,11 @@ fun BottomNavigationBar(
             items.forEach { item ->
                 NavigationBarItem(
                     icon = { Icon(painter = painterResource(item.bIcon), contentDescription = stringResource(item.bTitle)) },
-                    label = { Text(stringResource(item.bTitle)) },
+                    label = {
+                        Text(text = stringResource(item.bTitle),
+                            fontStyle = FontStyle.Normal,
+                            fontFamily = mulishFont()
+                        ) },
                     selected = currentRoute == item.bRoute,
                     colors = NavigationBarItemColors(
                         selectedIconColor = Color.White,

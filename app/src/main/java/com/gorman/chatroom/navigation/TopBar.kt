@@ -269,7 +269,8 @@ fun RotatingPlusIcon(navController: NavHostController) {
         expanded = expanded,
         onDismissRequest = {expanded = !expanded},
         offset = DpOffset(x = 0.dp, y = 10.dp),
-        containerColor = Color.White
+        containerColor = Color.White,
+        shape = RoundedCornerShape(12.dp)
     ) {
         items.forEach { item ->
             DropdownMenuItem(
@@ -277,7 +278,7 @@ fun RotatingPlusIcon(navController: NavHostController) {
                     fontStyle = FontStyle.Normal,
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = 6.dp)) },
                 onClick = {
                     navController.navigate(item.aRoute)

@@ -1,6 +1,10 @@
 package com.gorman.chatroom
 
+import android.app.LocaleManager
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.LocaleList
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -8,9 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.navigation.AppNavigation
 import com.gorman.chatroom.ui.theme.ChatRoomTheme
+import com.gorman.chatroom.viewmodel.MoreScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -18,14 +25,36 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val viewModel: MoreScreenViewModel = hiltViewModel()
             ChatRoomTheme {
                 Surface (
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    AppNavigation()
+                    AppNavigation(onLangChange = { newLang ->
+                        viewModel.changeLanguage(newLang)
+                        setLocaleAndRestart(newLang)
+                    })
                 }
             }
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setLocaleAndRestart(lang: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val localeManager = getSystemService(LocaleManager::class.java)
+            localeManager.applicationLocales = LocaleList(Locale.forLanguageTag(lang))
+        } else {
+            val locale = Locale(lang)
+            Locale.setDefault(locale)
+            val config = resources.configuration
+            config.setLocale(locale)
+            resources.updateConfiguration(config, resources.displayMetrics)
+        }
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        finish()
     }
 }

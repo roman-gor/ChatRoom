@@ -7,4 +7,22 @@
     <string name="add_friend">Add Friend</string>
     <string name="add_group">Create Group</string>
     <string name="search">Search</string>
+    <string name="phone">Phone:</string>
+    <string name="gender">Gender:</string>
+    <string name="birthday">Birthday:</string>
+    <string name="email">Email:</string>
+    <string name="genderManValue">Man</string>
+    <string name="genderWomanValue">Woman</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="language_item">Language</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="mute_notification">Mute Notification</string>
+    <string name="invite_friend">Invite Friends</string>
+    <string name="joined_groups">Joined Groups</string>
+    <string name="hide_chat_history">Hide Chat History</string>
+    <string name="security">Security</string>
+    <string name="term_of_service">Term of Services</string>
+    <string name="about_app">About App</string>
+    <string name="help">Help Center</string>
+    <string name="logout">Logout</string>
 </resources>

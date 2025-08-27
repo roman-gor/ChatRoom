@@ -16,7 +16,7 @@ import com.gorman.chatroom.ui.screens.main.MoreScreen
 import com.gorman.chatroom.ui.screens.main.ProfileScreen
 
 @Composable
-fun MainScreen(navController: NavHostController){
+fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit){
     val nestedNavController = rememberNavController()
 
     Scaffold(
@@ -41,7 +41,7 @@ fun MainScreen(navController: NavHostController){
                         Screen.BottomNavItem.Chats -> ChatsScreen(onItemClick = {})
                         Screen.BottomNavItem.Groups -> GroupsScreen()
                         Screen.BottomNavItem.Profile -> ProfileScreen()
-                        Screen.BottomNavItem.More -> MoreScreen()
+                        Screen.BottomNavItem.More -> MoreScreen(onLangChange = onLangChange)
                     }
                 }
             }

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">ChatRoom</string>
+    <string name="language_en" translatable="false">English</string>
+    <string name="language_ru" translatable="false">Русский</string>
     <string name="chats_title">Чаты</string>
     <string name="groups_title">Группы</string>
     <string name="profile_title">Профиль</string>
@@ -7,4 +9,22 @@
     <string name="add_friend">Добавить Друга</string>
     <string name="add_group">Создать Группу</string>
     <string name="search">Поиск</string>
+    <string name="phone">Телефон:</string>
+    <string name="gender">Пол:</string>
+    <string name="birthday">День рождения:</string>
+    <string name="email">Почта:</string>
+    <string name="genderManValue">Мужской</string>
+    <string name="genderWomanValue">Женский</string>
+    <string name="edit_profile">Изменить данные</string>
+    <string name="language_item">Язык</string>
+    <string name="dark_mode">Темная тема</string>
+    <string name="mute_notification">Уведомления</string>
+    <string name="invite_friend">Пригласить друзей</string>
+    <string name="joined_groups">Мои группы</string>
+    <string name="hide_chat_history">Скрывать историю просмотра</string>
+    <string name="security">Безопасность</string>
+    <string name="term_of_service">Пользовательское соглашение</string>
+    <string name="about_app">О приложении</string>
+    <string name="help">Помощь</string>
+    <string name="logout">Выход</string>
 </resources>

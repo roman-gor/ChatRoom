@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,7 +48,7 @@ fun GroupsScreen() {
 @Composable
 fun GroupPreviewItem(item: PeopleChatsDummyData, onItemClick: () -> Unit){
     Row (modifier = Modifier.fillMaxWidth()
-        .padding(horizontal = 30.dp, vertical = 16.dp),
+        .padding(start = 16.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Row (
@@ -62,15 +61,15 @@ fun GroupPreviewItem(item: PeopleChatsDummyData, onItemClick: () -> Unit){
                 verticalArrangement = Arrangement.Center
             ){
                 Text(text = item.name,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     fontFamily = mulishFont(),
                     color = Color.Black,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(text = item.message,
-                    fontSize = 10.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = mulishFont(),
                     color = colorResource(R.color.unselected_item_color),
@@ -79,15 +78,18 @@ fun GroupPreviewItem(item: PeopleChatsDummyData, onItemClick: () -> Unit){
                 )
             }
         }
-        Column (
-            modifier = Modifier.wrapContentSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(text = "09:25",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                fontFamily = mulishFont())
-            Text(text = "")
+        Row {
+            Spacer(modifier = Modifier.width(30.dp))
+            Column (
+                modifier = Modifier.wrapContentSize(),
+                horizontalAlignment = Alignment.End
+            ){
+                Text(text = "09:25",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = mulishFont())
+                TextField("15")
+            }
         }
     }
 }

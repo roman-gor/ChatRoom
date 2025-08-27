@@ -8,13 +8,13 @@ import com.gorman.chatroom.ui.screens.add.AddFriendScreen
 import com.gorman.chatroom.ui.screens.add.CreateGroupScreen
 
 @Composable
-fun AppNavigation(){
+fun AppNavigation(onLangChange: (String) -> Unit){
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "main_screen") {
 
         composable("main_screen") {
-            MainScreen(navController = navController)
+            MainScreen(navController = navController, onLangChange = onLangChange)
         }
         Screen.aItems.forEach { aItem ->
             composable(aItem.aRoute) {

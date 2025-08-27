@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="selected_indicator_color">#FF03A9F4</color>
     <color name="unselected_item_color">#FF9A9BB1</color>
+    <color name="red_logout_color">#FFF6695E</color>
+    <color name="logout_background_color">#FFFEECEB</color>
 </resources>

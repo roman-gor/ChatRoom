@@ -13,4 +13,6 @@ object SettingsKeys {
     val LANGUAGE = stringPreferencesKey("language")
     val DARK_MODE = booleanPreferencesKey("dark_mode")
     val MUTE_NOTIFICATIONS = booleanPreferencesKey("mute_notifications")
+    val HIDE_CHAT_HISTORY = booleanPreferencesKey("hide_chat_history")
+    val SECURITY = booleanPreferencesKey("security")
 }

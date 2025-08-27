@@ -10,13 +10,19 @@ import kotlinx.coroutines.flow.map
 class SettingsRepository(private val context: Context) {
 
     val languageFlow: Flow<String> = context.dataStore.data
-        .map { prefs -> prefs[SettingsKeys.LANGUAGE] ?: "ru" }
+        .map { prefs -> prefs[SettingsKeys.LANGUAGE] ?: getCurrentLanguage(context) }
 
     val darkModeFlow: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[SettingsKeys.DARK_MODE] ?: false }
 
     val muteNotificationsFlow: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[SettingsKeys.MUTE_NOTIFICATIONS] ?: false }
+
+    val hideChatHistoryFlow: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[SettingsKeys.HIDE_CHAT_HISTORY] ?: true }
+
+    val securityFlow: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[SettingsKeys.SECURITY] ?: false }
 
     suspend fun setLanguage(lang: String) {
         context.dataStore.edit { prefs ->
@@ -34,5 +40,21 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[SettingsKeys.MUTE_NOTIFICATIONS] = muted
         }
+    }
+
+    suspend fun setHideChatHistory(hided: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[SettingsKeys.HIDE_CHAT_HISTORY] = hided
+        }
+    }
+
+    suspend fun setSecurity(secure: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[SettingsKeys.SECURITY] = secure
+        }
+    }
+
+    fun getCurrentLanguage(context: Context): String {
+        return context.resources.configuration.locales[0].language
     }
 }

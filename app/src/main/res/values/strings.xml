@@ -21,9 +21,9 @@
     <string name="mute_notification">Уведомления</string>
     <string name="invite_friend">Пригласить друзей</string>
     <string name="joined_groups">Мои группы</string>
-    <string name="hide_chat_history">Скрывать историю просмотра</string>
+    <string name="hide_chat_history">История чатов</string>
     <string name="security">Безопасность</string>
-    <string name="term_of_service">Пользовательское соглашение</string>
+    <string name="term_of_service">Term of Services</string>
     <string name="about_app">О приложении</string>
     <string name="help">Помощь</string>
     <string name="logout">Выход</string>

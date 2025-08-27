@@ -1,6 +1,7 @@
 package com.gorman.chatroom
 
 import android.app.LocaleManager
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -33,28 +34,31 @@ class MainActivity : ComponentActivity() {
                 ){
                     AppNavigation(onLangChange = { newLang ->
                         viewModel.changeLanguage(newLang)
-                        setLocaleAndRestart(newLang)
+                        setLocaleAndRestart(newLang, this)
                     })
                 }
             }
         }
     }
 
-    @Suppress("DEPRECATION")
-    private fun setLocaleAndRestart(lang: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val localeManager = getSystemService(LocaleManager::class.java)
-            localeManager.applicationLocales = LocaleList(Locale.forLanguageTag(lang))
-        } else {
-            val locale = Locale(lang)
-            Locale.setDefault(locale)
-            val config = resources.configuration
-            config.setLocale(locale)
-            resources.updateConfiguration(config, resources.displayMetrics)
+    private fun setLocaleAndRestart(lang: String, context: Context) {
+        if (lang != context.resources.configuration.locales[0].language) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val localeManager = getSystemService(LocaleManager::class.java)
+                localeManager.applicationLocales = LocaleList(Locale.forLanguageTag(lang))
+            } else {
+                @Suppress("DEPRECATION")
+                val locale = Locale(lang)
+                Locale.setDefault(locale)
+                val config = resources.configuration
+                config.setLocale(locale)
+                @Suppress("DEPRECATION")
+                resources.updateConfiguration(config, resources.displayMetrics)
+            }
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            finish()
         }
-        val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
-        finish()
     }
 }

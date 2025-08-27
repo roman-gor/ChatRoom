@@ -25,4 +25,5 @@
     <string name="about_app">About App</string>
     <string name="help">Help Center</string>
     <string name="logout">Logout</string>
+    <string name="copy">Copied to the clipboard</string>
 </resources>

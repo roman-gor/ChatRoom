@@ -1,5 +1,9 @@
 package com.gorman.chatroom.ui.screens.main
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -129,6 +134,7 @@ fun ProfileButtons(){
 
 @Composable
 fun ProfileItem(name: Int, value: String){
+    val context = LocalContext.current
     Row (
         modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -152,10 +158,18 @@ fun ProfileItem(name: Int, value: String){
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
-        IconButton(onClick = {}) {
+        IconButton(onClick = {
+            copyToClipboard(context = context, text = value)
+        }) {
             Icon(painter = painterResource(R.drawable.copy),
                 contentDescription = "Copy",
                 tint = colorResource(R.color.black))
         }
     }
+}
+
+fun copyToClipboard(context: Context, text: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = ClipData.newPlainText("Copied Text", text)
+    clipboard.setPrimaryClip(clip)
 }

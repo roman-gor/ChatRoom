@@ -1,7 +1,6 @@
 package com.gorman.chatroom.navigation
 
 import com.gorman.chatroom.R
-import okhttp3.Route
 
 sealed class Screen(val route: String, val title: Int){
     sealed class BottomNavItem (val bRoute: String, val bTitle: Int, val bIcon: Int)

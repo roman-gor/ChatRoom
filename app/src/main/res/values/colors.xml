@@ -11,4 +11,8 @@
     <color name="unselected_item_color">#FF9A9BB1</color>
     <color name="red_logout_color">#FFF6695E</color>
     <color name="logout_background_color">#FFFEECEB</color>
+    <color name="chat_bg">#FFF0F0F3</color>
+    <color name="placeholder_message">#FFACADB1</color>
+    <color name="own_message">#FF1565C0</color>
+    <color name="not_own_message_time_text">#FFD0D1DB</color>
 </resources>

@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gorman.chatroom.ui.screens.add.AddFriendScreen
 import com.gorman.chatroom.ui.screens.add.CreateGroupScreen
+import com.gorman.chatroom.ui.screens.main.chats.ChatConversationScreen
 
 @Composable
 fun AppNavigation(onLangChange: (String) -> Unit){
@@ -23,6 +24,16 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                     Screen.AddScreenItem.Group -> CreateGroupScreen { navController.popBackStack() }
                 }
             }
+        }
+        composable(Screen.ConversationItem.ChatConversation.cRoute) {
+            ChatConversationScreen(
+                onVideoClick = {},
+                onPlusClick = {},
+                onPhoneClick = {},
+                onBackClick = { navController.popBackStack() },
+                onMoreClick = {},
+                onSendMessageClick = {it}
+            )
         }
     }
 }

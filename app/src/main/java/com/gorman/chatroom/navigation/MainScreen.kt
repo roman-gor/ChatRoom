@@ -10,7 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gorman.chatroom.ui.screens.main.ChatsScreen
+import com.gorman.chatroom.ui.screens.main.chats.ChatsScreen
 import com.gorman.chatroom.ui.screens.main.GroupsScreen
 import com.gorman.chatroom.ui.screens.main.MoreScreen
 import com.gorman.chatroom.ui.screens.main.ProfileScreen
@@ -38,7 +38,11 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
             Screen.bItems.forEach { bItem ->
                 composable(bItem.bRoute) {
                     when (bItem) {
-                        Screen.BottomNavItem.Chats -> ChatsScreen(onItemClick = {})
+                        Screen.BottomNavItem.Chats -> ChatsScreen(
+                            onItemClick = {
+                                navController.navigate(
+                                    Screen.ConversationItem.ChatConversation.cRoute) }
+                        )
                         Screen.BottomNavItem.Groups -> GroupsScreen()
                         Screen.BottomNavItem.Profile -> ProfileScreen()
                         Screen.BottomNavItem.More -> MoreScreen(onLangChange = onLangChange)

@@ -1,6 +1,7 @@
 package com.gorman.chatroom.navigation
 
 import com.gorman.chatroom.R
+import okhttp3.Route
 
 sealed class Screen(val route: String, val title: Int){
     sealed class BottomNavItem (val bRoute: String, val bTitle: Int, val bIcon: Int)
@@ -16,6 +17,11 @@ sealed class Screen(val route: String, val title: Int){
         object Friend: AddScreenItem("add_friend", R.string.add_friend, R.drawable.add_friend)
         object Group: AddScreenItem("add_group", R.string.add_group, R.drawable.add_group)
     }
+
+    sealed class ConversationItem(val cRoute: String, val cTitle: Int)
+        : Screen (cRoute, cTitle) {
+            object ChatConversation: ConversationItem("chat_conversation", R.string.message)
+        }
 
     companion object {
         val bItems = listOf<BottomNavItem>(

@@ -95,14 +95,14 @@ fun MoreItem(item: MoreScreenData,
              specialPadding: Dp){
     Row(
         modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = specialPadding)
             .clickable(onClick = {
                 when (index) {
                     1 -> viewModel.changeDarkModeState(!darkMode)
                     2 -> viewModel.changeNotificationsState(!mute)
                     else -> {}
                 }
-            }),
+            })
+            .padding(horizontal = 12.dp, vertical = specialPadding),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

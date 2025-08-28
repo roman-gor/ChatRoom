@@ -33,6 +33,7 @@ import com.gorman.chatroom.data.PeopleChatsDummyData
 import com.gorman.chatroom.data.PeopleChatsList
 import com.gorman.chatroom.data.avatars
 import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.ui.screens.main.chats.TextField
 
 @Composable
 fun GroupsScreen() {

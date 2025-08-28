@@ -28,4 +28,6 @@
     <string name="help">Помощь</string>
     <string name="logout">Выход</string>
     <string name="copy">Скопировано в буфер обмена</string>
+    <string name="message">Чат</string>
+    <string name="type_message_placeholder">Сообщение…</string>
 </resources>

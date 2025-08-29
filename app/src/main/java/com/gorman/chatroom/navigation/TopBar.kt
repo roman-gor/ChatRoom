@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.gorman.chatroom.R
@@ -49,7 +50,7 @@ import com.gorman.chatroom.viewmodel.MainScreenViewModel
 @Composable
 fun TopBar(navController: NavHostController) {
 
-    val viewModel: MainScreenViewModel = viewModel()
+    val viewModel: MainScreenViewModel = hiltViewModel()
     var isSearchBar by remember { mutableStateOf(false) }
 
     Box(

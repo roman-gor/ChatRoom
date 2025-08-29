@@ -6,14 +6,46 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ServerValue
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class FirebaseDB {
     val database = Firebase.database.getReference("ChatRoom")
+
+    fun getUserChats(userId: String): Flow<List<ChatsData?>> = callbackFlow {
+        val userIdRef = database.child("users").child(userId).child("chats")
+
+        val valueEventListener = object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val chatIds = snapshot.children.mapNotNull { it.key }
+                launch {
+                    val chatsList = chatIds.map { chatId ->
+                        try {
+                            val chatSnapshot = database.child("chats").child(chatId).get().await()
+                            chatSnapshot.getValue(ChatsData::class.java)
+                        } catch (e: Exception) {
+                            Log.e("Firebase", "Ошибка при загрузке чата $chatId: ${e.message}")
+                            null
+                        }
+                    }
+                    trySend(chatsList)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Ошибка при извлечении списка чатов $error")
+                close(error.toException())
+            }
+
+        }
+        userIdRef.addValueEventListener(valueEventListener)
+        awaitClose { userIdRef.removeEventListener(valueEventListener) }
+    }
 
     fun getMessages(chatId: String): Flow<List<MessagesData>> = callbackFlow {
         val chatMessagesRef = database.child("messages").child(chatId)

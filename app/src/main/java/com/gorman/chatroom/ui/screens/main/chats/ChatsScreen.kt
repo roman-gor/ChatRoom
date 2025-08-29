@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,17 +31,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.PeopleChatsDummyData
 import com.gorman.chatroom.data.PeopleChatsList
 import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.viewmodel.ChatsScreenViewModel
+import com.gorman.chatroom.viewmodel.MainScreenViewModel
 
 @Composable
 fun ChatsScreen(onItemClick: () -> Unit){
+    val chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel()
+    val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
+    val userId = mainScreenViewModel.userId
+    //val chatsList = chatsScreenViewModel.chatsList.collectAsState().value
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+//        items(chatsList){ item ->
+//            ChatPreviewItem(item, onItemClick = { onItemClick(item.) })
+//        }
         items(PeopleChatsList){ item ->
             ChatPreviewItem(item, onItemClick = { onItemClick() })
         }

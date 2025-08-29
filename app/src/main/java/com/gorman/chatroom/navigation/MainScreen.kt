@@ -38,10 +38,10 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
             Screen.bItems.forEach { bItem ->
                 composable(bItem.bRoute) {
                     when (bItem) {
-                        Screen.BottomNavItem.Chats -> ChatsScreen(
-                            onItemClick = {
-                                navController.navigate(
-                                    Screen.ConversationItem.ChatConversation.cRoute) }
+                        Screen.BottomNavItem.Chats -> ChatsScreen(onItemClick =
+                            {
+                                navController.navigate(Screen.ConversationItem.ChatConversation.cRoute)
+                            }
                         )
                         Screen.BottomNavItem.Groups -> GroupsScreen()
                         Screen.BottomNavItem.Profile -> ProfileScreen()

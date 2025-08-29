@@ -38,8 +38,7 @@ import com.gorman.chatroom.ui.screens.main.chats.TextField
 @Composable
 fun GroupsScreen() {
     LazyColumn (modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
+        horizontalAlignment = Alignment.CenterHorizontally) {
         items(PeopleChatsList){ item->
             GroupPreviewItem(item) { }
         }

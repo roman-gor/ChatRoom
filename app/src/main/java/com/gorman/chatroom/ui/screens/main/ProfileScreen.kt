@@ -26,8 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,20 +40,32 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
-import com.gorman.chatroom.data.profileItemsList
+import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.viewmodel.ProfileScreenViewModel
 
 @Composable
 fun ProfileScreen(){
+    val profileScreenViewModel: ProfileScreenViewModel = hiltViewModel()
+    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
+    val userId = mainScreenViewModel.userId.collectAsState()
+    LaunchedEffect(userId) {
+        profileScreenViewModel.getUserByID(userId.value)
+    }
+    val userData = profileScreenViewModel.userData.value
+    val profileItems = profileScreenViewModel.getProfileItemsFromObject(userData)
     Column (modifier = Modifier.fillMaxSize()
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box (modifier = Modifier.size(160.dp)){
-            Image(painter = painterResource(R.drawable.profile_ava),
+            Image(painter = rememberAsyncImagePainter(
+                model = userData.profileImageUrl
+            ),
                 contentDescription = "Profile Avatar",
                 modifier = Modifier
                     .clip(CircleShape)
@@ -67,14 +79,23 @@ fun ProfileScreen(){
                     .clickable(onClick = {}, indication = null, interactionSource = null))
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text(text = "John Lennon",
-            fontFamily = mulishFont(),
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = colorResource(R.color.black))
+        userData.username?.let {
+            Text(text = it,
+                fontFamily = mulishFont(),
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = colorResource(R.color.black))
+        }
         Spacer(modifier = Modifier.height(20.dp))
-        profileItemsList.forEach { item ->
-            ProfileItem(item.name, item.value)
+        profileItems.forEach { item ->
+            if (item.key == R.string.gender) {
+                if (item.value == "woman")
+                    ProfileItem(item.key, stringResource(R.string.genderWomanValue))
+                else
+                    ProfileItem(item.key, stringResource(R.string.genderManValue))
+            }
+            else
+                ProfileItem(item.key, item.value)
         }
         Spacer(modifier = Modifier.height(10.dp))
         ProfileButtons()
@@ -136,7 +157,7 @@ fun ProfileButtons(){
 }
 
 @Composable
-fun ProfileItem(name: Int, value: String){
+fun ProfileItem(name: Int, value: String?){
     val context = LocalContext.current
     Row (
         modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
@@ -151,22 +172,26 @@ fun ProfileItem(name: Int, value: String){
                 color = colorResource(R.color.unselected_item_color),
                 modifier = Modifier.padding(end = 8.dp)
             )
-            Text(text = value,
-                fontFamily = mulishFont(),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorResource(R.color.black),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            value?.let {
+                Text(text = it,
+                    fontFamily = mulishFont(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(R.color.black),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         Spacer(modifier = Modifier.width(12.dp))
-        IconButton(onClick = {
-            copyToClipboard(context = context, text = value)
-        }) {
-            Icon(painter = painterResource(R.drawable.copy),
-                contentDescription = "Copy",
-                tint = colorResource(R.color.black))
+        value?.let {
+            IconButton(onClick = {
+                copyToClipboard(context = context, text = it)
+            }) {
+                Icon(painter = painterResource(R.drawable.copy),
+                    contentDescription = "Copy",
+                    tint = colorResource(R.color.black))
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.ChatsData
 import com.gorman.chatroom.ui.fonts.mulishFont
@@ -99,7 +100,9 @@ fun ChatPreviewItem(item: ChatsData?,
                 horizontalArrangement = Arrangement.Center
             ){
                 Image(
-                    painter = painterResource(R.drawable.default_avatar),
+                    painter = rememberAsyncImagePainter(
+                        model = user?.profileImageUrl
+                    ),
                     contentDescription = "Avatar",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.MessagesData
 import com.gorman.chatroom.data.UsersData
@@ -69,6 +70,7 @@ fun ChatConversationScreen(mapId: Map<String, String>,
     val currentUserId = mapId["currentUserId"]
     val getterUserId = mapId["getterUserId"]
     val chatId = mapId["chatId"]
+
     LaunchedEffect(chatId, currentUserId) {
         Log.d("ConversationScreen", "chatId=$chatId currentUserId=$currentUserId")
         if (chatId != null && currentUserId != null) {
@@ -282,7 +284,9 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
             verticalAlignment = Alignment.CenterVertically
         ){
             Image(
-                painter = painterResource(R.drawable.default_avatar),
+                painter = rememberAsyncImagePainter(
+                    model = getterUser?.profileImageUrl
+                ),
                 contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

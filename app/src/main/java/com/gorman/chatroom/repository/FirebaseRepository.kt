@@ -5,7 +5,6 @@ import com.gorman.chatroom.data.FirebaseDB
 import com.gorman.chatroom.data.MessagesData
 import com.gorman.chatroom.data.UsersData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -14,6 +13,10 @@ class FirebaseRepository @Inject constructor(
 ) {
     fun getUserChats(userId: String): Flow<List<ChatsData?>> {
         return firebaseDB.getUserChats(userId)
+    }
+
+    suspend fun getUserById(userId: String): UsersData {
+        return firebaseDB.getUserById(userId)
     }
 
     fun getMessages(chatId: String): Flow<List<MessagesData>> {

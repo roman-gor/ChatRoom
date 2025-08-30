@@ -166,4 +166,14 @@ class FirebaseDB {
             throw e
         }
     }
+
+    suspend fun getUserById(userId: String): UsersData {
+        val currentUserRef = database.child("users").child(userId)
+        return try {
+            val userSnapshot = currentUserRef.get().await()
+            userSnapshot.getValue(UsersData::class.java)
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при поиске пользователя: ${e.message}")
+        } as UsersData
+    }
 }

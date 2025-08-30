@@ -1,5 +1,6 @@
 package com.gorman.chatroom.ui.screens.main.chats
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +31,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,6 +80,7 @@ fun ChatPreviewItem(item: ChatsData?,
                 item.chatId,
                 userId,
                 item.lastMessageId)
+            Log.d("Item", item.chatId)
         }
     }
     val mapId = mutableMapOf<String, String>()
@@ -128,7 +129,7 @@ fun ChatPreviewItem(item: ChatsData?,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    lastMessage?.let {
+                    lastMessage?.text?.let {
                         Text(text = it,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
@@ -146,7 +147,9 @@ fun ChatPreviewItem(item: ChatsData?,
                     modifier = Modifier.wrapContentSize(),
                     horizontalAlignment = Alignment.End
                 ){
-                    Text(text = formatTimestamp(item?.lastMessageTimestamp),
+                    Text(text = if (item?.lastMessageTimestamp != "")
+                        formatTimestamp(item?.lastMessageTimestamp)
+                        else "",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         fontFamily = mulishFont())

@@ -23,7 +23,7 @@ class MainScreenViewModel @Inject constructor(
     val userId: StateFlow<String> = settingsRepository.userIdFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = "qaCuaK9djXM5kFZAgjeZfmTGOpy1"
+        initialValue = ""
     )
 
     fun setUserId(id: String) {

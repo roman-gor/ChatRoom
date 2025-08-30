@@ -1,5 +1,6 @@
 package com.gorman.chatroom.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.data.ChatPreviewData
@@ -24,19 +25,29 @@ class ChatsScreenViewModel @Inject constructor(
     private val _chatPreviews = MutableStateFlow<Map<String, ChatPreviewData>>(emptyMap())
     val chatPreviews: StateFlow<Map<String, ChatPreviewData>> = _chatPreviews.asStateFlow()
 
-    fun initChatPreview(chatId: String, currentUserId: String, lastMessageId: String) {
+    fun initChatPreview(chatId: String, currentUserId: String, lastMessageId: String = "") {
         viewModelScope.launch {
+            Log.d("ViewModel", "Init viewmodel")
             val getterUserData = firebaseRepository.findUserByChatId(chatId, currentUserId)
             val flow = combine(
                 firebaseRepository.getMessages(chatId),
                 firebaseRepository.getUnreadMessagesQuantity(chatId, currentUserId)
             ) { messagesList, quantity ->
-                val lastMessage = messagesList.find { it.messageId == lastMessageId }
-                ChatPreviewData(
-                    user = getterUserData,
-                    lastMessage = lastMessage,
-                    unreadQuantity = quantity
-                )
+                if (lastMessageId != "") {
+                    val lastMessage = messagesList.find { it.messageId == lastMessageId }
+                    ChatPreviewData(
+                        user = getterUserData,
+                        lastMessage = lastMessage,
+                        unreadQuantity = quantity
+                    )
+                }
+                else {
+                    ChatPreviewData(
+                        user = getterUserData,
+                        lastMessage = null,
+                        unreadQuantity = quantity
+                    )
+                }
             }
             flow.collect { data ->
                 _chatPreviews.value = _chatPreviews.value.toMutableMap().apply {

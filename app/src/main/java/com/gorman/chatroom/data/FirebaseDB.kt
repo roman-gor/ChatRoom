@@ -26,6 +26,7 @@ class FirebaseDB {
         val valueEventListener = object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val chatIds = snapshot.children.mapNotNull { it.key }
+                Log.d("Firebase", "Чаты пользователя $userId: $chatIds")
                 launch {
                     val chatsList = chatIds.map { chatId ->
                         try {
@@ -36,6 +37,7 @@ class FirebaseDB {
                             null
                         }
                     }
+                    Log.d("Firebase", "${chatsList.size}")
                     trySend(chatsList)
                 }
             }
@@ -86,7 +88,6 @@ class FirebaseDB {
                     allMessages.add(message)
                     trySend(allMessages.toList())
                 }
-                Log.d("Firebase", "Получено сообщений: ${message}")
             }
 
             override fun onChildChanged(

@@ -78,7 +78,13 @@ fun ChatConversationScreen(mapId: Map<String, String>,
     }
     val messagesList = chatConversationViewModel.messages.collectAsState().value
     val getterUser = chatConversationViewModel.getterUserData.value
-    val sortedMessages = messagesList.sortedByDescending { parseIso(it.timestamp) }
+    val sortedMessages = messagesList.sortedByDescending {
+        if (it.timestamp.isNullOrEmpty()) {
+            0L
+        } else {
+            parseIso(it.timestamp)
+        }
+    }
 
     Scaffold (
         topBar = { ChatTopBar(onBackClick = onBackClick, onMoreClick = onMoreClick) },
@@ -115,8 +121,10 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                 itemsIndexed(sortedMessages) { index, message ->
                     val isFirstMessage = index == 0
                     val isLastMessage = index == sortedMessages.lastIndex
-                    currentUserId?.let {
-                        MessageItem(message, currentUserId, isFirstMessage, isLastMessage)
+                    if (message.timestamp != "") {
+                        currentUserId?.let {
+                            MessageItem(message, currentUserId, isFirstMessage, isLastMessage)
+                        }
                     }
                 }
             }
@@ -196,7 +204,9 @@ fun MessageItem(message: MessagesData,
                 )
             }
             Text(
-                text = formatTimestamp(message.timestamp),
+                text = if (message.timestamp != "")
+                    formatTimestamp(message.timestamp)
+                    else "",
                 fontFamily = mulishFont(),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,

@@ -8,6 +8,8 @@ import com.gorman.chatroom.R
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.repository.FirebaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,16 +18,21 @@ class ProfileScreenViewModel @Inject constructor(
     private val firebaseRepository: FirebaseRepository
 ): ViewModel() {
 
-    private val _userData = mutableStateOf(UsersData())
-    val userData: State<UsersData> = _userData
+    private val _userData = MutableStateFlow(UsersData())
+    val userData: StateFlow<UsersData> = _userData
+
+    private val _profileItems = mutableStateOf<Map<Int, String?>>(emptyMap())
+    val profileItems: State<Map<Int, String?>> = _profileItems
 
     fun getUserByID(userId: String) {
         viewModelScope.launch {
-            _userData.value = firebaseRepository.getUserById(userId)
+            val user = firebaseRepository.getUserById(userId)
+            _userData.value = user
+            _profileItems.value = getProfileItemsFromObject(user)
         }
     }
 
-    fun getProfileItemsFromObject(obj: UsersData): Map<Int, String?>{
+    private fun getProfileItemsFromObject(obj: UsersData): Map<Int, String?>{
         return mapOf(
             R.string.phone to obj.phone,
             R.string.gender to obj.gender,

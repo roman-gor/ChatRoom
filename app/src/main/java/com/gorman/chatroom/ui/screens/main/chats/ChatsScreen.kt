@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,9 +51,13 @@ fun ChatsScreen(onItemClick: (String) -> Unit){
     val chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel()
     val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
 
-    val userId = mainScreenViewModel.userId.collectAsState().value
-    chatsScreenViewModel.getUserChats(userId)
-    val chatsList = chatsScreenViewModel.chatsList.collectAsState().value
+    val userId by mainScreenViewModel.userId.collectAsState()
+    LaunchedEffect(userId) {
+        if (userId.isNotEmpty()) {
+            chatsScreenViewModel.getUserChats(userId)
+        }
+    }
+    val chatsList by chatsScreenViewModel.chatsList.collectAsState()
 
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
@@ -78,9 +83,10 @@ fun ChatPreviewItem(item: ChatsData?,
         }
     }
     val mapId = mutableMapOf<String, String>()
-    val user = chatsScreenViewModel.getterUserData.value
-    val lastMessage = chatsScreenViewModel.messageData.value?.text
-    val unreadMessages = chatsScreenViewModel.unreadQuantity.value
+    val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
+    val user = chatMap[item?.chatId]?.user
+    val lastMessage = chatMap[item?.chatId]?.lastMessage
+    val unreadMessages = chatMap[item?.chatId]?.unreadQuantity
     if (item?.chatId != null && user?.userId != null) {
         mapId.put("getterUserId", user.userId)
         mapId.put("currentUserId", userId)

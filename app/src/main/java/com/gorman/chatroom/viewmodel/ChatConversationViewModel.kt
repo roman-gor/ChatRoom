@@ -9,7 +9,6 @@ import com.gorman.chatroom.data.MessagesData
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.repository.FirebaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,19 +28,18 @@ class ChatConversationViewModel @Inject constructor(
 
     fun initializeChat(chatId: String, currentUserId: String) {
         viewModelScope.launch {
-            firebaseRepository.getMessages(chatId).collect { messagesList ->
-                _messages.value = messagesList
+            launch {
+                firebaseRepository.getMessages(chatId).collect { messagesList ->
+                    _messages.value = messagesList
+                }
             }
-        }
-        viewModelScope.launch {
+            val getterUser = firebaseRepository.findUserByChatId(chatId, currentUserId)
+            _getterUserData.value = getterUser
             try {
                 firebaseRepository.markMessageAsRead(chatId, currentUserId)
             } catch (e: Exception) {
-                Log.e("ConversationViewModel", "Ошибка при обработке сообщение ${e.message}")
+                Log.e("ConversationViewModel", "Ошибка при отметке сообщения как прочитанного: ${e.message}")
             }
-        }
-        viewModelScope.launch {
-            _getterUserData.value = firebaseRepository.findUserByChatId(chatId, currentUserId)
         }
     }
 

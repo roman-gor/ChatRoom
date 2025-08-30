@@ -142,21 +142,12 @@ fun MessageItem(message: MessagesData,
         else colorResource(R.color.not_own_message_time_text)
 
     val alignment = if (message.senderId == currentUserId) Alignment.CenterEnd else Alignment.CenterStart
-    val corners = when {
-        message.senderId == currentUserId -> RoundedCornerShape(
-            topStart = 16.dp,
-            topEnd = 16.dp,
-            bottomStart = 16.dp,
-            bottomEnd = 0.dp
-        )
-        message.senderId != currentUserId -> RoundedCornerShape(
-            topStart = 16.dp,
-            topEnd = 16.dp,
-            bottomStart = 0.dp,
-            bottomEnd = 16.dp
-        )
-        else -> RoundedCornerShape(16.dp)
-    }
+    val corners =
+        if (message.senderId == currentUserId) {
+            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 0.dp)
+        } else {
+            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 0.dp, bottomEnd = 16.dp)
+        }
     val boxPaddings = when {
         isLastMessage -> {
             if (message.senderId == currentUserId) {

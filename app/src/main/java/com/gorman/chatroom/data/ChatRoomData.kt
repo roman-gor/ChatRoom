@@ -51,3 +51,9 @@ data class UsersData(
     val userId: String? = null,
     val unreadMessagesCount: Int? = null
 )
+
+data class ChatPreviewData(
+    val user: UsersData? = null,
+    val lastMessage: MessagesData? = null,
+    val unreadQuantity: Int = 0
+)

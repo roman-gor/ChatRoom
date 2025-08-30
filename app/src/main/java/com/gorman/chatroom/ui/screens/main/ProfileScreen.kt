@@ -28,9 +28,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -42,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
-import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.viewmodel.ProfileScreenViewModel
@@ -55,8 +57,8 @@ fun ProfileScreen(){
     LaunchedEffect(userId) {
         profileScreenViewModel.getUserByID(userId.value)
     }
-    val userData = profileScreenViewModel.userData.value
-    val profileItems = profileScreenViewModel.getProfileItemsFromObject(userData)
+    val userData by profileScreenViewModel.userData.collectAsState()
+    val profileItems = profileScreenViewModel.profileItems.value
     Column (modifier = Modifier.fillMaxSize()
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
@@ -98,17 +100,37 @@ fun ProfileScreen(){
                 ProfileItem(item.key, item.value)
         }
         Spacer(modifier = Modifier.height(10.dp))
-        ProfileButtons()
+        ProfileButtons(
+            onClick = {},
+            containerColor = colorResource(R.color.selected_indicator_color),
+            icon = painterResource(R.drawable.edit_profile),
+            iconTint = colorResource(R.color.white),
+            text = "Edit Profile",
+            textColor = colorResource(R.color.white),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp))
+        ProfileButtons(
+            onClick = {},
+            containerColor = colorResource(R.color.logout_background_color),
+            icon = painterResource(R.drawable.logout_icon),
+            iconTint = colorResource(R.color.red_logout_color),
+            text = "Logout",
+            textColor = colorResource(R.color.red_logout_color),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp))
     }
 }
 
 @Composable
-fun ProfileButtons(){
-    Button(onClick = {},
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp),
+fun ProfileButtons(onClick: () -> Unit,
+                   containerColor: Color,
+                   icon: Painter,
+                   iconTint: Color,
+                   text: String,
+                   textColor: Color,
+                   modifier: Modifier){
+    Button(onClick = {onClick()},
+        modifier = modifier,
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(R.color.selected_indicator_color)
+            containerColor = containerColor
         ),
         shape = RoundedCornerShape(12.dp)) {
         Row (
@@ -116,42 +138,16 @@ fun ProfileButtons(){
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ){
-            Icon(painter = painterResource(R.drawable.edit_profile),
-                contentDescription = "Edit Profile",
-                tint = colorResource(R.color.white))
+            Icon(painter = icon,
+                contentDescription = text,
+                tint = iconTint)
             Spacer(modifier = Modifier.width(20.dp))
-            Text("Edit Profile",
+            Text(text,
                 fontFamily = mulishFont(),
                 fontSize = 18.sp,
                 modifier = Modifier
                     .padding(top = 4.dp, bottom = 4.dp),
-                color = colorResource(R.color.white))
-        }
-    }
-    Button(onClick = {},
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(R.color.logout_background_color)
-        ),
-        shape = RoundedCornerShape(12.dp),
-    ) {
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(painter = painterResource(R.drawable.logout_icon),
-                contentDescription = "Logout",
-                tint = colorResource(R.color.red_logout_color))
-            Spacer(modifier = Modifier.width(20.dp))
-            Text("Logout",
-                fontFamily = mulishFont(),
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .padding(top = 4.dp, bottom = 4.dp),
-                color = colorResource(R.color.red_logout_color)
-            )
+                color = textColor)
         }
     }
 }

@@ -12,9 +12,10 @@ data class ChatRoomData(
 
 @IgnoreExtraProperties
 data class ChatsData(
+    val chatId: String? = null,
     val isGroup: Boolean? = null,
     val lastMessageId: String? = null,
-    val lastMessageTimestamp: Long? = null,
+    val lastMessageTimestamp: String? = null,
     val members: Map<String, Boolean>? = null
 )
 
@@ -23,25 +24,28 @@ data class GroupsData(
     val admins: Map<String, Boolean>? = null,
     val groupName: String? = null,
     val lastMessageId: String? = null,
-    val lastMessageTimestamp: Long? = null,
+    val lastMessageTimestamp: String? = null,
     val members: Map<String, Boolean>? = null
 )
 
 @IgnoreExtraProperties
 data class MessagesData(
+    val messageId: String? = null,
     val senderId: String? = null,
     val status: Map<String, String>? = null,
     val text: String? = null,
-    val timestamp: Long? = null
+    val timestamp: String? = null
 )
 
 @IgnoreExtraProperties
 data class UsersData(
     val username: String? = null,
     val email: String? = null,
+    val phone: String? = null,
     val profileImageUrl: String? = null,
-    val lastSeen: Long? = null,
+    val lastSeen: String? = null,
     val groups: Map<String, Boolean>? = null,
     val chats: Map<String, Boolean>? = null,
+    val userId: String? = null,
     val unreadMessagesCount: Int? = null
 )

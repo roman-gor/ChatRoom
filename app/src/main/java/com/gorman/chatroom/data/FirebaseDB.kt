@@ -47,6 +47,28 @@ class FirebaseDB {
         awaitClose { userIdRef.removeEventListener(valueEventListener) }
     }
 
+    suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData {
+        val chatMembersRef = database.child("chats").child(chatId).child("members")
+        return try {
+            val membersSnapshot = chatMembersRef.get().await()
+            val membersMap = membersSnapshot.value as? Map<*, *>
+            if (membersMap != null) {
+                val getterId = membersMap.keys.find { it != currentUserId }
+                if (getterId != null) {
+                    val userRef = database.child("users").child(getterId as String)
+                    val userSnapshot = userRef.get().await()
+                    userSnapshot.getValue(UsersData::class.java)
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при поиске пользователя: ${e.message}")
+        } as UsersData
+    }
+
     fun getMessages(chatId: String): Flow<List<MessagesData>> = callbackFlow {
         val chatMessagesRef = database.child("messages").child(chatId)
         val allMessages = mutableListOf<MessagesData>()
@@ -61,6 +83,7 @@ class FirebaseDB {
                     allMessages.add(message)
                     trySend(allMessages.toList())
                 }
+                Log.d("Firebase", "Получено сообщений: ${message}")
             }
 
             override fun onChildChanged(
@@ -103,13 +126,13 @@ class FirebaseDB {
                 getterId to "unread"
             ),
             text = text,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis().toString()
         )
 
         try {
             newMessageRef.setValue(messageData).await()
             Log.d("Firebase", "Сообщение успешно отправлено")
-            val updates = hashMapOf<String, Any>(
+            val updates = hashMapOf(
                 "chats/$chatId/lastMessageId" to messageId!!,
                 "chats/$chatId/lastMessageTimestamp" to ServerValue.TIMESTAMP
             )

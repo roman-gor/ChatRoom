@@ -42,7 +42,7 @@ data class Message(
     val isOwn: Boolean
 )
 
-val messagesList = listOf(
+val messagesList__ = listOf(
     Message(5, "Oh, it's great!", "14:49", false),
     Message(4, "Today i'll drive a car" +
             "Today i'll drive a car" +

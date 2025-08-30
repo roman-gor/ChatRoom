@@ -3,7 +3,10 @@ package com.gorman.chatroom.repository
 import com.gorman.chatroom.data.ChatsData
 import com.gorman.chatroom.data.FirebaseDB
 import com.gorman.chatroom.data.MessagesData
+import com.gorman.chatroom.data.UsersData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class FirebaseRepository @Inject constructor(
@@ -17,6 +20,14 @@ class FirebaseRepository @Inject constructor(
         return firebaseDB.getMessages(chatId = chatId)
     }
 
+    fun getUnreadMessagesQuantity(chatId: String, userId: String): Flow<Int>{
+        return firebaseDB.getMessages(chatId).map { messagesData ->
+            messagesData.count { message ->
+                message.status?.get(userId) == "unread"
+            }
+        }
+    }
+
     suspend fun sendMessage(chatId: String,
                             currentUserId: String,
                             getterId: String,
@@ -26,5 +37,9 @@ class FirebaseRepository @Inject constructor(
 
     suspend fun markMessageAsRead(chatId: String, currentUserId: String) {
         firebaseDB.markMessageAsRead(chatId, currentUserId)
+    }
+
+    suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData? {
+        return firebaseDB.findUserByChatId(chatId, currentUserId)
     }
 }

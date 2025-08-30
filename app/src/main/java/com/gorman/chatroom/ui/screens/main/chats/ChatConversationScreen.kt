@@ -1,5 +1,6 @@
 package com.gorman.chatroom.ui.screens.main.chats
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -28,6 +29,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,18 +48,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
-import com.gorman.chatroom.data.Message
-import com.gorman.chatroom.data.messagesList
+import com.gorman.chatroom.data.MessagesData
+import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.viewmodel.ChatConversationViewModel
+import java.time.Instant
+import java.time.format.DateTimeParseException
 
 @Composable
-fun ChatConversationScreen(onBackClick: () -> Unit,
+fun ChatConversationScreen(mapId: Map<String, String>,
+                           onBackClick: () -> Unit,
                            onMoreClick: () -> Unit,
                            onPhoneClick: () -> Unit,
                            onVideoClick: () -> Unit,
                            onPlusClick: () -> Unit,
                            onSendMessageClick: (String) -> Unit) {
+    val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
+    val currentUserId = mapId["currentUserId"]
+    val getterUserId = mapId["getterUserId"]
+    val chatId = mapId["chatId"]
+    LaunchedEffect(chatId, currentUserId) {
+        Log.d("ConversationScreen", "chatId=$chatId currentUserId=$currentUserId")
+        if (chatId != null && currentUserId != null) {
+            chatConversationViewModel.initializeChat(chatId, currentUserId)
+        }
+    }
+    val messagesList = chatConversationViewModel.messages.collectAsState().value
+    val getterUser = chatConversationViewModel.getterUserData.value
+    val sortedMessages = messagesList.sortedByDescending { parseIso(it.timestamp) }
+
     Scaffold (
         topBar = { ChatTopBar(onBackClick = onBackClick, onMoreClick = onMoreClick) },
         bottomBar = { BottomSendMessageView(onPlusClick = onPlusClick, onSendMessageClick = onSendMessageClick) }
@@ -68,7 +90,7 @@ fun ChatConversationScreen(onBackClick: () -> Unit,
                 .background(color = colorResource(R.color.white)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            InfoChat(onVideoClick = onVideoClick, onPhoneClick = onPhoneClick)
+            InfoChat(onVideoClick = onVideoClick, onPhoneClick = onPhoneClick, getterUser = getterUser)
             LazyColumn (
                 modifier = Modifier
                     .weight(1f)
@@ -77,8 +99,12 @@ fun ChatConversationScreen(onBackClick: () -> Unit,
                     .background(color = colorResource(R.color.chat_bg)),
                 reverseLayout = true,
             ) {
-                items(messagesList) { message ->
-                    MessageItem(message)
+                itemsIndexed(sortedMessages) { index, message ->
+                    val isFirstMessage = index == 0
+                    val isLastMessage = index == sortedMessages.lastIndex
+                    currentUserId?.let {
+                        MessageItem(message, currentUserId, isFirstMessage, isLastMessage)
+                    }
                 }
             }
         }
@@ -86,52 +112,55 @@ fun ChatConversationScreen(onBackClick: () -> Unit,
 }
 
 @Composable
-fun MessageItem(message: Message){
+fun MessageItem(message: MessagesData,
+                currentUserId: String,
+                isFirstMessage: Boolean,
+                isLastMessage: Boolean){
     val colorBackground =
-        if (message.isOwn) colorResource(R.color.own_message)
+        if (message.senderId == currentUserId) colorResource(R.color.own_message)
         else colorResource(R.color.white)
 
     val colorText =
-        if (message.isOwn) colorResource(R.color.white)
+        if (message.senderId == currentUserId) colorResource(R.color.white)
         else colorResource(R.color.black)
 
     val colorTime =
-        if (message.isOwn) colorResource(R.color.chat_bg)
+        if (message.senderId == currentUserId) colorResource(R.color.chat_bg)
         else colorResource(R.color.not_own_message_time_text)
 
-    val alignment = if (message.isOwn) Alignment.CenterEnd else Alignment.CenterStart
-
-    val corners =
-        if (message.isOwn) RoundedCornerShape(
+    val alignment = if (message.senderId == currentUserId) Alignment.CenterEnd else Alignment.CenterStart
+    val corners = when {
+        message.senderId == currentUserId -> RoundedCornerShape(
             topStart = 16.dp,
             topEnd = 16.dp,
             bottomStart = 16.dp,
             bottomEnd = 0.dp
         )
-        else RoundedCornerShape(
+        message.senderId != currentUserId -> RoundedCornerShape(
             topStart = 16.dp,
             topEnd = 16.dp,
             bottomStart = 0.dp,
             bottomEnd = 16.dp
         )
-
-    val boxPaddings = when (message.messageId) {
-        messagesList.size - 1 -> {
-            if (message.isOwn) {
-                PaddingValues(bottom = 24.dp, start = 56.dp, end = 24.dp, top = 4.dp)
-            } else {
-                PaddingValues(bottom = 24.dp, start = 24.dp, end = 56.dp, top = 4.dp)
-            }
-        }
-        0 -> {
-            if (message.isOwn) {
+        else -> RoundedCornerShape(16.dp)
+    }
+    val boxPaddings = when {
+        isLastMessage -> {
+            if (message.senderId == currentUserId) {
                 PaddingValues(bottom = 4.dp, start = 56.dp, end = 24.dp, top = 24.dp)
             } else {
                 PaddingValues(bottom = 4.dp, start = 24.dp, end = 56.dp, top = 24.dp)
             }
         }
+        isFirstMessage -> {
+            if (message.senderId == currentUserId) {
+                PaddingValues(bottom = 24.dp, start = 56.dp, end = 24.dp, top = 4.dp)
+            } else {
+                PaddingValues(bottom = 24.dp, start = 24.dp, end = 56.dp, top = 4.dp)
+            }
+        }
         else -> {
-            if (message.isOwn) {
+            if (message.senderId == currentUserId) {
                 PaddingValues(bottom = 4.dp, start = 56.dp, end = 24.dp, top = 4.dp)
             } else {
                 PaddingValues(bottom = 4.dp, start = 24.dp, end = 56.dp, top = 4.dp)
@@ -153,15 +182,17 @@ fun MessageItem(message: Message){
                 )
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
+            message.text?.let {
+                Text(
+                    text = it,
+                    fontFamily = mulishFont(),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colorText
+                )
+            }
             Text(
-                text = message.content,
-                fontFamily = mulishFont(),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = colorText
-            )
-            Text(
-                text = message.time,
+                text = formatTimestamp(message.timestamp),
                 fontFamily = mulishFont(),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
@@ -170,6 +201,13 @@ fun MessageItem(message: Message){
         }
     }
 }
+
+fun parseIso(iso: String?): Long =
+    try {
+        Instant.parse(iso).toEpochMilli()
+    } catch (_: DateTimeParseException) {
+        Long.MAX_VALUE
+    }
 
 @Composable
 fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
@@ -232,7 +270,7 @@ fun IconButton(icon: Int, onClick: () -> Unit){
 }
 
 @Composable
-fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit){
+fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: UsersData?){
     Row (modifier = Modifier
         .fillMaxWidth()
         .padding(bottom = 16.dp, start = 24.dp, end = 24.dp),
@@ -255,22 +293,26 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit){
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ){
-                Text(text = "David Waynee",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = mulishFont(),
-                    color = Color.Black,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(text = "+(44) 59 4485 5794",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                getterUser?.username?.let {
+                    Text(text = it,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = mulishFont(),
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                getterUser?.phone?.let {
+                    Text(text = it,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = mulishFont(),
+                        color = colorResource(R.color.unselected_item_color),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
         Row {

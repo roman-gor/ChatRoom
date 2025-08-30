@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,8 +18,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,90 +36,131 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
-import com.gorman.chatroom.data.PeopleChatsDummyData
-import com.gorman.chatroom.data.PeopleChatsList
+import com.gorman.chatroom.data.ChatsData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun ChatsScreen(onItemClick: () -> Unit){
+fun ChatsScreen(onItemClick: (String) -> Unit){
     val chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel()
     val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
-    val userId = mainScreenViewModel.userId
-    //val chatsList = chatsScreenViewModel.chatsList.collectAsState().value
+
+    val userId = mainScreenViewModel.userId.collectAsState().value
+    chatsScreenViewModel.getUserChats(userId)
+    val chatsList = chatsScreenViewModel.chatsList.collectAsState().value
+
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-//        items(chatsList){ item ->
-//            ChatPreviewItem(item, onItemClick = { onItemClick(item.) })
-//        }
-        items(PeopleChatsList){ item ->
-            ChatPreviewItem(item, onItemClick = { onItemClick() })
+        items(chatsList){ item ->
+            ChatPreviewItem(item, onItemClick = onItemClick, userId, chatsScreenViewModel)
         }
     }
 }
 
 @Composable
-fun ChatPreviewItem(item: PeopleChatsDummyData, onItemClick: () -> Unit){
-    Row (modifier = Modifier.fillMaxWidth()
-        .clickable(onClick = onItemClick)
-        .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-        Row (
-            modifier = Modifier.weight(1f, fill = false),
-            horizontalArrangement = Arrangement.Center
-        ){
-            Image(
-                painter = painterResource(item.avatar),
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.size(50.dp)
-                    .clip(CircleShape))
-            Spacer(modifier = Modifier.width(12.dp))
-            Column (
-                verticalArrangement = Arrangement.Center
+fun ChatPreviewItem(item: ChatsData?,
+                    onItemClick: (String) -> Unit,
+                    userId: String,
+                    chatsScreenViewModel: ChatsScreenViewModel){
+    LaunchedEffect(key1 = item?.chatId) {
+        if (item?.chatId != null && item.lastMessageId != null) {
+            chatsScreenViewModel.initChatPreview(
+                item.chatId,
+                userId,
+                item.lastMessageId)
+        }
+    }
+    val mapId = mutableMapOf<String, String>()
+    val user = chatsScreenViewModel.getterUserData.value
+    val lastMessage = chatsScreenViewModel.messageData.value?.text
+    val unreadMessages = chatsScreenViewModel.unreadQuantity.value
+    if (item?.chatId != null && user?.userId != null) {
+        mapId.put("getterUserId", user.userId)
+        mapId.put("currentUserId", userId)
+        mapId.put("chatId", item.chatId)
+    }
+    val serialized = mapId.entries.joinToString(";") { "${it.key}=${it.value}" }
+
+    Column (modifier = Modifier.fillMaxWidth()){
+        Row (modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onItemClick(serialized) })
+            .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically) {
+            Row (
+                modifier = Modifier.weight(1f, fill = false),
+                horizontalArrangement = Arrangement.Center
             ){
-                Text(text = item.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = mulishFont(),
-                    color = Color.Black,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(text = item.message,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Image(
+                    painter = painterResource(R.drawable.default_avatar),
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape))
+                Spacer(modifier = Modifier.width(12.dp))
+                Column (
+                    verticalArrangement = Arrangement.Center
+                ){
+                    user?.username?.let {
+                        Text(text = it,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontFamily = mulishFont(),
+                            color = Color.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    lastMessage?.let {
+                        Text(text = it,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = mulishFont(),
+                            color = colorResource(R.color.unselected_item_color),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+            Row (verticalAlignment = Alignment.Top){
+                Spacer(modifier = Modifier.width(30.dp))
+                Column (
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalAlignment = Alignment.End
+                ){
+                    Text(text = formatTimestamp(item?.lastMessageTimestamp),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = mulishFont())
+                    if (unreadMessages != 0) {
+                        TextField(unreadMessages.toString())
+                    }
+                    else {
+                        Spacer(modifier = Modifier.height(27.dp))
+                    }
+                }
             }
         }
-        Row {
-            Spacer(modifier = Modifier.width(30.dp))
-            Column (
-                modifier = Modifier.wrapContentSize(),
-                horizontalAlignment = Alignment.End
-            ){
-                Text(text = "09:25",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = mulishFont())
-                TextField("5")
-            }
-        }
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(),
+            color = colorResource(R.color.chat_bg))
     }
 }
 
 @Composable
 fun TextField(value: String){
     Card (
-        modifier = Modifier.wrapContentSize().padding(top = 4.dp),
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(top = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(R.color.selected_indicator_color)
         )
@@ -128,4 +172,11 @@ fun TextField(value: String){
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, end = 8.dp))
     }
+}
+
+fun formatTimestamp(isoString: String?): String {
+    val instant = Instant.parse(isoString)
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        .withZone(ZoneId.systemDefault())
+    return formatter.format(instant)
 }

@@ -25,8 +25,13 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                 }
             }
         }
-        composable(Screen.ConversationItem.ChatConversation.cRoute) {
+        composable(Screen.ConversationItem.ChatConversation.cRoute + "/{map_id}") { backStackEntry ->
+            val mapId = backStackEntry.arguments?.getString("map_id") ?: ""
+            val restoredMap = mapId.split(";")
+                .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
+                .associate { it[0] to it[1] }
             ChatConversationScreen(
+                mapId = restoredMap,
                 onVideoClick = {},
                 onPlusClick = {},
                 onPhoneClick = {},

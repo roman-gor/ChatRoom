@@ -142,7 +142,7 @@ fun ChatPreviewItem(item: ChatsData?,
                 ){
                     Text(text = formatTimestamp(item?.lastMessageTimestamp),
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Normal,
                         fontFamily = mulishFont())
                     if (unreadMessages != 0) {
                         TextField(unreadMessages.toString())

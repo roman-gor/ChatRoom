@@ -64,8 +64,7 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                            onMoreClick: () -> Unit,
                            onPhoneClick: () -> Unit,
                            onVideoClick: () -> Unit,
-                           onPlusClick: () -> Unit,
-                           onSendMessageClick: (String) -> Unit) {
+                           onPlusClick: () -> Unit) {
     val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
     val currentUserId = mapId["currentUserId"]
     val getterUserId = mapId["getterUserId"]
@@ -83,7 +82,19 @@ fun ChatConversationScreen(mapId: Map<String, String>,
 
     Scaffold (
         topBar = { ChatTopBar(onBackClick = onBackClick, onMoreClick = onMoreClick) },
-        bottomBar = { BottomSendMessageView(onPlusClick = onPlusClick, onSendMessageClick = onSendMessageClick) }
+        bottomBar = {
+            BottomSendMessageView(
+                onPlusClick = onPlusClick,
+                onSendMessageClick = {
+                    if (chatId != null && currentUserId != null && getterUserId != null) {
+                        chatConversationViewModel.sendMessage(
+                            chatId = chatId,
+                            currentUserId = currentUserId,
+                            getterId = getterUserId,
+                            text = it)
+                    }
+                })
+        }
     ){ innerPaddings ->
         Column(
             modifier = Modifier
@@ -392,7 +403,10 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .clickable { onSendMessageClick(value) },
+                .clickable {
+                    onSendMessageClick(value)
+                    value = ""
+                },
             contentScale = ContentScale.Crop
         )
     }

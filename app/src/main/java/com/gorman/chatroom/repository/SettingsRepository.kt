@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 class SettingsRepository(private val context: Context) {
 
     val userIdFlow: Flow<String> = context.dataStore.data
-        .map { prefs -> prefs[SettingsKeys.USER_ID] ?: "S3BYeApReBhWlgMW4b9BrYpfCXH3" }
+        .map { prefs -> prefs[SettingsKeys.USER_ID] ?: "qaCuaK9djXM5kFZAgjeZfmTGOpy1" }
 
     val languageFlow: Flow<String> = context.dataStore.data
         .map { prefs -> prefs[SettingsKeys.LANGUAGE] ?: getCurrentLanguage(context) }

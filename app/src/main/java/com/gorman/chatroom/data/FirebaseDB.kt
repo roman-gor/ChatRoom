@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 class FirebaseDB {
     val database = Firebase.database.getReference("ChatRoom")
@@ -119,22 +122,24 @@ class FirebaseDB {
         val chatMessagesRef = database.child("messages").child(chatId)
         val newMessageRef = chatMessagesRef.push()
         val messageId = newMessageRef.key
+        val isoTimestamp: String = DateTimeFormatter.ISO_INSTANT
+            .format(Instant.now().atOffset(ZoneOffset.UTC))
         val messageData = MessagesData(
+            messageId = messageId,
             senderId = currentUserId,
             status = mapOf(
                 currentUserId to "read",
                 getterId to "unread"
             ),
             text = text,
-            timestamp = System.currentTimeMillis().toString()
+            timestamp = isoTimestamp
         )
-
         try {
             newMessageRef.setValue(messageData).await()
             Log.d("Firebase", "Сообщение успешно отправлено")
-            val updates = hashMapOf(
+            val updates = mapOf(
                 "chats/$chatId/lastMessageId" to messageId!!,
-                "chats/$chatId/lastMessageTimestamp" to ServerValue.TIMESTAMP
+                "chats/$chatId/lastMessageTimestamp" to isoTimestamp
             )
             database.updateChildren(updates).await()
             Log.d("Firebase", "Данные о чате обновлены")

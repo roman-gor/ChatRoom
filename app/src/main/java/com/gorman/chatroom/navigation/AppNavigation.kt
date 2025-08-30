@@ -36,8 +36,7 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                 onPlusClick = {},
                 onPhoneClick = {},
                 onBackClick = { navController.popBackStack() },
-                onMoreClick = {},
-                onSendMessageClick = {it}
+                onMoreClick = {}
             )
         }
     }

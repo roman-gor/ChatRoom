@@ -79,7 +79,7 @@ fun TopBar(navController: NavHostController) {
 
 @Composable
 fun DefaultTopBar(navController: NavHostController, onSearchClick: () -> Unit){
-        Row(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 40.dp, start = 24.dp, end = 24.dp, bottom = 20.dp),

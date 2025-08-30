@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.R
-import com.gorman.chatroom.data.ProfileItems
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.repository.FirebaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -56,6 +56,8 @@ import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatConversationViewModel
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 @Composable
@@ -66,8 +68,8 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                            onVideoClick: () -> Unit,
                            onPlusClick: () -> Unit) {
     val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
-    var currentUserId: String? = null
-    var getterUserId: String? = null
+    var currentUserId: String?
+    var getterUserId: String?
     var chatId: String? = null
     if (mapId.size == 2) {
         currentUserId = mapId["currentUserId"]
@@ -423,4 +425,11 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
             contentScale = ContentScale.Crop
         )
     }
+}
+
+fun formatTimestamp(isoString: String?): String {
+    val instant = Instant.parse(isoString)
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        .withZone(ZoneId.systemDefault())
+    return formatter.format(instant)
 }

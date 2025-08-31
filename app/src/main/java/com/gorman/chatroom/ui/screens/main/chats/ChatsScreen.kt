@@ -43,8 +43,11 @@ import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 @Composable
 fun ChatsScreen(onItemClick: (String) -> Unit){
@@ -83,6 +86,7 @@ fun ChatPreviewItem(item: ChatsData?,
             Log.d("Item", item.chatId)
         }
     }
+    val datetime = formatMessageTimestamp(item?.lastMessageTimestamp)
     val mapId = mutableMapOf<String, String>()
     val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
     val user = chatMap[item?.chatId]?.user
@@ -147,9 +151,7 @@ fun ChatPreviewItem(item: ChatsData?,
                     modifier = Modifier.wrapContentSize(),
                     horizontalAlignment = Alignment.End
                 ){
-                    Text(text = if (item?.lastMessageTimestamp != "")
-                        formatTimestamp(item?.lastMessageTimestamp)
-                        else "",
+                    Text(text = datetime,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         fontFamily = mulishFont())
@@ -186,9 +188,28 @@ fun TextField(value: String){
     }
 }
 
-fun formatTimestamp(isoString: String?): String {
-    val instant = Instant.parse(isoString)
-    val formatter = DateTimeFormatter.ofPattern("HH:mm")
-        .withZone(ZoneId.systemDefault())
-    return formatter.format(instant)
+fun formatMessageTimestamp(isoOrEpoch: String?): String {
+    if (isoOrEpoch.isNullOrBlank()) return ""
+
+    val locale = Locale.getDefault()
+    val zone = ZoneId.systemDefault()
+
+    val instant = runCatching {
+        Instant.parse(isoOrEpoch)
+    }.getOrElse {
+        runCatching { Instant.ofEpochMilli(isoOrEpoch.toLong()) }.getOrElse { return "" }
+    }
+
+    val dt = instant.atZone(zone)
+    val today = LocalDate.now(zone)
+    val date = dt.toLocalDate()
+
+    return when (ChronoUnit.DAYS.between(date, today)) {
+        0L -> DateTimeFormatter.ofPattern("HH:mm", locale).format(dt)                 // сегодня → время
+        in 1..6 -> {
+            val w = DateTimeFormatter.ofPattern("eee", locale).format(dt)
+            w.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+        }
+        else -> DateTimeFormatter.ofPattern("dd.MM.yyyy", locale).format(dt)          // иначе → дата
+    }
 }

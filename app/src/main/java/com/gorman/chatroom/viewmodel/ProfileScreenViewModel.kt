@@ -1,7 +1,6 @@
 package com.gorman.chatroom.viewmodel
 
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    firebaseRepository: FirebaseRepository
 ): ViewModel() {
 
     private val _userData = MutableStateFlow(UsersData())
@@ -38,6 +37,7 @@ class ProfileScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             currentUserData.filterNotNull().collect { user ->
+                _userData.value = user
                 _profileItems.value = getProfileItemsFromObject(user)
             }
         }

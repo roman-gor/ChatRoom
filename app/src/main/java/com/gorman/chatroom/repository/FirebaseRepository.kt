@@ -1,26 +1,19 @@
 package com.gorman.chatroom.repository
 
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.gorman.chatroom.data.ChatsData
 import com.gorman.chatroom.data.FirebaseDB
 import com.gorman.chatroom.data.MessagesData
 import com.gorman.chatroom.data.UsersData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 class FirebaseRepository @Inject constructor(
     private val firebaseDB: FirebaseDB,
-    private val settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -32,10 +25,6 @@ class FirebaseRepository @Inject constructor(
 
     fun getUserChats(userId: String): Flow<List<ChatsData?>> {
         return firebaseDB.getUserChats(userId)
-    }
-
-    suspend fun getUserById(userId: String): UsersData {
-        return firebaseDB.getUserById(userId)
     }
 
     fun getMessages(chatId: String): Flow<List<MessagesData>> {

@@ -1,13 +1,11 @@
 package com.gorman.chatroom.data
 
 import android.util.Log
-import com.google.firebase.Firebase
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -21,7 +19,6 @@ import javax.inject.Inject
 class FirebaseDB @Inject constructor(
     private val database: DatabaseReference
 ){
-    val _database = Firebase.database.getReference("ChatRoom")
 
     fun getUserChats(userId: String): Flow<List<ChatsData?>> = callbackFlow {
         val userIdRef = database.child("users").child(userId).child("chats")
@@ -190,16 +187,6 @@ class FirebaseDB @Inject constructor(
             Log.e("Firebase", "Ошибка при обновлении статуса сообщений: ${e.message}")
             throw e
         }
-    }
-
-    suspend fun getUserById(userId: String): UsersData {
-        val currentUserRef = database.child("users").child(userId)
-        return try {
-            val userSnapshot = currentUserRef.get().await()
-            userSnapshot.getValue(UsersData::class.java)
-        } catch (e: Exception) {
-            Log.e("Firebase", "Ошибка при поиске пользователя: ${e.message}")
-        } as UsersData
     }
 
     fun findUserByPhoneNumber(phoneNumber: String): Flow<UsersData?> = callbackFlow {

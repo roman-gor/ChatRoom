@@ -52,11 +52,6 @@ import com.gorman.chatroom.viewmodel.ProfileScreenViewModel
 @Composable
 fun ProfileScreen(){
     val profileScreenViewModel: ProfileScreenViewModel = hiltViewModel()
-    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
-    val userId = mainScreenViewModel.userId.collectAsState()
-    LaunchedEffect(userId) {
-        profileScreenViewModel.getUserByID(userId.value)
-    }
     val userData by profileScreenViewModel.userData.collectAsState()
     val profileItems = profileScreenViewModel.profileItems.value
     Column (modifier = Modifier.fillMaxSize()

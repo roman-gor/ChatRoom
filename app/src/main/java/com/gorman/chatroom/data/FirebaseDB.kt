@@ -5,6 +5,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import kotlinx.coroutines.channels.awaitClose
@@ -15,9 +16,12 @@ import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class FirebaseDB {
-    val database = Firebase.database.getReference("ChatRoom")
+class FirebaseDB @Inject constructor(
+    private val database: DatabaseReference
+){
+    val _database = Firebase.database.getReference("ChatRoom")
 
     fun getUserChats(userId: String): Flow<List<ChatsData?>> = callbackFlow {
         val userIdRef = database.child("users").child(userId).child("chats")
@@ -49,6 +53,22 @@ class FirebaseDB {
         }
         userIdRef.addValueEventListener(valueEventListener)
         awaitClose { userIdRef.removeEventListener(valueEventListener) }
+    }
+
+    fun getUserByIdFlow(userId: String): Flow<UsersData?> = callbackFlow {
+        val userRef = database.child("users").child(userId)
+
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val user = snapshot.getValue(UsersData::class.java)
+                trySend(user)
+            }
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        userRef.addValueEventListener(valueEventListener)
+        awaitClose { userRef.removeEventListener(valueEventListener) }
     }
 
     suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData {
@@ -205,5 +225,48 @@ class FirebaseDB {
         }
         query.addValueEventListener(valueEventListener)
         awaitClose { query.removeEventListener(valueEventListener) }
+    }
+
+    suspend fun checkChatForExistence(currentUserId: String, getterUserId: String): String? {
+        val currentUserChatsRef = database.child("users").child(currentUserId).child("chats")
+        val gettingUserChatsRef = database.child("users").child(getterUserId).child("chats")
+
+        return try {
+            val currentUserChatsSnapshot = currentUserChatsRef.get().await()
+            val gettingUserChatsSnapshot = gettingUserChatsRef.get().await()
+
+            val currentUserChatIds = currentUserChatsSnapshot.children.mapNotNull { it.key }.toSet()
+            val gettingUserChatIds = gettingUserChatsSnapshot.children.mapNotNull { it.key }.toSet()
+
+            currentUserChatIds.intersect(gettingUserChatIds).firstOrNull()
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при проверке чата на существование ${e.message}")
+        } as String?
+    }
+
+    fun createChat(currentUserId: String, getterUserId: String): String? {
+        return try {
+            val chatId = database.child("chats").push().key ?: return null
+            val newChat = ChatsData(
+                chatId = chatId,
+                isGroup = false,
+                lastMessageId = "",
+                lastMessageTimestamp = "",
+                members = mapOf(
+                    currentUserId to true,
+                    getterUserId to true
+                )
+            )
+            val updates = hashMapOf(
+                "/chats/$chatId" to newChat,
+                "/users/$currentUserId/chats/$chatId" to true,
+                "/users/$getterUserId/chats/$chatId" to true
+            )
+            database.updateChildren(updates)
+            chatId
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при создании чата: ${e.message}")
+            null
+        }
     }
 }

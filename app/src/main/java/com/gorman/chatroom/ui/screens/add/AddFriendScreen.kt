@@ -60,11 +60,12 @@ import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.AddFriendViewModel
 
 @Composable
-fun AddFriendScreen(onBack: () -> Unit){
+fun AddFriendScreen(onBack: () -> Unit, onStartChatClick: (String) -> Unit){
     val addFriendViewModel: AddFriendViewModel = hiltViewModel()
     var phoneNumber by remember { mutableStateOf("") }
     var phoneCode by remember { mutableStateOf("+375") }
     val user = addFriendViewModel.usersData.collectAsState().value
+    val currentUser = addFriendViewModel.currentUserData.collectAsState().value
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         topBar = { AppTopBar(title = R.string.add_friend, onBack = { onBack() }) }
@@ -93,8 +94,11 @@ fun AddFriendScreen(onBack: () -> Unit){
                 modifier = Modifier.padding(horizontal = 32.dp, vertical = 32.dp).fillMaxWidth(),
                 singleLine = true
             )
-            if (user?.userId != null) {
-                UserInfo(getterUser = user, onStartChatClick = {})
+            if (user?.userId != null && user.phone != currentUser?.phone && currentUser?.userId != null) {
+                UserInfo(getterUser = user, onStartChatClick = onStartChatClick, userId = currentUser.userId)
+            }
+            else {
+                Placeholder()
             }
         }
     }
@@ -166,7 +170,12 @@ fun LeadingIconMenu(onItemClick: (String) -> Unit) {
 }
 
 @Composable
-fun UserInfo(getterUser: UsersData?, onStartChatClick: () -> Unit) {
+fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId: String) {
+    val forChatDataMap = mapOf(
+        "currentUserId" to userId,
+        "getterUserId" to getterUser?.userId
+    )
+    val serialized = forChatDataMap.entries.joinToString(";") { "${it.key}=${it.value}" }
     Row (modifier = Modifier
         .fillMaxWidth()
         .padding(start = 32.dp, end = 32.dp, bottom = 8.dp),
@@ -214,7 +223,7 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: () -> Unit) {
             }
         }
         Row {
-            IconButton(onClick = { onStartChatClick() }) {
+            IconButton(onClick = { onStartChatClick(serialized) }) {
                 Icon(painter = painterResource(R.drawable.start_chat),
                     contentDescription = "VideoCall",
                     tint = colorResource(R.color.selected_indicator_color),
@@ -223,5 +232,20 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: () -> Unit) {
                         .height(24.dp))
             }
         }
+    }
+}
+
+@Composable
+fun Placeholder(){
+    Column (
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ){
+        Icon(painter = painterResource(R.drawable.background_addfriend_placeholder),
+            contentDescription = "Background Placeholder",
+            modifier = Modifier.width(287.dp).height(240.dp),
+            tint = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f))
+        Spacer(modifier = Modifier.height(100.dp))
     }
 }

@@ -66,14 +66,26 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                            onVideoClick: () -> Unit,
                            onPlusClick: () -> Unit) {
     val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
-    val currentUserId = mapId["currentUserId"]
-    val getterUserId = mapId["getterUserId"]
-    val chatId = mapId["chatId"]
+    var currentUserId: String? = null
+    var getterUserId: String? = null
+    var chatId: String? = null
+    if (mapId.size == 2) {
+        currentUserId = mapId["currentUserId"]
+        getterUserId = mapId["getterUserId"]
+    }
+    else {
+        currentUserId = mapId["currentUserId"]
+        getterUserId = mapId["getterUserId"]
+        chatId = mapId["chatId"]
+    }
 
-    LaunchedEffect(chatId, currentUserId) {
+    LaunchedEffect(chatId, currentUserId, getterUserId) {
         Log.d("ConversationScreen", "chatId=$chatId currentUserId=$currentUserId")
         if (chatId != null && currentUserId != null) {
             chatConversationViewModel.initializeChat(chatId, currentUserId)
+        }
+        else if (currentUserId != null && getterUserId != null){
+            chatConversationViewModel.setupNewConversation(currentUserId, getterUserId)
         }
     }
     val messagesList = chatConversationViewModel.messages.collectAsState().value

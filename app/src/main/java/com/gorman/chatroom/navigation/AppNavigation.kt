@@ -20,7 +20,13 @@ fun AppNavigation(onLangChange: (String) -> Unit){
         Screen.aItems.forEach { aItem ->
             composable(aItem.aRoute) {
                 when (aItem) {
-                    Screen.AddScreenItem.Friend -> AddFriendScreen { navController.popBackStack() }
+                    Screen.AddScreenItem.Friend -> AddFriendScreen (
+                        onBack = { navController.popBackStack() },
+                        onStartChatClick = {it->
+                            navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$it") {
+                                popUpTo("main_screen")
+                            }
+                        })
                     Screen.AddScreenItem.Group -> CreateGroupScreen { navController.popBackStack() }
                 }
             }

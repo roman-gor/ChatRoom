@@ -28,4 +28,6 @@
     <string name="copy">Copied to the clipboard</string>
     <string name="message">Message</string>
     <string name="type_message_placeholder">Type a message…</string>
+    <string name="belarus">Belarus</string>
+    <string name="usa">USA</string>
 </resources>

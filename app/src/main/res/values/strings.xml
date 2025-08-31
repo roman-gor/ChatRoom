@@ -30,4 +30,6 @@
     <string name="copy">Скопировано в буфер обмена</string>
     <string name="message">Чат</string>
     <string name="type_message_placeholder">Сообщение…</string>
+    <string name="belarus">Беларусь</string>
+    <string name="usa">США</string>
 </resources>

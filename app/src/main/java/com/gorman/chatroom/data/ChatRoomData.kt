@@ -1,6 +1,8 @@
 package com.gorman.chatroom.data
 
+import androidx.compose.ui.res.stringResource
 import com.google.firebase.database.IgnoreExtraProperties
+import com.gorman.chatroom.R
 
 @IgnoreExtraProperties
 data class ChatRoomData(
@@ -56,4 +58,15 @@ data class ChatPreviewData(
     val user: UsersData? = null,
     val lastMessage: MessagesData? = null,
     val unreadQuantity: Int = 0
+)
+
+data class Flag(
+    val flagImage: Int,
+    val flagCountryName: Int,
+    val phoneCode: String
+)
+
+val flagsList = listOf(
+    Flag(R.drawable.belarus, R.string.belarus, "+375"),
+    Flag(R.drawable.united_states_of_america, R.string.usa, "+1")
 )

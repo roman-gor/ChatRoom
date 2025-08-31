@@ -5,7 +5,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import kotlinx.coroutines.channels.awaitClose
@@ -181,5 +180,30 @@ class FirebaseDB {
         } catch (e: Exception) {
             Log.e("Firebase", "Ошибка при поиске пользователя: ${e.message}")
         } as UsersData
+    }
+
+    fun findUserByPhoneNumber(phoneNumber: String): Flow<UsersData?> = callbackFlow {
+        val usersRef = database.child("users")
+        val query = usersRef.orderByChild("phone").equalTo(phoneNumber)
+        Log.d("Firebase", "Ищем пользователя $phoneNumber")
+        val valueEventListener = object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val user = snapshot.children.firstOrNull()?.getValue(UsersData::class.java)
+                    trySend(user)
+                    Log.d("Firebase", "Найден пользователь $user")
+                }
+                else {
+                    trySend(null)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+                Log.d("Firebase", "Ошибка при поиске ${error.message}")
+            }
+        }
+        query.addValueEventListener(valueEventListener)
+        awaitClose { query.removeEventListener(valueEventListener) }
     }
 }

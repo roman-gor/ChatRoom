@@ -45,4 +45,8 @@ class FirebaseRepository @Inject constructor(
     suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData? {
         return firebaseDB.findUserByChatId(chatId, currentUserId)
     }
+
+    fun findUserByPhoneNumber(phoneNumber: String): Flow<UsersData?> {
+        return firebaseDB.findUserByPhoneNumber(phoneNumber)
+    }
 }

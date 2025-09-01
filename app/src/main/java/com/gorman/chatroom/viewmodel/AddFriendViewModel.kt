@@ -1,11 +1,9 @@
 package com.gorman.chatroom.viewmodel
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.repository.FirebaseRepository
-import com.gorman.chatroom.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +26,7 @@ class ChatsScreenViewModel @Inject constructor(
     private val _chatPreviews = MutableStateFlow<Map<String, ChatPreviewData>>(emptyMap())
     val chatPreviews: StateFlow<Map<String, ChatPreviewData>> = _chatPreviews.asStateFlow()
 
-    fun initChatPreview(chatId: String, currentUserId: String, lastMessageId: String = "") {
+    fun initChatPreview(chatId: String, currentUserId: String) {
         viewModelScope.launch {
             Log.d("ViewModel", "Init viewmodel")
             val getterUserData = firebaseRepository.findUserByChatId(chatId, currentUserId)
@@ -33,8 +34,10 @@ class ChatsScreenViewModel @Inject constructor(
                 firebaseRepository.getMessages(chatId),
                 firebaseRepository.getUnreadMessagesQuantity(chatId, currentUserId)
             ) { messagesList, quantity ->
-                if (lastMessageId != "") {
-                    val lastMessage = messagesList.find { it.messageId == lastMessageId }
+                val lastMessage = messagesList.maxByOrNull {
+                    runCatching { Instant.parse(it.timestamp).toEpochMilli() }.getOrDefault(0L)
+                }
+                if (lastMessage?.timestamp != "") {
                     ChatPreviewData(
                         user = getterUserData,
                         lastMessage = lastMessage,
@@ -62,6 +65,12 @@ class ChatsScreenViewModel @Inject constructor(
             firebaseRepository.getUserChats(userId).collect { chatsList ->
                 _chatsList.value = chatsList
             }
+        }
+    }
+
+    fun deleteChat(chatId: String) {
+        viewModelScope.launch {
+            firebaseRepository.deleteChat(chatId)
         }
     }
 }

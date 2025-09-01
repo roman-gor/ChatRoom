@@ -26,11 +26,16 @@ class ChatConversationViewModel @Inject constructor(
     private val _getterUserData = mutableStateOf<UsersData?>(UsersData())
     val getterUserData: State<UsersData?> = _getterUserData
 
+    private val _chatId = mutableStateOf<String?>("")
+    val chatId: State<String?> = _chatId
+
     fun setupNewConversation(currentUserId: String, getterUserId: String) {
         viewModelScope.launch {
             val chatId = firebaseRepository.setupNewConversation(currentUserId, getterUserId)
-            if (chatId != null)
+            if (chatId != null) {
                 initializeChat(chatId, currentUserId)
+                _chatId.value = chatId
+            }
         }
     }
 

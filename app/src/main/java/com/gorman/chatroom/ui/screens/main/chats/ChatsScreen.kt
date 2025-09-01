@@ -1,9 +1,12 @@
 package com.gorman.chatroom.ui.screens.main.chats
 
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,12 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
+import com.gorman.chatroom.data.ChatPreviewData
 import com.gorman.chatroom.data.ChatsData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatsScreenViewModel
@@ -66,29 +75,109 @@ fun ChatsScreen(onItemClick: (String) -> Unit){
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        items(chatsList){ item ->
-            ChatPreviewItem(item, onItemClick = onItemClick, userId, chatsScreenViewModel)
+        itemsIndexed(
+            items = chatsList.reversed(),
+            key = { _, item -> item?.chatId ?: "" }
+        ) { index, item ->
+            LaunchedEffect(item?.chatId, item?.lastMessageId) {
+                if (item?.chatId != null && item.lastMessageId != null) {
+                    chatsScreenViewModel.initChatPreview(
+                        item.chatId,
+                        userId
+                    )
+                    Log.d("Item", item.chatId)
+                }
+            }
+            val datetime = formatMessageTimestamp(item?.lastMessageTimestamp)
+            val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
+            val preview = chatMap[item?.chatId]
+            val text = preview?.lastMessage?.text
+            if (!text.isNullOrBlank()) {
+                DismissibleChatPreviewItem(
+                    item = item,
+                    onDeleteChat = {
+                        if (item?.chatId != null)
+                            chatsScreenViewModel.deleteChat(item.chatId)
+                    },
+                    onItemClick = onItemClick,
+                    userId = userId,
+                    chatMap = chatMap,
+                    datetime = datetime
+                )
+                if (index < chatsList.lastIndex)
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = colorResource(R.color.chat_bg)
+                    )
+            }
         }
     }
 }
 
 @Composable
+fun DismissibleChatPreviewItem(
+    item: ChatsData?,
+    onDeleteChat: (String) -> Unit,
+    onItemClick: (String) -> Unit,
+    userId: String,
+    chatMap: Map<String, ChatPreviewData>,
+    datetime: String
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        initialValue = SwipeToDismissBoxValue.Settled,
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                if (item?.chatId != null) {
+                    onDeleteChat(item.chatId)
+                }
+                true
+            } else {
+                false
+            }
+        },
+        positionalThreshold = { it / 2 }
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            when (dismissState.dismissDirection) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    Icon(
+                        painter = painterResource(R.drawable.delete_icon),
+                        contentDescription = "Delete Item",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(colorResource(R.color.logout_background_color))
+                            .wrapContentSize(Alignment.CenterEnd)
+                            .padding(end = 24.dp),
+                        tint = colorResource(R.color.red_logout_color)
+                    )
+                }
+                SwipeToDismissBoxValue.Settled -> {}
+                SwipeToDismissBoxValue.StartToEnd -> {}
+            }
+        },
+        enableDismissFromEndToStart = true,
+        enableDismissFromStartToEnd = false
+    ) {
+        ChatPreviewItem(
+            item = item,
+            onItemClick = onItemClick,
+            userId = userId,
+            chatMap = chatMap,
+            datetime = datetime
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 fun ChatPreviewItem(item: ChatsData?,
                     onItemClick: (String) -> Unit,
                     userId: String,
-                    chatsScreenViewModel: ChatsScreenViewModel){
-    LaunchedEffect(key1 = item?.chatId) {
-        if (item?.chatId != null && item.lastMessageId != null) {
-            chatsScreenViewModel.initChatPreview(
-                item.chatId,
-                userId,
-                item.lastMessageId)
-            Log.d("Item", item.chatId)
-        }
-    }
-    val datetime = formatMessageTimestamp(item?.lastMessageTimestamp)
+                    chatMap: Map<String, ChatPreviewData>,
+                    datetime: String) {
     val mapId = mutableMapOf<String, String>()
-    val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
     val user = chatMap[item?.chatId]?.user
     val lastMessage = chatMap[item?.chatId]?.lastMessage
     val unreadMessages = chatMap[item?.chatId]?.unreadQuantity
@@ -97,19 +186,29 @@ fun ChatPreviewItem(item: ChatsData?,
         mapId.put("currentUserId", userId)
         mapId.put("chatId", item.chatId)
     }
-    val serialized = mapId.entries.joinToString(";") { "${it.key}=${it.value}" }
-
-    Column (modifier = Modifier.fillMaxWidth()){
-        Row (modifier = Modifier
+    Box(
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onItemClick(serialized) })
-            .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
+            .clickable(
+                onClick = {
+                    if (item?.chatId != null && user?.userId != null) {
+                        val serialized =
+                            "getterUserId=${user.userId};currentUserId=${userId};chatId=${item.chatId}"
+                        onItemClick(serialized)
+                    }
+                }
+            )
+            .background(colorResource(R.color.white))
+            .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
-            Row (
+            Row(
                 modifier = Modifier.weight(1f, fill = false),
                 horizontalArrangement = Arrangement.Center
-            ){
+            ) {
                 Image(
                     painter = rememberAsyncImagePainter(
                         model = user?.profileImageUrl
@@ -118,13 +217,15 @@ fun ChatPreviewItem(item: ChatsData?,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(50.dp)
-                        .clip(CircleShape))
+                        .clip(CircleShape)
+                )
                 Spacer(modifier = Modifier.width(12.dp))
-                Column (
+                Column(
                     verticalArrangement = Arrangement.Center
-                ){
+                ) {
                     user?.username?.let {
-                        Text(text = it,
+                        Text(
+                            text = it,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = mulishFont(),
@@ -134,7 +235,8 @@ fun ChatPreviewItem(item: ChatsData?,
                         )
                     }
                     lastMessage?.text?.let {
-                        Text(text = it,
+                        Text(
+                            text = it,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             fontFamily = mulishFont(),
@@ -145,27 +247,26 @@ fun ChatPreviewItem(item: ChatsData?,
                     }
                 }
             }
-            Row (verticalAlignment = Alignment.Top){
+            Row(verticalAlignment = Alignment.Top) {
                 Spacer(modifier = Modifier.width(30.dp))
-                Column (
+                Column(
                     modifier = Modifier.wrapContentSize(),
                     horizontalAlignment = Alignment.End
-                ){
-                    Text(text = datetime,
+                ) {
+                    Text(
+                        text = datetime,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
-                        fontFamily = mulishFont())
+                        fontFamily = mulishFont()
+                    )
                     if (unreadMessages != 0) {
                         TextField(unreadMessages.toString())
-                    }
-                    else {
+                    } else {
                         Spacer(modifier = Modifier.height(27.dp))
                     }
                 }
             }
         }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(),
-            color = colorResource(R.color.chat_bg))
     }
 }
 

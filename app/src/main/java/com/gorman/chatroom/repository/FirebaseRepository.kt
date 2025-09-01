@@ -62,4 +62,8 @@ class FirebaseRepository @Inject constructor(
         val existingChatId = firebaseDB.checkChatForExistence(currentUserId,getterUserId)
         return existingChatId ?: firebaseDB.createChat(currentUserId, getterUserId)
     }
+
+    suspend fun deleteChat(chatId: String) {
+        firebaseDB.deleteChat(chatId)
+    }
 }

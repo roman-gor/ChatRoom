@@ -1,6 +1,5 @@
 package com.gorman.chatroom.data
 
-import androidx.compose.ui.res.stringResource
 import com.google.firebase.database.IgnoreExtraProperties
 import com.gorman.chatroom.R
 
@@ -66,7 +65,16 @@ data class Flag(
     val phoneCode: String
 )
 
+data class ChatSettingsItem(
+    val icon: Int,
+    val title: Int
+)
+
 val flagsList = listOf(
     Flag(R.drawable.belarus, R.string.belarus, "+375"),
     Flag(R.drawable.united_states_of_america, R.string.usa, "+1")
+)
+
+val settingsList = listOf(
+    ChatSettingsItem(R.drawable.delete_icon, R.string.delete_chat)
 )

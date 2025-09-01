@@ -137,6 +137,7 @@ class FirebaseDB @Inject constructor(
                             getterId: String,
                             text: String){
         val chatMessagesRef = database.child("messages").child(chatId)
+        Log.d("Firebase", "Проверка ChatId $chatId")
         val newMessageRef = chatMessagesRef.push()
         val messageId = newMessageRef.key
         val isoTimestamp: String = DateTimeFormatter.ISO_INSTANT
@@ -234,20 +235,33 @@ class FirebaseDB @Inject constructor(
     fun createChat(currentUserId: String, getterUserId: String): String? {
         return try {
             val chatId = database.child("chats").push().key ?: return null
+            val messageId = database.child("messages").child(chatId).push().key
             val newChat = ChatsData(
                 chatId = chatId,
                 isGroup = false,
-                lastMessageId = "",
+                lastMessageId = messageId,
                 lastMessageTimestamp = "",
                 members = mapOf(
                     currentUserId to true,
                     getterUserId to true
                 )
             )
+            val newMessage = MessagesData(
+                messageId = messageId,
+                senderId = currentUserId,
+                status = mapOf(
+                    currentUserId to "read",
+                    getterUserId to "read"
+                ),
+                text = "",
+                timestamp = ""
+            )
+
             val updates = hashMapOf(
                 "/chats/$chatId" to newChat,
                 "/users/$currentUserId/chats/$chatId" to true,
-                "/users/$getterUserId/chats/$chatId" to true
+                "/users/$getterUserId/chats/$chatId" to true,
+                "/messages/$chatId/$messageId" to newMessage
             )
             database.updateChildren(updates)
             chatId
@@ -255,5 +269,31 @@ class FirebaseDB @Inject constructor(
             Log.e("Firebase", "Ошибка при создании чата: ${e.message}")
             null
         }
+    }
+
+    suspend fun deleteChat(chatId: String) {
+        val chatRef = database.child("chats").child(chatId)
+        try {
+            val chatMembersSnapshot = chatRef.child("members").get().await()
+            val chatMembers = chatMembersSnapshot.children.mapNotNull { it.key }
+            if (chatMembers.size < 2) {
+                Log.e("Firebase", "В чате недостаточно участников для удаления")
+                return
+            }
+            val userOne = chatMembers[0]
+            val userTwo = chatMembers[1]
+            val updates = hashMapOf<String, Any?>(
+                "/users/$userOne/chats/$chatId" to null,
+                "/users/$userTwo/chats/$chatId" to null,
+                "/chats/$chatId" to null,
+                "/messages/$chatId" to null
+            )
+            database.updateChildren(updates).await()
+            Log.d("Firebase", "Чат $chatId успешно удален у всех участников")
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при удалении чата $chatId: ${e.message}")
+            throw e
+        }
+
     }
 }

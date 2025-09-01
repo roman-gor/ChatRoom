@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -56,9 +57,11 @@ import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatConversationViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
 
 @Composable
 fun ChatConversationScreen(mapId: Map<String, String>,
@@ -68,26 +71,17 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                            onVideoClick: () -> Unit,
                            onPlusClick: () -> Unit) {
     val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
-    var currentUserId: String?
-    var getterUserId: String?
-    var chatId: String? = null
-    if (mapId.size == 2) {
-        currentUserId = mapId["currentUserId"]
-        getterUserId = mapId["getterUserId"]
-    }
-    else {
-        currentUserId = mapId["currentUserId"]
-        getterUserId = mapId["getterUserId"]
-        chatId = mapId["chatId"]
-    }
+    val currentUserId = mapId["currentUserId"]
+    val getterUserId = mapId["getterUserId"]
+    val chatId = chatConversationViewModel.chatId.value
 
     LaunchedEffect(chatId, currentUserId, getterUserId) {
-        Log.d("ConversationScreen", "chatId=$chatId currentUserId=$currentUserId")
-        if (chatId != null && currentUserId != null) {
-            chatConversationViewModel.initializeChat(chatId, currentUserId)
-        }
-        else if (currentUserId != null && getterUserId != null){
+        if (!mapId["chatId"].isNullOrEmpty() && currentUserId != null) {
+            chatConversationViewModel.initializeChat(mapId["chatId"]!!, currentUserId)
+            Log.d("ConversationScreen", "Existing chat: chatId=${mapId["chatId"]} currentUserId=$currentUserId")
+        } else if (currentUserId != null && getterUserId != null && chatId.isNullOrEmpty()){
             chatConversationViewModel.setupNewConversation(currentUserId, getterUserId)
+            Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUserId=$getterUserId")
         }
     }
     val messagesList = chatConversationViewModel.messages.collectAsState().value
@@ -108,7 +102,7 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                 onSendMessageClick = {
                     if (chatId != null && currentUserId != null && getterUserId != null) {
                         chatConversationViewModel.sendMessage(
-                            chatId = chatId,
+                            chatId = chatId.ifBlank { mapId["chatId"]!! },
                             currentUserId = currentUserId,
                             getterId = getterUserId,
                             text = it)
@@ -143,6 +137,21 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                 }
             }
         }
+    }
+}
+
+@Composable
+fun DateItem(date: LocalDate) {
+    Row (
+        modifier = Modifier.fillMaxWidth().wrapContentHeight()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = formatDate(date),
+            fontFamily = mulishFont(),
+            color = colorResource(R.color.unselected_item_color),
+            fontSize = 12.sp)
     }
 }
 
@@ -419,7 +428,8 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
                 .size(56.dp)
                 .clip(CircleShape)
                 .clickable {
-                    onSendMessageClick(value)
+                    if (value.isNotBlank())
+                        onSendMessageClick(value)
                     value = ""
                 },
             contentScale = ContentScale.Crop
@@ -432,4 +442,14 @@ fun formatTimestamp(isoString: String?): String {
     val formatter = DateTimeFormatter.ofPattern("HH:mm")
         .withZone(ZoneId.systemDefault())
     return formatter.format(instant)
+}
+
+fun formatDate(date: LocalDate): String {
+    val today = LocalDate.now(ZoneId.systemDefault())
+
+    return when (ChronoUnit.DAYS.between(date, today)) {
+        1L -> "вчера"
+        0L -> "сегодня"
+        else -> DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date)
+    }
 }

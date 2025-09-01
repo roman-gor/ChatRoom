@@ -127,12 +127,22 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                 reverseLayout = true,
             ) {
                 itemsIndexed(sortedMessages) { index, message ->
-                    val isFirstMessage = index == 0
-                    val isLastMessage = index == sortedMessages.lastIndex
+                    val messageDate = runCatching { Instant.parse(message.timestamp)
+                        .atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
+                    val nextMessageDate = sortedMessages.getOrNull(index + 1)?.timestamp
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let {
+                            runCatching { Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
+                        }
                     if (message.timestamp != "") {
                         currentUserId?.let {
+                            val isFirstMessage = index == 0
+                            val isLastMessage = index == sortedMessages.lastIndex
                             MessageItem(message, currentUserId, isFirstMessage, isLastMessage)
                         }
+                    }
+                    if (index == sortedMessages.lastIndex || messageDate != nextMessageDate) {
+                        messageDate?.let { DateItem(it) }
                     }
                 }
             }
@@ -182,9 +192,9 @@ fun MessageItem(message: MessagesData,
     val boxPaddings = when {
         isLastMessage -> {
             if (message.senderId == currentUserId) {
-                PaddingValues(bottom = 4.dp, start = 56.dp, end = 24.dp, top = 24.dp)
+                PaddingValues(bottom = 4.dp, start = 56.dp, end = 24.dp, top = 4.dp)
             } else {
-                PaddingValues(bottom = 4.dp, start = 24.dp, end = 56.dp, top = 24.dp)
+                PaddingValues(bottom = 4.dp, start = 24.dp, end = 56.dp, top = 4.dp)
             }
         }
         isFirstMessage -> {

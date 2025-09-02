@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">ChatRoom</string>
+    <string name="app_name" translatable="false">Chat Room</string>
     <string name="language_en" translatable="false">English</string>
     <string name="language_ru" translatable="false">Русский</string>
     <string name="chats_title">Чаты</string>
@@ -31,6 +31,8 @@
     <string name="message">Чат</string>
     <string name="type_message_placeholder">Сообщение…</string>
     <string name="delete_chat">Удалить чат</string>
+    <string name="login">Войти</string>
+    <string name="enter_phone_for_sms">Введите номер телефона</string>
     <string name="belarus">Беларусь</string>
     <string name="usa">США</string>
 </resources>

@@ -6,16 +6,26 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.navigation.AppNavigation
 import com.gorman.chatroom.ui.theme.ChatRoomTheme
+import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.viewmodel.MoreScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
@@ -23,8 +33,13 @@ import java.util.Locale
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val mainScreenViewModel: MainScreenViewModel by viewModels()
+        splashScreen.setKeepOnScreenCondition {
+            !mainScreenViewModel.isUserIdLoaded.value
+        }
         setContent {
             val viewModel: MoreScreenViewModel = hiltViewModel()
             ChatRoomTheme {

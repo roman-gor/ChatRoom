@@ -29,6 +29,8 @@
     <string name="message">Message</string>
     <string name="type_message_placeholder">Type a message…</string>
     <string name="delete_chat">Delete chat</string>
+    <string name="login">Login</string>
+    <string name="enter_phone_for_sms">Enter your phone number</string>
     <string name="belarus">Belarus</string>
     <string name="usa">USA</string>
 </resources>

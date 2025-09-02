@@ -76,7 +76,7 @@ fun ChatsScreen(onItemClick: (String) -> Unit){
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         itemsIndexed(
-            items = chatsList.reversed(),
+            items = chatsList,
             key = { _, item -> item?.chatId ?: "" }
         ) { index, item ->
             LaunchedEffect(item?.chatId, item?.lastMessageId) {

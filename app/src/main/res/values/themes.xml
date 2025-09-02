@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.ChatRoom" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.ChatRoom.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="windowSplashScreenBackground">@color/own_message</item>
+        <item name="postSplashScreenTheme">@style/Theme.ChatRoom</item>
+    </style>
 </resources>

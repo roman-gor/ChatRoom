@@ -63,8 +63,13 @@ class MainScreenViewModel @Inject constructor(
     }
 
     fun loadNewUser(user: UsersData) {
-        //firebaseRepository...
-        _isUserDataLoaded.value = true
+        viewModelScope.launch {
+            val loadingResult = firebaseRepository.loadNewUser(user)
+            if (loadingResult && user.userId != null) {
+                _isUserDataLoaded.value = true
+                setUserId(user.userId)
+            }
+        }
     }
 
     fun setUserId(id: String) {

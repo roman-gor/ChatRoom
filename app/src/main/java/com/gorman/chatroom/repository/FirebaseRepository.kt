@@ -66,4 +66,8 @@ class FirebaseRepository @Inject constructor(
     suspend fun deleteChat(chatId: String) {
         firebaseDB.deleteChat(chatId)
     }
+
+    suspend fun loadNewUser(user: UsersData?): Boolean {
+        return firebaseDB.loadNewUser(user)
+    }
 }

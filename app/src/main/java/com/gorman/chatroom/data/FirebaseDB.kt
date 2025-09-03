@@ -295,6 +295,19 @@ class FirebaseDB @Inject constructor(
             Log.e("Firebase", "Ошибка при удалении чата $chatId: ${e.message}")
             throw e
         }
+    }
 
+    suspend fun loadNewUser(user: UsersData?): Boolean {
+        val userId = database.child("users").push().key ?: return false
+        val userRef = database.child("users").child(userId)
+        val newUser = user?.copy(userId = userId)
+        return try {
+            userRef.setValue(newUser).await()
+            Log.d("Firebase", "Пользователь успешно создан: $newUser")
+            true
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при создании пользователя: ${e.message}")
+            false
+        }
     }
 }

@@ -36,7 +36,15 @@ fun AppNavigation(onLangChange: (String) -> Unit){
     NavHost(navController = navController, startDestination = "loading_placeholder") {
         composable("loading_placeholder") {}
         composable("sign_up") {
-            SignUpScreen({}, {})
+            SignUpScreen({
+                navController.navigate("main_screen"){
+                    popUpTo("sign_up") { inclusive = true }
+                }
+            }, {
+                navController.navigate("login"){
+                    popUpTo("sign_up") { inclusive = true }
+                }
+            })
         }
         composable("login") {
             LoginScreen (onStartClick = {
@@ -44,7 +52,9 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                     popUpTo("login") { inclusive = true }
                 }
             }, onSignUpClick = {
-                navController.navigate("sign_up")
+                navController.navigate("sign_up"){
+                    popUpTo("login") { inclusive = true }
+                }
             })
         }
         composable("main_screen") {

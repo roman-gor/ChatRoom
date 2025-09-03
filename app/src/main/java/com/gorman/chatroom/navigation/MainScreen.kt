@@ -44,7 +44,9 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
                             }
                         )
                         Screen.BottomNavItem.Groups -> GroupsScreen()
-                        Screen.BottomNavItem.Profile -> ProfileScreen()
+                        Screen.BottomNavItem.Profile -> ProfileScreen(onLogoutClick = {
+                            navController.navigate("login")
+                        })
                         Screen.BottomNavItem.More -> MoreScreen(onLangChange = onLangChange)
                     }
                 }

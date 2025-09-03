@@ -49,7 +49,7 @@ import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.viewmodel.ProfileScreenViewModel
 
 @Composable
-fun ProfileScreen(){
+fun ProfileScreen(onLogoutClick: () -> Unit){
     val profileScreenViewModel: ProfileScreenViewModel = hiltViewModel()
     val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
     val userData by profileScreenViewModel.userData.collectAsState()
@@ -106,6 +106,7 @@ fun ProfileScreen(){
         ProfileButtons(
             onClick = {
                 mainScreenViewModel.setUserId("")
+                onLogoutClick()
             },
             containerColor = colorResource(R.color.logout_background_color),
             icon = painterResource(R.drawable.logout_icon),

@@ -1,6 +1,7 @@
 package com.gorman.chatroom.ui.screens.auth
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -92,10 +93,7 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
     var alpha by remember { mutableFloatStateOf(0.2f) }
     var isPhoneNumberTrue by remember { mutableStateOf(false) }
 
-    LaunchedEffect(userId, isPhoneNumberExist) {
-        if (isAllDataLoaded) {
-            onStartClick()
-        }
+    LaunchedEffect(isPhoneNumberExist) {
         when (isPhoneNumberExist) {
             true -> Toast.makeText(context, "Пользователь с таким номером существует!", Toast.LENGTH_LONG).show()
             false -> isPhoneNumberTrue = true
@@ -180,6 +178,7 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                     onBirthdayChange = {birthday = it},
                     onEmailChange = {email = it}
                 )
+                Log.d("UsersData","$userName, $gender, $birthday, $email")
             }
         }
         ConfirmAndLoginButton(
@@ -188,6 +187,7 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                 if (!isPhoneNumberTrue) {
                     if ((phoneCode + phoneNumber).length >= 13) {
                         val phone = phoneCode + phoneNumber
+                        Log.d("Phone", phone)
                         mainScreenViewModel.findUserByPhoneNumber(phone)
                     }
                 }
@@ -197,17 +197,20 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                             username = userName,
                             birthday = birthday,
                             email = email,
-                            phone = phoneNumber,
+                            phone = phoneCode + phoneNumber,
                             gender = gender,
                             profileImageUrl = "https://st3.depositphotos.com/19428878/37137/v/450/depositphotos_371377450-stock-illustration-default-avatar-profile-image-vector.jpg",
                             lastSeen = "",
                             groups = mapOf(),
                             chats = mapOf(),
-                            userId = userId,
                             unreadMessagesCount = 0
                         )
+                        Log.d("UsersData","$userName, $gender, $birthday, $email")
                         mainScreenViewModel.loadNewUser(user)
+                        if (userId.isNotEmpty())
+                            onStartClick()
                     }
+                    Log.d("UsersData","$userName, $gender, $birthday, $email")
                 }
             },
             alpha = alpha)
@@ -276,7 +279,9 @@ fun ItemsAfterPhoneNumber(
             },
             placeholder = stringResource(R.string.enter_username),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text))
-        DatePickerDocked(onBirthdayChange = {onBirthdayChange(it)})
+        DatePickerDocked(onBirthdayChange = {
+            onBirthdayChange(it)
+        })
         DefaultOutlinedTextField(
             value = email,
             onValueChange = {
@@ -330,15 +335,17 @@ fun DatePickerDocked(onBirthdayChange: (String) -> Unit) {
     val selectedDate = datePickerState.selectedDateMillis?.let {
         convertMillisToDate(it)
     } ?: ""
-
+    LaunchedEffect(datePickerState.selectedDateMillis) {
+        selectedDate.takeIf { it.isNotEmpty() }?.let {
+            onBirthdayChange(it)
+        }
+    }
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = selectedDate,
-            onValueChange = {
-                onBirthdayChange(selectedDate)
-            },
+            onValueChange = {},
             textStyle = TextStyle(
                 fontFamily = mulishFont(),
                 fontSize = 14.sp

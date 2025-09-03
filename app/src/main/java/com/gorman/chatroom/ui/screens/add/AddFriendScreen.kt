@@ -90,7 +90,7 @@ fun AddFriendScreen(onBack: () -> Unit, onStartChatClick: (String) -> Unit){
                     focusedBorderColor = colorResource(R.color.unselected_item_color)
                 ),
                 shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.padding(horizontal = 32.dp, vertical = 32.dp).fillMaxWidth(),
                 singleLine = true
             )

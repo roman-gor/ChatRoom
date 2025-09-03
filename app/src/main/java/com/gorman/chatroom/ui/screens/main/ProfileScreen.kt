@@ -45,11 +45,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.viewmodel.ProfileScreenViewModel
 
 @Composable
 fun ProfileScreen(){
     val profileScreenViewModel: ProfileScreenViewModel = hiltViewModel()
+    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
     val userData by profileScreenViewModel.userData.collectAsState()
     val profileItems = profileScreenViewModel.profileItems.value
     Column (modifier = Modifier.fillMaxSize()
@@ -102,7 +104,9 @@ fun ProfileScreen(){
             textColor = colorResource(R.color.white),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp))
         ProfileButtons(
-            onClick = {},
+            onClick = {
+                mainScreenViewModel.setUserId("")
+            },
             containerColor = colorResource(R.color.logout_background_color),
             icon = painterResource(R.drawable.logout_icon),
             iconTint = colorResource(R.color.red_logout_color),

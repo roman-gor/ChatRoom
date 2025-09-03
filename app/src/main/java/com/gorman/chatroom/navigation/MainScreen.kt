@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.gorman.chatroom.ui.screens.auth.LoginScreen
 import com.gorman.chatroom.ui.screens.main.chats.ChatsScreen
 import com.gorman.chatroom.ui.screens.main.GroupsScreen
 import com.gorman.chatroom.ui.screens.main.MoreScreen

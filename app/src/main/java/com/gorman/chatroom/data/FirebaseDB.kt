@@ -202,6 +202,7 @@ class FirebaseDB @Inject constructor(
                     Log.d("Firebase", "Найден пользователь $user")
                 }
                 else {
+                    Log.d("Firebase", "Пользователь не найден")
                     trySend(null)
                 }
             }

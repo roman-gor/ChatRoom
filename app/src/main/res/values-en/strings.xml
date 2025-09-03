@@ -7,10 +7,10 @@
     <string name="add_friend">Add Friend</string>
     <string name="add_group">Create Group</string>
     <string name="search">Search</string>
-    <string name="phone">Phone:</string>
-    <string name="gender">Gender:</string>
-    <string name="birthday">Birthday:</string>
-    <string name="email">Email:</string>
+    <string name="phone">Phone</string>
+    <string name="gender">Gender</string>
+    <string name="birthday">Birthday</string>
+    <string name="email">Email</string>
     <string name="genderManValue">Man</string>
     <string name="genderWomanValue">Woman</string>
     <string name="edit_profile">Edit Profile</string>
@@ -30,7 +30,10 @@
     <string name="type_message_placeholder">Type a message…</string>
     <string name="delete_chat">Delete chat</string>
     <string name="login">Login</string>
-    <string name="enter_phone_for_sms">Enter your phone number</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="enter_phone_for_sms">Phone number</string>
+    <string name="enter_username">Name</string>
+    <string name="enter_sms">Enter the code from SMS</string>
     <string name="belarus">Belarus</string>
     <string name="usa">USA</string>
 </resources>

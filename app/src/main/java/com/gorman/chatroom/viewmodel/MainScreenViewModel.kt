@@ -1,5 +1,6 @@
 package com.gorman.chatroom.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -25,7 +26,6 @@ class MainScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<MessengerUiState>(MessengerUiState.Loading)
-    val uiState: StateFlow<MessengerUiState> = _uiState.asStateFlow()
 
     private val _isUserIdLoaded = MutableStateFlow(false)
     val isUserIdLoaded: StateFlow<Boolean> = _isUserIdLoaded.asStateFlow()
@@ -34,6 +34,12 @@ class MainScreenViewModel @Inject constructor(
     val searchState: State<String> = _searchState
 
     private val _userData = MutableStateFlow<UsersData?>(UsersData())
+
+    private val _isPhoneNumberExist = MutableStateFlow<Boolean?>(null)
+    val isPhoneNumberExist: StateFlow<Boolean?> = _isPhoneNumberExist
+
+    private val _isUserDataLoaded = MutableStateFlow(false)
+    val isUserDataLoaded: StateFlow<Boolean> = _isUserIdLoaded.asStateFlow()
 
     val userId: StateFlow<String> = settingsRepository.userIdFlow.stateIn(
         scope = viewModelScope,
@@ -56,7 +62,12 @@ class MainScreenViewModel @Inject constructor(
         }
     }
 
-    private fun setUserId(id: String) {
+    fun loadNewUser(user: UsersData) {
+        //firebaseRepository...
+        _isUserDataLoaded.value = true
+    }
+
+    fun setUserId(id: String) {
         viewModelScope.launch {
             settingsRepository.setUserId(id)
         }
@@ -67,9 +78,16 @@ class MainScreenViewModel @Inject constructor(
     fun findUserByPhoneNumber(phoneNumber: String) {
         viewModelScope.launch {
             firebaseRepository.findUserByPhoneNumber(phoneNumber).collect { user ->
-                _userData.value = user
-                user?.userId?.let {
-                    setUserId(it)
+                if (user != null) {
+                    _userData.value = user
+                    user.userId?.let {
+                        setUserId(it)
+                    }
+                    _isPhoneNumberExist.value = true
+                }
+                else {
+                    Log.d("ViewModel", "false")
+                    _isPhoneNumberExist.value = false
                 }
             }
         }

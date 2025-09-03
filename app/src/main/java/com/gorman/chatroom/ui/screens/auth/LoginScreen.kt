@@ -5,7 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,9 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -45,7 +50,7 @@ import com.gorman.chatroom.ui.screens.add.LeadingIconMenu
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
 
 @Composable
-fun LoginScreen(onStartClick: () -> Unit) {
+fun LoginScreen(onStartClick: () -> Unit, onSignUpClick: () -> Unit) {
     val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
     var phoneNumber by remember { mutableStateOf("") }
     var phoneCode by remember { mutableStateOf("+375") }
@@ -89,19 +94,49 @@ fun LoginScreen(onStartClick: () -> Unit) {
             ),
             shape = RoundedCornerShape(12.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.padding(horizontal = 32.dp, vertical = 32.dp).fillMaxWidth(),
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth(),
             singleLine = true
         )
+        ConfirmAndSignUpButton(onSignUpClick = {onSignUpClick()}, onStartClick = {
+            if ((phoneCode+phoneNumber).length >= 13) {
+                Log.d("UserLogin", "UserID: ${mainScreenViewModel.userId.value}")
+                mainScreenViewModel.findUserByPhoneNumber(phoneCode + phoneNumber)
+            }
+        }, alpha = alpha)
+    }
+}
+
+@Composable
+fun ConfirmAndSignUpButton(onSignUpClick: () -> Unit, onStartClick: () -> Unit, alpha: Float) {
+    Row (modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Button(
+            onClick = {
+                onSignUpClick()
+            },
+            modifier = Modifier.height(50.dp),
+            elevation = ButtonDefaults.buttonElevation(6.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.selected_indicator_color)
+            )
+        ) {
+            Text(text = stringResource(R.string.sign_up),
+                fontFamily = mulishFont(),
+                fontSize = 14.sp,
+                color = colorResource(R.color.white),
+                fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.width(25.dp))
         Image(painter = painterResource(R.drawable.start_button),
             contentDescription = "Start",
             modifier = Modifier.size(80.dp)
                 .background(color = Color.Transparent, shape = CircleShape)
                 .clickable(
                     onClick = {
-                        if ((phoneCode+phoneNumber).length >= 13) {
-                            Log.d("UserLogin", "UserID: ${mainScreenViewModel.userId.value}")
-                            mainScreenViewModel.findUserByPhoneNumber(phoneCode + phoneNumber)
-                        }
+                        onStartClick()
                     },
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -107,7 +108,8 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                             getterId = getterUserId,
                             text = it)
                     }
-                })
+                },
+                modifier = Modifier)
         }
     ){ innerPaddings ->
         Column(
@@ -387,10 +389,10 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
 }
 
 @Composable
-fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) -> Unit){
+fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) -> Unit, modifier: Modifier){
     var value by remember { mutableStateOf("") }
     Row (
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(color = colorResource(R.color.white))
             .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 32.dp),
@@ -398,18 +400,18 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
         verticalAlignment = Alignment.CenterVertically
     ){
         IconButton(onClick = { onPlusClick() },
-            modifier = Modifier
+            modifier = modifier
                 .background(color = Color.Transparent)
                 .size(56.dp)) {
             Icon(painter = painterResource(R.drawable.plus),
                 contentDescription = "Plus",
                 tint = colorResource(R.color.selected_indicator_color),
-                modifier = Modifier.size(18.dp))
+                modifier = modifier.size(18.dp))
         }
         OutlinedTextField(
             value = value,
             onValueChange = { value = it },
-            modifier = Modifier.weight(1f),
+            modifier = modifier.weight(1f),
             textStyle = TextStyle(
                 fontFamily = mulishFont(),
                 fontSize = 14.sp,
@@ -434,7 +436,7 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
         Image(
             painter = painterResource(R.drawable.send_message),
             contentDescription = "Send Data",
-            modifier = Modifier
+            modifier = modifier
                 .size(56.dp)
                 .clip(CircleShape)
                 .clickable {

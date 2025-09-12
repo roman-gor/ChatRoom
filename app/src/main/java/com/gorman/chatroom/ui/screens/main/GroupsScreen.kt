@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,25 +31,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
+import com.gorman.chatroom.data.GroupsData
 import com.gorman.chatroom.data.PeopleChatsDummyData
 import com.gorman.chatroom.data.PeopleChatsList
 import com.gorman.chatroom.data.avatars
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.screens.main.chats.TextField
+import com.gorman.chatroom.ui.screens.main.chats.parseIso
+import com.gorman.chatroom.viewmodel.GroupsScreenViewModel
+import com.gorman.chatroom.viewmodel.MainScreenViewModel
 
 @Composable
 fun GroupsScreen() {
+    val groupsViewModel: GroupsScreenViewModel = hiltViewModel()
+    val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
+    val userId by mainScreenViewModel.userId.collectAsState()
+    LaunchedEffect(userId) {
+        groupsViewModel.getUserGroups(userId)
+    }
+    val groupsList = groupsViewModel.groupsState.collectAsState().value
+    val sortedGroupsList = groupsList.sortedByDescending {
+        parseIso(it?.lastMessageTimestamp)
+    }
     LazyColumn (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        items(PeopleChatsList){ item->
+        items(sortedGroupsList){ item->
+
             GroupPreviewItem(item) { }
         }
     }
 }
 
 @Composable
-fun GroupPreviewItem(item: PeopleChatsDummyData, onItemClick: () -> Unit){
+fun GroupPreviewItem(item: GroupsData?, onItemClick: () -> Unit){
     Row (modifier = Modifier.fillMaxWidth()
         .padding(start = 16.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -60,14 +79,16 @@ fun GroupPreviewItem(item: PeopleChatsDummyData, onItemClick: () -> Unit){
             Column (
                 verticalArrangement = Arrangement.Center
             ){
-                Text(text = item.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontFamily = mulishFont(),
-                    color = Color.Black,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                item?.groupName?.let {
+                    Text(text = it,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = mulishFont(),
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Text(text = item.message,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,

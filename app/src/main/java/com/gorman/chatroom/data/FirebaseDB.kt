@@ -310,4 +310,34 @@ class FirebaseDB @Inject constructor(
             false
         }
     }
+
+    fun getUserGroups(userId: String): Flow<List<GroupsData?>> = callbackFlow {
+        val userRef = database.child("users").child(userId).child("groups")
+        val valueEventListener = object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val groupsIds = snapshot.children.mapNotNull { it.key }
+                Log.d("Firebase", "Группы пользователя $userId: $groupsIds")
+                launch {
+                    val groupsList = groupsIds.map { groupId ->
+                        try {
+                            val groupSnapshot = database.child("groups").child(groupId).get().await()
+                            groupSnapshot.getValue(GroupsData::class.java)
+                        } catch (e: Exception) {
+                            Log.e("Firebase", "Ошибка при загрузке чата $groupId: ${e.message}")
+                            null
+                        }
+                    }
+                    Log.d("Firebase", "${groupsList.size}")
+                    trySend(groupsList)
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Ошибка при извлечении списка чатов $error")
+                close(error.toException())
+            }
+
+        }
+        userRef.addValueEventListener(valueEventListener)
+        awaitClose { userRef.removeEventListener(valueEventListener) }
+    }
 }

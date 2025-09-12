@@ -2,6 +2,7 @@ package com.gorman.chatroom.repository
 
 import com.gorman.chatroom.data.ChatsData
 import com.gorman.chatroom.data.FirebaseDB
+import com.gorman.chatroom.data.GroupsData
 import com.gorman.chatroom.data.MessagesData
 import com.gorman.chatroom.data.UsersData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,6 +26,10 @@ class FirebaseRepository @Inject constructor(
 
     fun getUserChats(userId: String): Flow<List<ChatsData?>> {
         return firebaseDB.getUserChats(userId)
+    }
+
+    fun getUserGroups(userId: String): Flow<List<GroupsData?>> {
+        return firebaseDB.getUserGroups(userId)
     }
 
     fun getMessages(chatId: String): Flow<List<MessagesData>> {

@@ -67,16 +67,20 @@ fun ChatsScreen(onItemClick: (String) -> Unit){
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
             chatsScreenViewModel.getUserChats(userId)
+            Log.d("Loading chats", "Loading")
         }
     }
     val chatsList by chatsScreenViewModel.chatsList.collectAsState()
+    val sortedChatsList = chatsList.sortedByDescending { chat->
+        parseIso(chat?.lastMessageTimestamp)
+    }
 
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         itemsIndexed(
-            items = chatsList,
+            items = sortedChatsList,
             key = { _, item -> item?.chatId ?: "" }
         ) { index, item ->
             LaunchedEffect(item?.chatId, item?.lastMessageId) {

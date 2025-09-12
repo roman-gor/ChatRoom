@@ -32,12 +32,12 @@ class FirebaseRepository @Inject constructor(
         return firebaseDB.getUserGroups(userId)
     }
 
-    fun getMessages(chatId: String): Flow<List<MessagesData>> {
-        return firebaseDB.getMessages(chatId = chatId)
+    fun getMessages(conversationId: String): Flow<List<MessagesData>> {
+        return firebaseDB.getMessages(conversationId = conversationId)
     }
 
-    fun getUnreadMessagesQuantity(chatId: String, userId: String): Flow<Int>{
-        return firebaseDB.getMessages(chatId).map { messagesData ->
+    fun getUnreadMessagesQuantity(conversationId: String, userId: String): Flow<Int>{
+        return firebaseDB.getMessages(conversationId).map { messagesData ->
             messagesData.count { message ->
                 message.status?.get(userId) == "unread"
             }
@@ -57,6 +57,10 @@ class FirebaseRepository @Inject constructor(
 
     suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData? {
         return firebaseDB.findUserByChatId(chatId, currentUserId)
+    }
+
+    suspend fun findUserByGroupId(groupId: String, currentUserId: String): List<UsersData?> {
+        return firebaseDB.findUsersByGroupId(groupId, currentUserId)
     }
 
     fun findUserByPhoneNumber(phoneNumber: String): Flow<UsersData?> {

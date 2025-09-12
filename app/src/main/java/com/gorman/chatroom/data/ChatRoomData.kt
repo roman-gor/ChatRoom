@@ -22,6 +22,7 @@ data class ChatsData(
 
 @IgnoreExtraProperties
 data class GroupsData(
+    val groupId: String? = null,
     val admins: Map<String, Boolean>? = null,
     val groupName: String? = null,
     val lastMessageId: String? = null,
@@ -57,6 +58,12 @@ data class ChatPreviewData(
     val user: UsersData? = null,
     val lastMessage: MessagesData? = null,
     val unreadQuantity: Int = 0
+)
+
+data class GroupPreviewData(
+    val users: List<UsersData?>? = null,
+    val lastMessage: MessagesData? = null,
+    val unreadQuantity: Int? = 0
 )
 
 data class Flag(

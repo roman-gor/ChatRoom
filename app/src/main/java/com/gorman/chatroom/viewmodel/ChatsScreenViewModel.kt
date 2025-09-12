@@ -37,6 +37,7 @@ class ChatsScreenViewModel @Inject constructor(
                 val lastMessage = messagesList.maxByOrNull {
                     runCatching { Instant.parse(it.timestamp).toEpochMilli() }.getOrDefault(0L)
                 }
+                Log.d("Last message", "$lastMessage")
                 if (lastMessage?.timestamp != "") {
                     ChatPreviewData(
                         user = getterUserData,

@@ -90,8 +90,31 @@ class FirebaseDB @Inject constructor(
         } as UsersData
     }
 
-    fun getMessages(chatId: String): Flow<List<MessagesData>> = callbackFlow {
-        val chatMessagesRef = database.child("messages").child(chatId)
+    suspend fun findUsersByGroupId(groupId: String, currentUserId: String): List<UsersData?> {
+        val groupMembersRef = database.child("groups").child(groupId).child("members")
+        val gettersList = mutableListOf<UsersData?>()
+        return try {
+            val membersSnapshot = groupMembersRef.get().await()
+            val membersMap = membersSnapshot.value as? Map<*, *>
+            if (membersMap != null) {
+                val getterIds = membersMap.keys.filter { it != currentUserId }
+                for (id in getterIds) {
+                    val userRef = database.child("users").child(id as String)
+                    val userSnapshot = userRef.get().await()
+                    gettersList.add(userSnapshot.getValue(UsersData::class.java))
+                }
+                gettersList
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при поиске пользователей: ${e.message}")
+            emptyList()
+        }
+    }
+
+    fun getMessages(conversationId: String): Flow<List<MessagesData>> = callbackFlow {
+        val chatMessagesRef = database.child("messages").child(conversationId)
         val allMessages = mutableListOf<MessagesData>()
 
         val childEventListener = object: ChildEventListener {

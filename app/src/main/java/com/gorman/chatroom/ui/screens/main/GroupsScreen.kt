@@ -1,5 +1,6 @@
 package com.gorman.chatroom.ui.screens.main
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,19 +28,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
+import com.gorman.chatroom.data.GroupPreviewData
 import com.gorman.chatroom.data.GroupsData
-import com.gorman.chatroom.data.PeopleChatsDummyData
-import com.gorman.chatroom.data.PeopleChatsList
-import com.gorman.chatroom.data.avatars
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.screens.main.chats.TextField
+import com.gorman.chatroom.ui.screens.main.chats.formatMessageTimestamp
 import com.gorman.chatroom.ui.screens.main.chats.parseIso
 import com.gorman.chatroom.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
@@ -58,15 +59,46 @@ fun GroupsScreen() {
     LazyColumn (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
         items(sortedGroupsList){ item->
-
-            GroupPreviewItem(item) { }
+            LaunchedEffect(item?.groupId, item?.lastMessageId) {
+                if (item?.groupId != null && item.lastMessageId != null) {
+                    groupsViewModel.initGroupPreview(
+                        item.groupId,
+                        userId
+                    )
+                    Log.d("Item", item.groupId)
+                }
+            }
+            val datetime = formatMessageTimestamp(item?.lastMessageTimestamp)
+            val chatMap = groupsViewModel.groupPreview.collectAsState().value
+            val preview = chatMap[item?.groupId]
+            val text = preview?.lastMessage?.text
+            Log.d("Text", "$text")
+            Log.d("Getters", "${chatMap[item?.groupId]?.users?.size}")
+            GroupPreviewItem(
+                item = item,
+                chatMap = chatMap,
+                datetime = datetime,
+                onItemClick = {})
         }
     }
 }
 
 @Composable
-fun GroupPreviewItem(item: GroupsData?, onItemClick: () -> Unit){
-    Row (modifier = Modifier.fillMaxWidth()
+fun GroupPreviewItem(item: GroupsData?,
+                     chatMap: Map<String, GroupPreviewData>,
+                     datetime: String,
+                     onItemClick: () -> Unit){
+    val lastMessage = chatMap[item?.groupId]?.lastMessage
+    val unreadQuantity = chatMap[item?.groupId]?.unreadQuantity
+    val getterUsers = chatMap[item?.groupId]?.users
+    val usersAvatars = mutableListOf<String?>()
+    if (getterUsers != null) {
+        for (user in getterUsers) {
+            usersAvatars.add(user?.profileImageUrl)
+        }
+    }
+    Row (modifier = Modifier
+        .fillMaxWidth()
         .padding(start = 16.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
@@ -74,7 +106,7 @@ fun GroupPreviewItem(item: GroupsData?, onItemClick: () -> Unit){
             modifier = Modifier.weight(1f, fill = false),
             horizontalArrangement = Arrangement.Center
         ){
-            OverlappingAvatars(avatars)
+            OverlappingAvatars(usersAvatars)
             Spacer(modifier = Modifier.width(12.dp))
             Column (
                 verticalArrangement = Arrangement.Center
@@ -89,27 +121,35 @@ fun GroupPreviewItem(item: GroupsData?, onItemClick: () -> Unit){
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Text(text = item.message,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                lastMessage?.text?.let {
+                    Text(text = it,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = mulishFont(),
+                        color = colorResource(R.color.unselected_item_color),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
-        Row {
+        Row(verticalAlignment = Alignment.Top) {
             Spacer(modifier = Modifier.width(30.dp))
-            Column (
+            Column(
                 modifier = Modifier.wrapContentSize(),
                 horizontalAlignment = Alignment.End
-            ){
-                Text(text = "09:25",
+            ) {
+                Text(
+                    text = datetime,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = mulishFont())
-                TextField("15")
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = mulishFont()
+                )
+                if (unreadQuantity != 0) {
+                    TextField(unreadQuantity.toString())
+                } else {
+                    Spacer(modifier = Modifier.height(27.dp))
+                }
             }
         }
     }
@@ -117,18 +157,20 @@ fun GroupPreviewItem(item: GroupsData?, onItemClick: () -> Unit){
 
 @Composable
 fun OverlappingAvatars(
-    avatarsList: List<Int>
+    avatarsList: MutableList<String?>
 ) {
     val avatarSize = 50.dp
     val overlapOffset = (-40).dp
 
     Row(
         modifier = Modifier.wrapContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(overlapOffset) // аватары будут перекрываться
+        horizontalArrangement = Arrangement.spacedBy(overlapOffset)
     ) {
-        listOf(avatarsList[0],avatarsList[1],avatarsList[2]).forEach { resId ->
+        avatarsList.forEach { resId ->
             Image(
-                painter = painterResource(id = resId),
+                painter = rememberAsyncImagePainter(
+                    model = resId
+                ),
                 contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

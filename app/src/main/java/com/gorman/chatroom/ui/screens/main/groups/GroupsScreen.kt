@@ -1,4 +1,4 @@
-package com.gorman.chatroom.ui.screens.main
+package com.gorman.chatroom.ui.screens.main.groups
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -43,6 +43,7 @@ import com.gorman.chatroom.ui.screens.main.chats.formatMessageTimestamp
 import com.gorman.chatroom.ui.screens.main.chats.parseIso
 import com.gorman.chatroom.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import kotlin.collections.get
 
 @Composable
 fun GroupsScreen() {
@@ -62,8 +63,8 @@ fun GroupsScreen() {
             LaunchedEffect(item?.groupId, item?.lastMessageId) {
                 if (item?.groupId != null && item.lastMessageId != null) {
                     groupsViewModel.initGroupPreview(
-                        item.groupId,
-                        userId
+                        userId,
+                        item.groupId
                     )
                     Log.d("Item", item.groupId)
                 }
@@ -160,24 +161,28 @@ fun OverlappingAvatars(
     avatarsList: MutableList<String?>
 ) {
     val avatarSize = 50.dp
-    val overlapOffset = (-40).dp
+    val overlapOffset = (-15 * avatarsList.size).dp
+    var counter = 0
 
     Row(
         modifier = Modifier.wrapContentSize(),
         horizontalArrangement = Arrangement.spacedBy(overlapOffset)
     ) {
         avatarsList.forEach { resId ->
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = resId
-                ),
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(avatarSize)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.White, CircleShape)
-            )
+            if (counter < 3) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = resId
+                    ),
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(avatarSize)
+                        .clip(CircleShape)
+                        .border(2.dp, Color.White, CircleShape)
+                )
+                counter++
+            }
         }
     }
 }

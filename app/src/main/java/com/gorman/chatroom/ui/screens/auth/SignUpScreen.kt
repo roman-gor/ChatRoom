@@ -68,7 +68,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.screens.add.LeadingIconMenu
+import com.gorman.chatroom.ui.screens.LeadingIconMenu
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -81,7 +81,6 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
 
     val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
     val userId = mainScreenViewModel.userId.collectAsState().value
-    val isAllDataLoaded = mainScreenViewModel.isUserDataLoaded.collectAsState().value
     val isPhoneNumberExist = mainScreenViewModel.isPhoneNumberExist.collectAsState().value
 
     var phoneNumber by remember { mutableStateOf("") }
@@ -278,10 +277,10 @@ fun ItemsAfterPhoneNumber(
                 onUserNameChange(it)
             },
             placeholder = stringResource(R.string.enter_username),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text))
-        DatePickerDocked(onBirthdayChange = {
-            onBirthdayChange(it)
-        })
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth())
+        DatePickerDocked(onBirthdayChange = { onBirthdayChange(it) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp))
         DefaultOutlinedTextField(
             value = email,
             onValueChange = {
@@ -289,15 +288,17 @@ fun ItemsAfterPhoneNumber(
                 onEmailChange(it)
             },
             placeholder = stringResource(R.string.email),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth())
         GenderDropDown(gender = gender, onGenderChange = {
             gender = it
-            onGenderChange(it) })
+            onGenderChange(it) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp))
     }
 }
 
 @Composable
-fun DefaultOutlinedTextField(value: String, onValueChange: (String) -> Unit, placeholder: String? = null, keyboardOptions: KeyboardOptions) {
+fun DefaultOutlinedTextField(value: String, onValueChange: (String) -> Unit, placeholder: String? = null, keyboardOptions: KeyboardOptions, modifier: Modifier) {
     OutlinedTextField(
         value = value,
         onValueChange = {
@@ -322,14 +323,14 @@ fun DefaultOutlinedTextField(value: String, onValueChange: (String) -> Unit, pla
         },
         shape = RoundedCornerShape(12.dp),
         keyboardOptions = keyboardOptions,
-        modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth(),
+        modifier = modifier,
         singleLine = true
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDocked(onBirthdayChange: (String) -> Unit) {
+fun DatePickerDocked(onBirthdayChange: (String) -> Unit, modifier: Modifier) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     val selectedDate = datePickerState.selectedDateMillis?.let {
@@ -372,7 +373,7 @@ fun DatePickerDocked(onBirthdayChange: (String) -> Unit) {
                 focusedBorderColor = colorResource(R.color.unselected_item_color)
             ),
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp),
+            modifier = modifier
         )
 
         if (showDatePicker) {
@@ -429,7 +430,7 @@ fun convertMillisToDate(millis: Long): String {
 }
 
 @Composable
-fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit) {
+fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit, modifier: Modifier) {
     var expanded by remember { mutableStateOf(false) }
     val womanGender = stringResource(R.string.genderWomanValue)
     val manGender = stringResource(R.string.genderManValue)
@@ -468,7 +469,7 @@ fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit) {
                 focusedBorderColor = colorResource(R.color.unselected_item_color)
             ),
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp),
+            modifier = modifier,
         )
         DropdownMenu(
             expanded = expanded,

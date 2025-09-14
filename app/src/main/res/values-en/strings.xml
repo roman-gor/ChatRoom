@@ -36,4 +36,6 @@
     <string name="enter_sms">Enter the code from SMS</string>
     <string name="belarus">Belarus</string>
     <string name="usa">USA</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 </resources>

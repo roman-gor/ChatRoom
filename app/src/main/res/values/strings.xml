@@ -38,4 +38,6 @@
     <string name="enter_sms">Введите код из SMS уведомления</string>
     <string name="belarus">Беларусь</string>
     <string name="usa">США</string>
+    <string name="cancel">Закрыть</string>
+    <string name="save">Сохранить</string>
 </resources>

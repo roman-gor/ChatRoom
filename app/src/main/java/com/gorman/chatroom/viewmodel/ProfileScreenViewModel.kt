@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(
-    firebaseRepository: FirebaseRepository
+    val firebaseRepository: FirebaseRepository
 ): ViewModel() {
 
     private val _userData = MutableStateFlow(UsersData())
@@ -50,5 +50,11 @@ class ProfileScreenViewModel @Inject constructor(
             R.string.birthday to obj?.birthday,
             R.string.email to obj?.email
         )
+    }
+
+    fun updateUserData(userId: String, user: UsersData?) {
+        viewModelScope.launch {
+            firebaseRepository.updateUserData(userId, user)
+        }
     }
 }

@@ -44,6 +44,10 @@ class FirebaseRepository @Inject constructor(
         }
     }
 
+    suspend fun updateUserData(userId: String, user: UsersData?) {
+        firebaseDB.updateUserData(userId, user)
+    }
+
     suspend fun sendMessage(chatId: String,
                             currentUserId: String,
                             getterId: String,

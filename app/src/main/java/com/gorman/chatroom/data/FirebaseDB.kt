@@ -113,6 +113,15 @@ class FirebaseDB @Inject constructor(
         }
     }
 
+    suspend fun updateUserData(userId: String, user: UsersData?) {
+        val userRef = database.child("users").child(userId)
+        try {
+            userRef.setValue(user).await()
+        } catch (e: Exception) {
+            Log.d("Firebase", "Не удалось добавить пользователя ${e.message}")
+        }
+    }
+
     fun getMessages(conversationId: String): Flow<List<MessagesData>> = callbackFlow {
         val chatMessagesRef = database.child("messages").child(conversationId)
         val allMessages = mutableListOf<MessagesData>()

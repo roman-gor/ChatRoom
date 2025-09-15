@@ -136,7 +136,14 @@ fun ProfileScreen(onLogoutClick: () -> Unit){
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp))
     }
     if(showSheet) {
-        BottomSheetDialog(onDismiss = {showSheet = !showSheet}, sheetState = editSheetState, user = userData, onSave = {})
+        BottomSheetDialog(onDismiss = {showSheet = !showSheet},
+            sheetState = editSheetState,
+            user = userData,
+            onSave = { newUserData->
+                userData.userId?.let { userId->
+                    profileScreenViewModel.updateUserData(userId, newUserData)
+                }
+            })
     }
 }
 
@@ -218,7 +225,7 @@ fun ProfileItem(name: Int, value: String?){
 fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: UsersData?, onSave: (UsersData?) -> Unit) {
     var newUsername by remember { mutableStateOf("") }
     var newPhone by remember { mutableStateOf("") }
-    var newPhoneCode by remember { mutableStateOf("") }
+    var newPhoneCode by remember { mutableStateOf("+375") }
     var newGender by remember { mutableStateOf("") }
     var newBirthday by remember { mutableStateOf("") }
     var newEmail by remember { mutableStateOf("") }
@@ -268,7 +275,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
             Column (
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             ){
-                Text(text = stringResource(R.string.enter_username),
+                Text(text = stringResource(R.string.phone),
                     fontSize = 12.sp,
                     fontFamily = mulishFont(),
                     color = colorResource(R.color.unselected_item_color),
@@ -357,7 +364,8 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                         gender = newGender,
                         birthday = newBirthday
                     )
-                    onSave(newUser)},
+                    onDismiss()
+                    onSave(newUser) },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorResource(R.color.selected_indicator_color)),

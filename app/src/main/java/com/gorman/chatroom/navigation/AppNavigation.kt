@@ -13,6 +13,7 @@ import com.gorman.chatroom.ui.screens.add.CreateGroupScreen
 import com.gorman.chatroom.ui.screens.auth.LoginScreen
 import com.gorman.chatroom.ui.screens.auth.SignUpScreen
 import com.gorman.chatroom.ui.screens.main.chats.ChatConversationScreen
+import com.gorman.chatroom.ui.screens.main.groups.GroupConversationScreen
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
 
 @Composable
@@ -80,6 +81,20 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                 .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
                 .associate { it[0] to it[1] }
             ChatConversationScreen(
+                mapId = restoredMap,
+                onVideoClick = {},
+                onPlusClick = {},
+                onPhoneClick = {},
+                onBackClick = { navController.popBackStack() },
+                onMoreClick = {}
+            )
+        }
+        composable(Screen.ConversationItem.GroupConversation.cRoute + "/{map_id}") { backStackEntry ->
+            val mapId = backStackEntry.arguments?.getString("map_id") ?: ""
+            val restoredMap = mapId.split(";")
+                .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
+                .associate { it[0] to it[1] }
+            GroupConversationScreen(
                 mapId = restoredMap,
                 onVideoClick = {},
                 onPlusClick = {},

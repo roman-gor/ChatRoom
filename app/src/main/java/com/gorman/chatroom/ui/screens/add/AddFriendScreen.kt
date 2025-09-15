@@ -45,7 +45,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.screens.LeadingIconMenu
+import com.gorman.chatroom.ui.components.LeadingIconMenu
 import com.gorman.chatroom.viewmodel.AddFriendViewModel
 
 @Composable

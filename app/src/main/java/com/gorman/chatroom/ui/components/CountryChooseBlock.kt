@@ -1,4 +1,4 @@
-package com.gorman.chatroom.ui.screens
+package com.gorman.chatroom.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

@@ -2,8 +2,11 @@ package com.gorman.chatroom.ui.screens.main.groups
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,16 +40,16 @@ import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.GroupPreviewData
 import com.gorman.chatroom.data.GroupsData
+import com.gorman.chatroom.ui.components.formatMessageTimestamp
+import com.gorman.chatroom.ui.components.parseIso
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.screens.main.chats.TextField
-import com.gorman.chatroom.ui.screens.main.chats.formatMessageTimestamp
-import com.gorman.chatroom.ui.screens.main.chats.parseIso
 import com.gorman.chatroom.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
 import kotlin.collections.get
 
 @Composable
-fun GroupsScreen() {
+fun GroupsScreen(onItemClick: (String) -> Unit) {
     val groupsViewModel: GroupsScreenViewModel = hiltViewModel()
     val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
     val userId by mainScreenViewModel.userId.collectAsState()
@@ -78,8 +81,9 @@ fun GroupsScreen() {
             GroupPreviewItem(
                 item = item,
                 chatMap = chatMap,
+                userId = userId,
                 datetime = datetime,
-                onItemClick = {})
+                onItemClick = onItemClick)
         }
     }
 }
@@ -87,8 +91,9 @@ fun GroupsScreen() {
 @Composable
 fun GroupPreviewItem(item: GroupsData?,
                      chatMap: Map<String, GroupPreviewData>,
+                     userId: String,
                      datetime: String,
-                     onItemClick: () -> Unit){
+                     onItemClick: (String) -> Unit){
     val lastMessage = chatMap[item?.groupId]?.lastMessage
     val unreadQuantity = chatMap[item?.groupId]?.unreadQuantity
     val getterUsers = chatMap[item?.groupId]?.users
@@ -98,58 +103,72 @@ fun GroupPreviewItem(item: GroupsData?,
             usersAvatars.add(user?.profileImageUrl)
         }
     }
-    Row (modifier = Modifier
-        .fillMaxWidth()
-        .padding(start = 16.dp, end = 30.dp, top = 16.dp, bottom = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
-        Row (
-            modifier = Modifier.weight(1f, fill = false),
-            horizontalArrangement = Arrangement.Center
-        ){
-            OverlappingAvatars(usersAvatars)
-            Spacer(modifier = Modifier.width(12.dp))
-            Column (
-                verticalArrangement = Arrangement.Center
-            ){
-                item?.groupName?.let {
-                    Text(text = it,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontFamily = mulishFont(),
-                        color = Color.Black,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = {
+                    if (item?.groupId != null && getterUsers != null) {
+                        val serialized =
+                            "groupName=${item.groupName};currentUserId=${userId};groupId=${item.groupId}"
+                        onItemClick(serialized)
+                    }
                 }
-                lastMessage?.text?.let {
-                    Text(text = it,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        fontFamily = mulishFont(),
-                        color = colorResource(R.color.unselected_item_color),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+            )
+            .background(colorResource(R.color.white))
+            .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp)
+    ) {
+        Row (modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically)  {
+            Row (
+                modifier = Modifier.weight(1f, fill = false),
+                horizontalArrangement = Arrangement.Center
+            ){
+                OverlappingAvatars(usersAvatars)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column (
+                    verticalArrangement = Arrangement.Center
+                ){
+                    item?.groupName?.let {
+                        Text(text = it,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontFamily = mulishFont(),
+                            color = Color.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    lastMessage?.text?.let {
+                        Text(text = it,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = mulishFont(),
+                            color = colorResource(R.color.unselected_item_color),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
-        }
-        Row(verticalAlignment = Alignment.Top) {
-            Spacer(modifier = Modifier.width(30.dp))
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                horizontalAlignment = Alignment.End
-            ) {
-                Text(
-                    text = datetime,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = mulishFont()
-                )
-                if (unreadQuantity != 0) {
-                    TextField(unreadQuantity.toString())
-                } else {
-                    Spacer(modifier = Modifier.height(27.dp))
+            Row(verticalAlignment = Alignment.Top) {
+                Spacer(modifier = Modifier.width(30.dp))
+                Column(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        text = datetime,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = mulishFont()
+                    )
+                    if (unreadQuantity != 0) {
+                        TextField(unreadQuantity.toString())
+                    } else {
+                        Spacer(modifier = Modifier.height(27.dp))
+                    }
                 }
             }
         }

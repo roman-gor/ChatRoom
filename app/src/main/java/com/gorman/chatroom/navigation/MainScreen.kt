@@ -39,10 +39,11 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
                 composable(bItem.bRoute) {
                     when (bItem) {
                         Screen.BottomNavItem.Chats -> ChatsScreen(onItemClick = {mapId ->
-                                navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$mapId")
-                            }
-                        )
-                        Screen.BottomNavItem.Groups -> GroupsScreen()
+                            navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$mapId")
+                        })
+                        Screen.BottomNavItem.Groups -> GroupsScreen(onItemClick = {mapId->
+                            navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$mapId")
+                        })
                         Screen.BottomNavItem.Profile -> ProfileScreen(onLogoutClick = {
                             navController.navigate("login")
                         })

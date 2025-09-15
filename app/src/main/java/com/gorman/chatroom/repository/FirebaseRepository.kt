@@ -48,11 +48,12 @@ class FirebaseRepository @Inject constructor(
         firebaseDB.updateUserData(userId, user)
     }
 
-    suspend fun sendMessage(chatId: String,
-                            currentUserId: String,
-                            getterId: String,
-                            text: String) {
+    suspend fun sendMessage(chatId: String, currentUserId: String, getterId: String, text: String) {
         firebaseDB.sendMessage(chatId, currentUserId, getterId, text)
+    }
+
+    suspend fun sendGroupMessages(groupId: String, currentUserId: String, getterUsers: List<UsersData?>, text: String){
+        firebaseDB.sendGroupMessage(groupId, currentUserId, getterUsers, text)
     }
 
     suspend fun markMessageAsRead(chatId: String, currentUserId: String) {

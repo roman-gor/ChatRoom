@@ -27,6 +27,7 @@
     <string name="logout">Logout</string>
     <string name="copy">Copied to the clipboard</string>
     <string name="message">Message</string>
+    <string name="group">Group</string>
     <string name="type_message_placeholder">Type a message…</string>
     <string name="delete_chat">Delete chat</string>
     <string name="login">Login</string>
@@ -38,4 +39,7 @@
     <string name="usa">USA</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="membersX1">members</string>
+    <string name="members3_4_X2_X4">members</string>
+    <string name="membersX5_X0">members</string>
 </resources>

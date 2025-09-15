@@ -164,10 +164,7 @@ class FirebaseDB @Inject constructor(
         awaitClose { chatMessagesRef.removeEventListener(childEventListener) }
     }
 
-    suspend fun sendMessage(chatId: String,
-                            currentUserId: String,
-                            getterId: String,
-                            text: String){
+    suspend fun sendMessage(chatId: String, currentUserId: String, getterId: String, text: String){
         val chatMessagesRef = database.child("messages").child(chatId)
         Log.d("Firebase", "Проверка ChatId $chatId")
         val newMessageRef = chatMessagesRef.push()
@@ -193,6 +190,39 @@ class FirebaseDB @Inject constructor(
             )
             database.updateChildren(updates).await()
             Log.d("Firebase", "Данные о чате обновлены")
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при отправке данных ${e.message}")
+            throw e
+        }
+    }
+
+    suspend fun sendGroupMessage(groupId: String, currentUserId: String, getterUsers: List<UsersData?>, text: String){
+        val groupMessagesRef = database.child("messages").child(groupId)
+        val newMessageRef = groupMessagesRef.push()
+        val messageId = newMessageRef.key
+        val isoTimestamp: String = DateTimeFormatter.ISO_INSTANT
+            .format(Instant.now().atOffset(ZoneOffset.UTC))
+        val status = HashMap<String, String>(emptyMap<String, String>())
+        for (user in getterUsers) {
+            user?.userId?.let { status[it] = "unread" }
+        }
+        status[currentUserId] = "read"
+        val messageData = MessagesData(
+            messageId = messageId,
+            senderId = currentUserId,
+            status = status,
+            text = text,
+            timestamp = isoTimestamp
+        )
+        try {
+            newMessageRef.setValue(messageData).await()
+            Log.d("Firebase", "Сообщение успешно отправлено")
+            val updates = mapOf(
+                "groups/$groupId/lastMessageId" to messageId,
+                "groups/$groupId/lastMessageTimestamp" to isoTimestamp
+            )
+            database.updateChildren(updates).await()
+            Log.d("Firebase", "Данные о группе обновлены")
         } catch (e: Exception) {
             Log.e("Firebase", "Ошибка при отправке данных ${e.message}")
             throw e

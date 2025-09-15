@@ -20,6 +20,7 @@ sealed class Screen(){
     sealed class ConversationItem(val cRoute: String)
         : Screen () {
             object ChatConversation: ConversationItem("chat_conversation")
+            object GroupConversation: ConversationItem("group_conversation")
         }
 
     companion object {

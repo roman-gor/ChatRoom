@@ -48,15 +48,11 @@ import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.ChatPreviewData
 import com.gorman.chatroom.data.ChatsData
+import com.gorman.chatroom.ui.components.formatMessageTimestamp
+import com.gorman.chatroom.ui.components.parseIso
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.viewmodel.MainScreenViewModel
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.Locale
 
 @Composable
 fun ChatsScreen(onItemClick: (String) -> Unit){
@@ -290,31 +286,5 @@ fun TextField(value: String){
             fontSize = 12.sp,
             color = Color.White,
             modifier = Modifier.padding(start = 8.dp, end = 8.dp))
-    }
-}
-
-fun formatMessageTimestamp(isoOrEpoch: String?): String {
-    if (isoOrEpoch.isNullOrBlank()) return ""
-
-    val locale = Locale.getDefault()
-    val zone = ZoneId.systemDefault()
-
-    val instant = runCatching {
-        Instant.parse(isoOrEpoch)
-    }.getOrElse {
-        runCatching { Instant.ofEpochMilli(isoOrEpoch.toLong()) }.getOrElse { return "" }
-    }
-
-    val dt = instant.atZone(zone)
-    val today = LocalDate.now(zone)
-    val date = dt.toLocalDate()
-
-    return when (ChronoUnit.DAYS.between(date, today)) {
-        0L -> DateTimeFormatter.ofPattern("HH:mm", locale).format(dt)                 // сегодня → время
-        in 1..6 -> {
-            val w = DateTimeFormatter.ofPattern("eee", locale).format(dt)
-            w.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
-        }
-        else -> DateTimeFormatter.ofPattern("dd.MM.yyyy", locale).format(dt)          // иначе → дата
     }
 }

@@ -3,40 +3,27 @@ package com.gorman.chatroom.ui.screens.main.chats
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,16 +39,16 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
-import com.gorman.chatroom.data.MessagesData
 import com.gorman.chatroom.data.UsersData
+import com.gorman.chatroom.ui.components.BottomSendMessageView
+import com.gorman.chatroom.ui.components.DateItem
+import com.gorman.chatroom.ui.components.IconButton
+import com.gorman.chatroom.ui.components.MessageItem
+import com.gorman.chatroom.ui.components.parseIso
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.viewmodel.ChatConversationViewModel
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun ChatConversationScreen(mapId: Map<String, String>,
@@ -136,11 +122,17 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                         ?.let {
                             runCatching { Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
                         }
-                    if (message.timestamp != "") {
+                    if (message.timestamp != "" && getterUser?.username != null) {
                         currentUserId?.let {
                             val isFirstMessage = index == 0
                             val isLastMessage = index == sortedMessages.lastIndex
-                            MessageItem(message, currentUserId, isFirstMessage, isLastMessage)
+                            MessageItem(
+                                message,
+                                currentUserId,
+                                isFirstMessage,
+                                isLastMessage,
+                                getterUser.username,
+                                false)
                         }
                     }
                     if (index == sortedMessages.lastIndex || messageDate != nextMessageDate) {
@@ -151,112 +143,6 @@ fun ChatConversationScreen(mapId: Map<String, String>,
         }
     }
 }
-
-@Composable
-fun DateItem(date: LocalDate) {
-    Row (
-        modifier = Modifier.fillMaxWidth().wrapContentHeight()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = formatDate(date),
-            fontFamily = mulishFont(),
-            color = colorResource(R.color.unselected_item_color),
-            fontSize = 12.sp)
-    }
-}
-
-@Composable
-fun MessageItem(message: MessagesData,
-                currentUserId: String,
-                isFirstMessage: Boolean,
-                isLastMessage: Boolean){
-    val colorBackground =
-        if (message.senderId == currentUserId) colorResource(R.color.own_message)
-        else colorResource(R.color.white)
-
-    val colorText =
-        if (message.senderId == currentUserId) colorResource(R.color.white)
-        else colorResource(R.color.black)
-
-    val colorTime =
-        if (message.senderId == currentUserId) colorResource(R.color.chat_bg)
-        else colorResource(R.color.not_own_message_time_text)
-
-    val alignment = if (message.senderId == currentUserId) Alignment.CenterEnd else Alignment.CenterStart
-    val corners =
-        if (message.senderId == currentUserId) {
-            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 0.dp)
-        } else {
-            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 0.dp, bottomEnd = 16.dp)
-        }
-    val boxPaddings = when {
-        isLastMessage -> {
-            if (message.senderId == currentUserId) {
-                PaddingValues(bottom = 4.dp, start = 56.dp, end = 24.dp, top = 4.dp)
-            } else {
-                PaddingValues(bottom = 4.dp, start = 24.dp, end = 56.dp, top = 4.dp)
-            }
-        }
-        isFirstMessage -> {
-            if (message.senderId == currentUserId) {
-                PaddingValues(bottom = 24.dp, start = 56.dp, end = 24.dp, top = 4.dp)
-            } else {
-                PaddingValues(bottom = 24.dp, start = 24.dp, end = 56.dp, top = 4.dp)
-            }
-        }
-        else -> {
-            if (message.senderId == currentUserId) {
-                PaddingValues(bottom = 4.dp, start = 56.dp, end = 24.dp, top = 4.dp)
-            } else {
-                PaddingValues(bottom = 4.dp, start = 24.dp, end = 56.dp, top = 4.dp)
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(boxPaddings),
-        contentAlignment = alignment
-    ) {
-        Column(
-            modifier = Modifier
-                .background(
-                    color = colorBackground,
-                    shape = corners
-                )
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            message.text?.let {
-                Text(
-                    text = it,
-                    fontFamily = mulishFont(),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = colorText
-                )
-            }
-            Text(
-                text = if (message.timestamp != "")
-                    formatTimestamp(message.timestamp)
-                    else "",
-                fontFamily = mulishFont(),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                color = colorTime
-            )
-        }
-    }
-}
-
-fun parseIso(iso: String?): Long =
-    try {
-        Instant.parse(iso).toEpochMilli()
-    } catch (_: DateTimeParseException) {
-        Long.MAX_VALUE
-    }
 
 @Composable
 fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
@@ -289,31 +175,6 @@ fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
                 )
                 IconButton(R.drawable.more_icon, onClick = { onMoreClick() })
             }
-        }
-    }
-}
-
-@Composable
-fun IconButton(icon: Int, onClick: () -> Unit){
-    Card(
-        modifier = Modifier
-            .size(42.dp),
-        elevation = CardDefaults.cardElevation(5.dp),
-        shape = RoundedCornerShape(36.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.white)
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(onClick = { onClick() })
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ){
-            Icon(painter = painterResource(icon),
-                contentDescription = "Back",
-                tint = colorResource(R.color.black))
         }
     }
 }
@@ -385,83 +246,5 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
                         .height(20.dp))
             }
         }
-    }
-}
-
-@Composable
-fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) -> Unit, modifier: Modifier){
-    var value by remember { mutableStateOf("") }
-    Row (
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color = colorResource(R.color.white))
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 32.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        IconButton(onClick = { onPlusClick() },
-            modifier = modifier
-                .background(color = Color.Transparent)
-                .size(56.dp)) {
-            Icon(painter = painterResource(R.drawable.plus),
-                contentDescription = "Plus",
-                tint = colorResource(R.color.selected_indicator_color),
-                modifier = modifier.size(18.dp))
-        }
-        OutlinedTextField(
-            value = value,
-            onValueChange = { value = it },
-            modifier = modifier.weight(1f),
-            textStyle = TextStyle(
-                fontFamily = mulishFont(),
-                fontSize = 14.sp,
-                color = Color.Black
-            ),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = colorResource(R.color.chat_bg),
-                unfocusedContainerColor = colorResource(R.color.chat_bg),
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-            ),
-            placeholder = {
-                Text(
-                    text = stringResource(R.string.type_message_placeholder),
-                    fontFamily = mulishFont(),
-                    fontSize = 14.sp,
-                    color = colorResource(R.color.placeholder_message)
-                )
-            }
-        )
-        Image(
-            painter = painterResource(R.drawable.send_message),
-            contentDescription = "Send Data",
-            modifier = modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .clickable {
-                    if (value.isNotBlank())
-                        onSendMessageClick(value)
-                    value = ""
-                },
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-
-fun formatTimestamp(isoString: String?): String {
-    val instant = Instant.parse(isoString)
-    val formatter = DateTimeFormatter.ofPattern("HH:mm")
-        .withZone(ZoneId.systemDefault())
-    return formatter.format(instant)
-}
-
-fun formatDate(date: LocalDate): String {
-    val today = LocalDate.now(ZoneId.systemDefault())
-
-    return when (ChronoUnit.DAYS.between(date, today)) {
-        1L -> "вчера"
-        0L -> "сегодня"
-        else -> DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date)
     }
 }

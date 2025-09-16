@@ -77,6 +77,10 @@ class FirebaseRepository @Inject constructor(
         return existingChatId ?: firebaseDB.createChat(currentUserId, getterUserId)
     }
 
+    fun createGroup(currentUserId: String, getterUsers: List<String?>, groupName: String): String?{
+        return firebaseDB.createGroup(currentUserId, getterUsers, groupName)
+    }
+
     suspend fun deleteChat(chatId: String) {
         firebaseDB.deleteChat(chatId)
     }

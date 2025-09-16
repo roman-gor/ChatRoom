@@ -59,6 +59,7 @@ import com.gorman.chatroom.R
 import com.gorman.chatroom.data.UsersData
 import com.gorman.chatroom.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.components.LeadingIconMenu
+import com.gorman.chatroom.ui.components.RoundedButton
 import com.gorman.chatroom.ui.screens.auth.DatePickerDocked
 import com.gorman.chatroom.ui.screens.auth.DefaultOutlinedTextField
 import com.gorman.chatroom.ui.screens.auth.GenderDropDown
@@ -344,19 +345,13 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ){
-                Button(onClick = {onDismiss()},
+                RoundedButton(onClick = {
+                    onDismiss() },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f)),
-                    shape = RoundedCornerShape(32.dp)) {
-                    Text(text = stringResource(R.string.cancel),
-                        fontFamily = mulishFont(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = colorResource(R.color.selected_indicator_color),
-                        modifier = Modifier.padding(8.dp))
-                }
-                Button(onClick = {
+                    color = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f),
+                    text = R.string.cancel,
+                    textColor = colorResource(R.color.selected_indicator_color))
+                RoundedButton(onClick = {
                     val newUser = user?.copy(
                         username = newUsername,
                         phone = newPhoneCode+newPhone,
@@ -367,16 +362,9 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                     onDismiss()
                     onSave(newUser) },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.selected_indicator_color)),
-                    shape = RoundedCornerShape(32.dp)) {
-                    Text(text = stringResource(R.string.save),
-                        fontFamily = mulishFont(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = colorResource(R.color.white),
-                        modifier = Modifier.padding(8.dp))
-                }
+                    color = colorResource(R.color.selected_indicator_color),
+                    text = R.string.save,
+                    textColor = colorResource(R.color.white))
             }
         }
     }

@@ -29,17 +29,17 @@ class GroupConversationViewModel @Inject constructor(
     private val _groupId = mutableStateOf<String?>("")
     val groupId: State<String?> = _groupId
 
-//    fun setupNewConversation(currentUserId: String, getterUserId: String) {
-//        viewModelScope.launch {
-//            val chatId = firebaseRepository.setupNewConversation(currentUserId, getterUserId)
-//            if (chatId != null) {
-//                initializeChat(chatId, currentUserId)
-//                _groupId.value = chatId
-//            }
-//        }
-//    }
+    fun setupNewConversation(currentUserId: String, getterUsers: List<String?>, groupName: String) {
+        viewModelScope.launch {
+            val groupId = firebaseRepository.createGroup(currentUserId, getterUsers, groupName)
+            if (groupId != null) {
+                initializeGroup(groupId, currentUserId)
+                _groupId.value = groupId
+            }
+        }
+    }
 
-    fun initializeChat(groupId: String, currentUserId: String) {
+    fun initializeGroup(groupId: String, currentUserId: String) {
         viewModelScope.launch {
             launch {
                 firebaseRepository.getMessages(groupId).collect { messagesList ->

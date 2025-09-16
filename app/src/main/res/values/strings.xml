@@ -44,4 +44,9 @@
     <string name="membersX1">участник</string>
     <string name="members3_4_X2_X4">участника</string>
     <string name="membersX5_X0">участников</string>
+    <string name="members">Участники</string>
+    <string name="enterGroupName">Введите название группы</string>
+    <string name="groupName">Название группы</string>
+    <string name="add_members_to_group">Добавить участников</string>
+    <string name="add">Добавить</string>
 </resources>

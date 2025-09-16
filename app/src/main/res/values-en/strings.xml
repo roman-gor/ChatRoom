@@ -42,4 +42,9 @@
     <string name="membersX1">members</string>
     <string name="members3_4_X2_X4">members</string>
     <string name="membersX5_X0">members</string>
+    <string name="members">Members</string>
+    <string name="enterGroupName">Enter Name Group</string>
+    <string name="groupName">Name Group</string>
+    <string name="add_members_to_group">Add members to group</string>
+    <string name="add">Add</string>
 </resources>

@@ -71,7 +71,13 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                                 popUpTo("main_screen")
                             }
                         })
-                    Screen.AddScreenItem.Group -> CreateGroupScreen { navController.popBackStack() }
+                    Screen.AddScreenItem.Group -> CreateGroupScreen(
+                        onBack = { navController.popBackStack() },
+                        onGroupStart = {it->
+                            navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$it")  {
+                                popUpTo("main_screen")
+                            }
+                        })
                 }
             }
         }

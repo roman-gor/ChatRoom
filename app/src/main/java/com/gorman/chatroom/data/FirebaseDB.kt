@@ -334,6 +334,55 @@ class FirebaseDB @Inject constructor(
         }
     }
 
+    fun createGroup(currentUserId: String, getterUsers: List<String?>, groupName: String): String? {
+        return try {
+            val groupId = database.child("groups").push().key ?: return null
+            val messageId = database.child("messages").child(groupId).push().key
+            val members = hashMapOf<String, Boolean>()
+            val membersRead = hashMapOf<String, String>()
+            for (user in getterUsers) {
+                user?.let {
+                    members[it] = true
+                    membersRead[it] = "read"
+                }
+            }
+            membersRead[currentUserId] = "read"
+            members[currentUserId] = true
+            val newGroup = GroupsData(
+                groupId = groupId,
+                admins = mapOf(
+                    currentUserId to true
+                ),
+                groupName = groupName,
+                lastMessageId = messageId,
+                lastMessageTimestamp = "",
+                members = members
+            )
+            val newMessage = MessagesData(
+                messageId = messageId,
+                senderId = currentUserId,
+                status = membersRead,
+                text = "",
+                timestamp = ""
+            )
+            val updates = hashMapOf(
+                "/groups/$groupId" to newGroup,
+                "/users/$currentUserId/groups/$groupId" to true,
+                "/messages/$groupId/$messageId" to newMessage
+            )
+            for (user in getterUsers) {
+                user?.let {
+                    updates["/users/$it/groups/$groupId"] to true
+                }
+            }
+            database.updateChildren(updates)
+            groupId
+        } catch (e: Exception) {
+            Log.e("Firebase", "Ошибка при создании группы: ${e.message}")
+            null
+        }
+    }
+
     suspend fun deleteChat(chatId: String) {
         val chatRef = database.child("chats").child(chatId)
         try {

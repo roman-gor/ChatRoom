@@ -54,19 +54,20 @@ fun GroupConversationScreen(mapId: Map<String, String>,
     val groupConversationViewModel: GroupConversationViewModel = hiltViewModel()
     val currentUserId = mapId["currentUserId"]
     val groupId = groupConversationViewModel.groupId.value
+    val getterUsers = groupConversationViewModel.getterUsersData.value
 
     LaunchedEffect(groupId, currentUserId) {
         if (!mapId["groupId"].isNullOrEmpty() && currentUserId != null) {
-            groupConversationViewModel.initializeChat(mapId["groupId"]!!, currentUserId)
+            groupConversationViewModel.initializeGroup(mapId["groupId"]!!, currentUserId)
             Log.d("ConversationScreen", "Existing group: groupId=${mapId["groupId"]} currentUserId=$currentUserId")
         }
-//        else if (currentUserId != null && getterUserId != null && chatId.isNullOrEmpty()){
-//            groupConversationViewModel.setupNewConversation(currentUserId, getterUserId)
-//            Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUserId=$getterUserId")
-//        }
+        else if (currentUserId != null && groupId.isNullOrEmpty() && !mapId["groupName"].isNullOrEmpty()){
+            val membersList = mapId["getterUsers"]?.split(",")?.map { it.trim() }!!
+            groupConversationViewModel.setupNewConversation(currentUserId, membersList, mapId["groupName"]!!)
+            Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUsers=${getterUsers.size}")
+        }
     }
     val messagesList = groupConversationViewModel.messages.collectAsState().value
-    val getterUsers = groupConversationViewModel.getterUsersData.value
     val sortedMessages = messagesList.sortedByDescending {
         if (it.timestamp.isNullOrEmpty()) {
             0L

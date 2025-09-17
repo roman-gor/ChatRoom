@@ -206,8 +206,7 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                         )
                         Log.d("UsersData","$userName, $gender, $birthday, $email")
                         mainScreenViewModel.loadNewUser(user)
-                        if (userId.isNotEmpty())
-                            onStartClick()
+                        onStartClick()
                     }
                     Log.d("UsersData","$userName, $gender, $birthday, $email")
                 }

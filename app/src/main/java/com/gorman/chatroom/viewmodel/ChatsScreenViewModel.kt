@@ -31,12 +31,9 @@ class ChatsScreenViewModel @Inject constructor(
             Log.d("ViewModel", "Init viewmodel")
             val getterUserData = firebaseRepository.findUserByChatId(chatId, currentUserId)
             val flow = combine(
-                firebaseRepository.getMessages(chatId),
+                firebaseRepository.getLastMessage(chatId),
                 firebaseRepository.getUnreadMessagesQuantity(chatId, currentUserId)
-            ) { messagesList, quantity ->
-                val lastMessage = messagesList.maxByOrNull {
-                    runCatching { Instant.parse(it.timestamp).toEpochMilli() }.getOrDefault(0L)
-                }
+            ) { lastMessage, quantity ->
                 Log.d("Last message", "$lastMessage")
                 if (lastMessage?.timestamp != "") {
                     ChatPreviewData(

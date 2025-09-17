@@ -164,6 +164,25 @@ class FirebaseDB @Inject constructor(
         awaitClose { chatMessagesRef.removeEventListener(childEventListener) }
     }
 
+    fun getLastMessage(conversationId: String): Flow<MessagesData?> = callbackFlow {
+        val chatMessagesRef = database.child("messages").child(conversationId).orderByChild("timestamp").limitToLast(1)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val lastMessage = snapshot.children
+                    .firstOrNull()
+                    ?.getValue(MessagesData::class.java)
+                trySend(lastMessage)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+
+        chatMessagesRef.addValueEventListener(listener)
+        awaitClose { chatMessagesRef.removeEventListener(listener) }
+    }
+
     suspend fun sendMessage(chatId: String, currentUserId: String, getterId: String, text: String){
         val chatMessagesRef = database.child("messages").child(chatId)
         Log.d("Firebase", "Проверка ChatId $chatId")
@@ -372,7 +391,7 @@ class FirebaseDB @Inject constructor(
             )
             for (user in getterUsers) {
                 user?.let {
-                    updates["/users/$it/groups/$groupId"] to true
+                    updates["/users/$it/groups/$groupId"] = true
                 }
             }
             database.updateChildren(updates)

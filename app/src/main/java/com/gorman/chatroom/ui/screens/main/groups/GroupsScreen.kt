@@ -180,27 +180,44 @@ fun OverlappingAvatars(
     avatarsList: MutableList<String?>
 ) {
     val avatarSize = 50.dp
-    val overlapOffset = (-15 * avatarsList.size).dp
-    var counter = 0
+    val overlapOffset = (-35).dp
+    val remainingUsersCount = avatarsList.size - 3
+    val displayedAvatars = if (remainingUsersCount <= 0) avatarsList.take(3) else avatarsList.take(2)
 
     Row(
-        modifier = Modifier.wrapContentSize(),
+        modifier = Modifier.width(85.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(overlapOffset)
     ) {
-        avatarsList.forEach { resId ->
-            if (counter < 3) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = resId
-                    ),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(avatarSize)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.White, CircleShape)
+        displayedAvatars.forEach { resId ->
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = resId
+                ),
+                contentDescription = "Avatar",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(avatarSize)
+                    .clip(CircleShape)
+                    .border(2.dp, Color.White, CircleShape)
+            )
+        }
+        if (remainingUsersCount > 0) {
+            Box(
+                modifier = Modifier
+                    .size(avatarSize - 5.dp)
+                    .clip(CircleShape)
+                    .border(1.dp, Color.Black, CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "+${remainingUsersCount + 1}",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = mulishFont()
                 )
-                counter++
             }
         }
     }

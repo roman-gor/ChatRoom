@@ -36,6 +36,10 @@ class FirebaseRepository @Inject constructor(
         return firebaseDB.getMessages(conversationId = conversationId)
     }
 
+    fun getLastMessage(conversationId: String): Flow<MessagesData?> {
+        return firebaseDB.getLastMessage(conversationId)
+    }
+
     fun getUnreadMessagesQuantity(conversationId: String, userId: String): Flow<Int>{
         return firebaseDB.getMessages(conversationId).map { messagesData ->
             messagesData.count { message ->

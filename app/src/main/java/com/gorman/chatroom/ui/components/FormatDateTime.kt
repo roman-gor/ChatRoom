@@ -21,7 +21,7 @@ fun formatDate(date: LocalDate): String {
     return when (ChronoUnit.DAYS.between(date, today)) {
         1L -> "вчера"
         0L -> "сегодня"
-        else -> DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date)
+        else -> DateTimeFormatter.ofPattern("dd/MM").format(date)
     }
 }
 
@@ -47,7 +47,7 @@ fun formatMessageTimestamp(isoOrEpoch: String?): String {
             val w = DateTimeFormatter.ofPattern("eee", locale).format(dt)
             w.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
         }
-        else -> DateTimeFormatter.ofPattern("dd.MM.yyyy", locale).format(dt)          // иначе → дата
+        else -> DateTimeFormatter.ofPattern("dd/MM", locale).format(dt)          // иначе → дата
     }
 }
 

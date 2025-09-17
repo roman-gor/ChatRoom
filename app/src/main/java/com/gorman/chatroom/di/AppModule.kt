@@ -6,10 +6,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.gorman.chatroom.BuildConfig
 import com.gorman.chatroom.data.FirebaseDB
-import com.gorman.chatroom.network.ExolveApiService
-import com.gorman.chatroom.network.SmsRepository
-import com.gorman.chatroom.repository.FirebaseRepository
-import com.gorman.chatroom.repository.SettingsRepository
+import com.gorman.chatroom.data.ExolveApiService
+import com.gorman.chatroom.domain.repository.SmsRepository
+import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

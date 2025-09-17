@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,12 +40,12 @@ import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.GroupPreviewData
 import com.gorman.chatroom.domain.entities.GroupsData
-import com.gorman.chatroom.ui.components.formatMessageTimestamp
-import com.gorman.chatroom.ui.components.parseIso
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.screens.main.chats.TextField
-import com.gorman.chatroom.viewmodel.GroupsScreenViewModel
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.ui.components.formatMessageTimestamp
+import com.gorman.chatroom.presentation.ui.components.parseIso
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.screens.main.chats.TextField
+import com.gorman.chatroom.presentation.viewmodel.GroupsScreenViewModel
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
 import kotlin.collections.get
 
 @Composable

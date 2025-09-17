@@ -32,7 +32,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gorman.chatroom.R
-import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 
 @Composable
 fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) -> Unit, modifier: Modifier){

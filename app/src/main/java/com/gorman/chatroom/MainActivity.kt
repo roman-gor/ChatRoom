@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.presentation.navigation.AppNavigation
-import com.gorman.chatroom.ui.theme.ChatRoomTheme
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
-import com.gorman.chatroom.viewmodel.MoreScreenViewModel
+import com.gorman.chatroom.presentation.ui.theme.ChatRoomTheme
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.viewmodel.MoreScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 

@@ -67,9 +67,9 @@ import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.components.LeadingIconMenu
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.components.LeadingIconMenu
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -80,7 +80,6 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
     val context = LocalContext.current
 
     val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
-    val userId = mainScreenViewModel.userId.collectAsState().value
     val isPhoneNumberExist = mainScreenViewModel.isPhoneNumberExist.collectAsState().value
 
     var phoneNumber by remember { mutableStateOf("") }

@@ -8,13 +8,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gorman.chatroom.ui.screens.add.AddFriendScreen
-import com.gorman.chatroom.ui.screens.add.CreateGroupScreen
-import com.gorman.chatroom.ui.screens.auth.LoginScreen
-import com.gorman.chatroom.ui.screens.auth.SignUpScreen
-import com.gorman.chatroom.ui.screens.main.chats.ChatConversationScreen
-import com.gorman.chatroom.ui.screens.main.groups.GroupConversationScreen
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.ui.screens.add.AddFriendScreen
+import com.gorman.chatroom.presentation.ui.screens.add.CreateGroupScreen
+import com.gorman.chatroom.presentation.ui.screens.auth.LoginScreen
+import com.gorman.chatroom.presentation.ui.screens.auth.SignUpScreen
+import com.gorman.chatroom.presentation.ui.screens.main.chats.ChatConversationScreen
+import com.gorman.chatroom.presentation.ui.screens.main.groups.GroupConversationScreen
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
 
 @Composable
 fun AppNavigation(onLangChange: (String) -> Unit){

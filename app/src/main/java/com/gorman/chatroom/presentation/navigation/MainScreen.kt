@@ -10,10 +10,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gorman.chatroom.ui.screens.main.chats.ChatsScreen
-import com.gorman.chatroom.ui.screens.main.groups.GroupsScreen
-import com.gorman.chatroom.ui.screens.main.MoreScreen
-import com.gorman.chatroom.ui.screens.main.ProfileScreen
+import com.gorman.chatroom.presentation.ui.screens.main.chats.ChatsScreen
+import com.gorman.chatroom.presentation.ui.screens.main.groups.GroupsScreen
+import com.gorman.chatroom.presentation.ui.screens.main.MoreScreen
+import com.gorman.chatroom.presentation.ui.screens.main.ProfileScreen
 
 @Composable
 fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit){

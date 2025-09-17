@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.MoreScreenData
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.viewmodel.MoreScreenViewModel
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.viewmodel.MoreScreenViewModel
 
 @Composable
 fun MoreScreen(onLangChange: (String) -> Unit){

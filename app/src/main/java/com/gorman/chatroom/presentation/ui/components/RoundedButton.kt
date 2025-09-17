@@ -8,13 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.gorman.chatroom.R
-import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 
 @Composable
 fun RoundedButton(onClick: () -> Unit, modifier: Modifier, color: Color, text: Int, textColor: Color) {

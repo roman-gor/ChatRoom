@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gorman.chatroom.R
-import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 
 @Composable
 fun AppTopBar(onBack: () -> Unit, title: Int){

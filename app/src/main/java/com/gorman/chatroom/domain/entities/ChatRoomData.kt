@@ -4,14 +4,6 @@ import com.google.firebase.database.IgnoreExtraProperties
 import com.gorman.chatroom.R
 
 @IgnoreExtraProperties
-data class ChatRoomData(
-    val chats: Map<String, ChatsData>? = null,
-    val groups: Map<String, GroupsData>? = null,
-    val messages: Map<String, MessagesData>? = null,
-    val users: Map<String, UsersData>? = null
-)
-
-@IgnoreExtraProperties
 data class ChatsData(
     val chatId: String? = null,
     val isGroup: Boolean? = null,

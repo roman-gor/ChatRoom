@@ -57,14 +57,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.components.LeadingIconMenu
-import com.gorman.chatroom.ui.components.RoundedButton
-import com.gorman.chatroom.ui.screens.auth.DatePickerDocked
-import com.gorman.chatroom.ui.screens.auth.DefaultOutlinedTextField
-import com.gorman.chatroom.ui.screens.auth.GenderDropDown
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
-import com.gorman.chatroom.viewmodel.ProfileScreenViewModel
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.components.LeadingIconMenu
+import com.gorman.chatroom.presentation.ui.components.RoundedButton
+import com.gorman.chatroom.presentation.ui.screens.auth.DatePickerDocked
+import com.gorman.chatroom.presentation.ui.screens.auth.DefaultOutlinedTextField
+import com.gorman.chatroom.presentation.ui.screens.auth.GenderDropDown
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.viewmodel.ProfileScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

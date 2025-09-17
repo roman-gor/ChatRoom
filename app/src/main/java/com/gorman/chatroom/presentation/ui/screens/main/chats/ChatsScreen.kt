@@ -48,11 +48,11 @@ import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.ChatPreviewData
 import com.gorman.chatroom.domain.entities.ChatsData
-import com.gorman.chatroom.ui.components.formatMessageTimestamp
-import com.gorman.chatroom.ui.components.parseIso
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.viewmodel.ChatsScreenViewModel
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.ui.components.formatMessageTimestamp
+import com.gorman.chatroom.presentation.ui.components.parseIso
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.viewmodel.ChatsScreenViewModel
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
 
 @Composable
 fun ChatsScreen(onItemClick: (String) -> Unit){

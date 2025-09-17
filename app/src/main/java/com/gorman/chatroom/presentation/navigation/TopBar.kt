@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.gorman.chatroom.R
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
 
 @Composable
 fun TopBar(navController: NavHostController) {

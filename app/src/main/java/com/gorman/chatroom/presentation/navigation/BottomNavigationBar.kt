@@ -25,7 +25,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.gorman.chatroom.R
-import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 
 @Composable
 fun BottomNavigationBar(

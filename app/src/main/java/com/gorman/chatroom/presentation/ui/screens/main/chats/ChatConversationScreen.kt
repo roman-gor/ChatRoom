@@ -40,12 +40,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.ui.components.BottomSendMessageView
-import com.gorman.chatroom.ui.components.DateItem
-import com.gorman.chatroom.ui.components.MessageItem
-import com.gorman.chatroom.ui.components.parseIso
-import com.gorman.chatroom.ui.fonts.mulishFont
-import com.gorman.chatroom.viewmodel.ChatConversationViewModel
+import com.gorman.chatroom.presentation.ui.components.BottomSendMessageView
+import com.gorman.chatroom.presentation.ui.components.DateItem
+import com.gorman.chatroom.presentation.ui.components.MessageItem
+import com.gorman.chatroom.presentation.ui.components.parseIso
+import com.gorman.chatroom.presentation.ui.components.IconButton
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.viewmodel.ChatConversationViewModel
 import java.time.Instant
 import java.time.ZoneId
 

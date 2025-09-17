@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.flagsList
-import com.gorman.chatroom.ui.fonts.mulishFont
+import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 
 @Composable
 fun LeadingIconMenu(onItemClick: (String) -> Unit) {

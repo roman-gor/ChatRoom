@@ -1,4 +1,4 @@
-package com.gorman.chatroom.data
+package com.gorman.chatroom.data.datasource
 
 import android.util.Log
 import com.google.firebase.database.ChildEventListener
@@ -20,14 +20,14 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-class FirebaseDB @Inject constructor(
+class FirebaseDBImpl @Inject constructor(
     private val database: DatabaseReference
-){
+) : FirebaseDB {
 
-    fun getUserChats(userId: String): Flow<List<ChatsData?>> = callbackFlow {
+    override fun getUserChats(userId: String): Flow<List<ChatsData?>> = callbackFlow {
         val userIdRef = database.child("users").child(userId).child("chats")
 
-        val valueEventListener = object: ValueEventListener {
+        val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val chatIds = snapshot.children.mapNotNull { it.key }
                 Log.d("Firebase", "Чаты пользователя $userId: $chatIds")
@@ -56,7 +56,7 @@ class FirebaseDB @Inject constructor(
         awaitClose { userIdRef.removeEventListener(valueEventListener) }
     }
 
-    fun getUserByIdFlow(userId: String): Flow<UsersData?> = callbackFlow {
+    override fun getUserByIdFlow(userId: String): Flow<UsersData?> = callbackFlow {
         val userRef = database.child("users").child(userId)
 
         val valueEventListener = object : ValueEventListener {
@@ -64,6 +64,7 @@ class FirebaseDB @Inject constructor(
                 val user = snapshot.getValue(UsersData::class.java)
                 trySend(user)
             }
+
             override fun onCancelled(error: DatabaseError) {
                 close(error.toException())
             }
@@ -72,7 +73,7 @@ class FirebaseDB @Inject constructor(
         awaitClose { userRef.removeEventListener(valueEventListener) }
     }
 
-    suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData {
+    override suspend fun findUserByChatId(chatId: String, currentUserId: String): UsersData {
         val chatMembersRef = database.child("chats").child(chatId).child("members")
         return try {
             val membersSnapshot = chatMembersRef.get().await()
@@ -94,7 +95,7 @@ class FirebaseDB @Inject constructor(
         } as UsersData
     }
 
-    suspend fun findUsersByGroupId(groupId: String, currentUserId: String): List<UsersData?> {
+    override suspend fun findUsersByGroupId(groupId: String, currentUserId: String): List<UsersData?> {
         val groupMembersRef = database.child("groups").child(groupId).child("members")
         val gettersList = mutableListOf<UsersData?>()
         return try {
@@ -117,7 +118,7 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    suspend fun updateUserData(userId: String, user: UsersData?) {
+    override suspend fun updateUserData(userId: String, user: UsersData?) {
         val userRef = database.child("users").child(userId)
         try {
             userRef.setValue(user).await()
@@ -126,11 +127,11 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    fun getMessages(conversationId: String): Flow<List<MessagesData>> = callbackFlow {
+    override fun getMessages(conversationId: String): Flow<List<MessagesData>> = callbackFlow {
         val chatMessagesRef = database.child("messages").child(conversationId)
         val allMessages = mutableListOf<MessagesData>()
 
-        val childEventListener = object: ChildEventListener {
+        val childEventListener = object : ChildEventListener {
             override fun onChildAdded(
                 snapshot: DataSnapshot,
                 previousChildName: String?
@@ -148,7 +149,8 @@ class FirebaseDB @Inject constructor(
             ) {
                 val updatedMessage = snapshot.getValue(MessagesData::class.java)
                 if (updatedMessage != null) {
-                    val index = allMessages.indexOfFirst { it.timestamp == updatedMessage.timestamp }
+                    val index =
+                        allMessages.indexOfFirst { it.timestamp == updatedMessage.timestamp }
                     if (index != -1) {
                         allMessages[index] = updatedMessage
                         trySend(allMessages.toList())
@@ -168,8 +170,10 @@ class FirebaseDB @Inject constructor(
         awaitClose { chatMessagesRef.removeEventListener(childEventListener) }
     }
 
-    fun getLastMessage(conversationId: String): Flow<MessagesData?> = callbackFlow {
-        val chatMessagesRef = database.child("messages").child(conversationId).orderByChild("timestamp").limitToLast(1)
+    override fun getLastMessage(conversationId: String): Flow<MessagesData?> = callbackFlow {
+        val chatMessagesRef =
+            database.child("messages").child(conversationId).orderByChild("timestamp")
+                .limitToLast(1)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val lastMessage = snapshot.children
@@ -187,7 +191,7 @@ class FirebaseDB @Inject constructor(
         awaitClose { chatMessagesRef.removeEventListener(listener) }
     }
 
-    suspend fun sendMessage(chatId: String, currentUserId: String, getterId: String, text: String){
+    override suspend fun sendMessage(chatId: String, currentUserId: String, getterId: String, text: String){
         val chatMessagesRef = database.child("messages").child(chatId)
         Log.d("Firebase", "Проверка ChatId $chatId")
         val newMessageRef = chatMessagesRef.push()
@@ -219,7 +223,7 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    suspend fun sendGroupMessage(groupId: String, currentUserId: String, getterUsers: List<UsersData?>, text: String){
+    override suspend fun sendGroupMessage(groupId: String, currentUserId: String, getterUsers: List<UsersData?>, text: String){
         val groupMessagesRef = database.child("messages").child(groupId)
         val newMessageRef = groupMessagesRef.push()
         val messageId = newMessageRef.key
@@ -252,7 +256,7 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    suspend fun markMessageAsRead(chatId: String,
+    override suspend fun markMessageAsRead(chatId: String,
                              currentUserId: String){
         val chatMessageRef = database.child("messages").child(chatId)
         val updates = hashMapOf<String, Any>()
@@ -275,18 +279,17 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    fun findUserByPhoneNumber(phoneNumber: String): Flow<UsersData?> = callbackFlow {
+    override fun findUserByPhoneNumber(phoneNumber: String): Flow<UsersData?> = callbackFlow {
         val usersRef = database.child("users")
         val query = usersRef.orderByChild("phone").equalTo(phoneNumber)
         Log.d("Firebase", "Ищем пользователя $phoneNumber")
-        val valueEventListener = object: ValueEventListener {
+        val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     val user = snapshot.children.firstOrNull()?.getValue(UsersData::class.java)
                     trySend(user)
                     Log.d("Firebase", "Найден пользователь $user")
-                }
-                else {
+                } else {
                     Log.d("Firebase", "Пользователь не найден")
                     trySend(null)
                 }
@@ -301,7 +304,7 @@ class FirebaseDB @Inject constructor(
         awaitClose { query.removeEventListener(valueEventListener) }
     }
 
-    suspend fun checkChatForExistence(currentUserId: String, getterUserId: String): String? {
+    override suspend fun checkChatForExistence(currentUserId: String, getterUserId: String): String? {
         val currentUserChatsRef = database.child("users").child(currentUserId).child("chats")
         val gettingUserChatsRef = database.child("users").child(getterUserId).child("chats")
 
@@ -318,7 +321,7 @@ class FirebaseDB @Inject constructor(
         } as String?
     }
 
-    fun createChat(currentUserId: String, getterUserId: String): String? {
+    override fun createChat(currentUserId: String, getterUserId: String): String? {
         return try {
             val chatId = database.child("chats").push().key ?: return null
             val messageId = database.child("messages").child(chatId).push().key
@@ -357,7 +360,7 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    fun createGroup(currentUserId: String, getterUsers: List<String?>, groupName: String): String? {
+    override fun createGroup(currentUserId: String, getterUsers: List<String?>, groupName: String): String? {
         return try {
             val groupId = database.child("groups").push().key ?: return null
             val messageId = database.child("messages").child(groupId).push().key
@@ -406,7 +409,7 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    suspend fun deleteChat(chatId: String) {
+    override suspend fun deleteChat(chatId: String) {
         val chatRef = database.child("chats").child(chatId)
         try {
             val chatMembersSnapshot = chatRef.child("members").get().await()
@@ -431,7 +434,7 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    suspend fun loadNewUser(user: UsersData?): Boolean {
+    override suspend fun loadNewUser(user: UsersData?): Boolean {
         val userId = database.child("users").push().key ?: return false
         val userRef = database.child("users").child(userId)
         val newUser = user?.copy(userId = userId)
@@ -445,16 +448,17 @@ class FirebaseDB @Inject constructor(
         }
     }
 
-    fun getUserGroups(userId: String): Flow<List<GroupsData?>> = callbackFlow {
+    override fun getUserGroups(userId: String): Flow<List<GroupsData?>> = callbackFlow {
         val userRef = database.child("users").child(userId).child("groups")
-        val valueEventListener = object: ValueEventListener {
+        val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val groupsIds = snapshot.children.mapNotNull { it.key }
                 Log.d("Firebase", "Группы пользователя $userId: $groupsIds")
                 launch {
                     val groupsList = groupsIds.map { groupId ->
                         try {
-                            val groupSnapshot = database.child("groups").child(groupId).get().await()
+                            val groupSnapshot =
+                                database.child("groups").child(groupId).get().await()
                             groupSnapshot.getValue(GroupsData::class.java)
                         } catch (e: Exception) {
                             Log.e("Firebase", "Ошибка при загрузке чата $groupId: ${e.message}")
@@ -465,6 +469,7 @@ class FirebaseDB @Inject constructor(
                     trySend(groupsList)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Firebase", "Ошибка при извлечении списка чатов $error")
                 close(error.toException())

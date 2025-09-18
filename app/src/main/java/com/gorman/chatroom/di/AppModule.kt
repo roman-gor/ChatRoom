@@ -5,11 +5,14 @@ import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.gorman.chatroom.BuildConfig
-import com.gorman.chatroom.data.FirebaseDB
+import com.gorman.chatroom.data.datasource.FirebaseDBImpl
 import com.gorman.chatroom.data.ExolveApiService
-import com.gorman.chatroom.domain.repository.SmsRepository
+import com.gorman.chatroom.data.datasource.FirebaseDB
+import com.gorman.chatroom.data.repositoryImpl.FirebaseRepositoryImpl
+import com.gorman.chatroom.data.repositoryImpl.SmsRepositoryImpl
 import com.gorman.chatroom.domain.repository.FirebaseRepository
 import com.gorman.chatroom.domain.repository.SettingsRepository
+import com.gorman.chatroom.domain.repository.SmsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -67,7 +70,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSmsRepository(api: ExolveApiService): SmsRepository {
-        return SmsRepository(api)
+        return SmsRepositoryImpl(api)
     }
 
     @Provides
@@ -78,15 +81,14 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseDB(databaseReference: DatabaseReference): FirebaseDB {
-        return FirebaseDB(databaseReference)
+    fun provideFirebaseDBImpl(databaseReference: DatabaseReference): FirebaseDB {
+        return FirebaseDBImpl(databaseReference)
     }
 
     @Provides
     @Singleton
-    fun provideFirebaseRepository(firebaseDB: FirebaseDB,
-                                  settingsRepository: SettingsRepository): FirebaseRepository {
-        return FirebaseRepository(firebaseDB = firebaseDB, settingsRepository = settingsRepository)
+    fun provideFirebaseRepositoryImpl(firebaseDB: FirebaseDB, settingsRepository: SettingsRepository): FirebaseRepository {
+        return FirebaseRepositoryImpl(firebaseDB = firebaseDB, settingsRepository = settingsRepository)
     }
 
     @Provides

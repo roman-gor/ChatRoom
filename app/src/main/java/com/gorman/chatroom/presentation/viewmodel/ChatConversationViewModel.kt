@@ -7,7 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.entities.MessagesData
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
+import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
+import com.gorman.chatroom.domain.usecases.MarkMessagesAsReadUseCase
+import com.gorman.chatroom.domain.usecases.SendMessageUseCase
+import com.gorman.chatroom.domain.usecases.SetupNewConversationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,13 +21,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatConversationViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    private val getMessagesUseCase: GetMessagesUseCase,
+    private val sendMessageUseCase: SendMessageUseCase,
+    private val findUserByChatIdUseCase: FindUserByChatIdUseCase,
+    private val setupNewConversationUseCase: SetupNewConversationUseCase,
+    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())
     val messages: StateFlow<List<MessagesData>> = _messages.asStateFlow()
 
-    private val _getterUserData = mutableStateOf<UsersData?>(UsersData())
+    private val _getterUserData = mutableStateOf<UsersData?>(null)
     val getterUserData: State<UsersData?> = _getterUserData
 
     private val _chatId = mutableStateOf<String?>("")
@@ -31,7 +39,7 @@ class ChatConversationViewModel @Inject constructor(
 
     fun setupNewConversation(currentUserId: String, getterUserId: String) {
         viewModelScope.launch {
-            val chatId = firebaseRepository.setupNewConversation(currentUserId, getterUserId)
+            val chatId = setupNewConversationUseCase(currentUserId, getterUserId)
             if (chatId != null) {
                 initializeChat(chatId, currentUserId)
                 _chatId.value = chatId
@@ -42,14 +50,14 @@ class ChatConversationViewModel @Inject constructor(
     fun initializeChat(chatId: String, currentUserId: String) {
         viewModelScope.launch {
             launch {
-                firebaseRepository.getMessages(chatId).collect { messagesList ->
+                getMessagesUseCase(chatId).collect { messagesList ->
                     _messages.value = messagesList
                 }
             }
-            val getterUser = firebaseRepository.findUserByChatId(chatId, currentUserId)
+            val getterUser = findUserByChatIdUseCase(chatId, currentUserId)
             _getterUserData.value = getterUser
             try {
-                firebaseRepository.markMessageAsRead(chatId, currentUserId)
+                markMessagesAsReadUseCase(chatId, currentUserId)
             } catch (e: Exception) {
                 Log.e("ConversationViewModel", "Ошибка при отметке сообщения как прочитанного: ${e.message}")
             }
@@ -62,7 +70,7 @@ class ChatConversationViewModel @Inject constructor(
                             text: String) {
         viewModelScope.launch {
             try {
-                firebaseRepository.sendMessage(chatId, currentUserId, getterId, text)
+                sendMessageUseCase(chatId, currentUserId, getterId, text)
             } catch (e: Exception) {
                 Log.e("ConversationViewModel", "Ошибка при отправке сообщения ${e.message}")
             }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.entities.ChatPreviewData
 import com.gorman.chatroom.domain.entities.ChatsData
 import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.usecases.DeleteChatUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatsScreenViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    private val firebaseRepository: FirebaseRepository,
+    private val deleteChatUseCase: DeleteChatUseCase
 ): ViewModel() {
 
     private val _chatsList = MutableStateFlow<List<ChatsData?>>(emptyList())
@@ -67,7 +69,7 @@ class ChatsScreenViewModel @Inject constructor(
 
     fun deleteChat(chatId: String) {
         viewModelScope.launch {
-            firebaseRepository.deleteChat(chatId)
+            deleteChatUseCase(chatId = chatId)
         }
     }
 }

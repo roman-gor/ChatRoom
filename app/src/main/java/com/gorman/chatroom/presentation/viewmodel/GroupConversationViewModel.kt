@@ -7,7 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.entities.MessagesData
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.usecases.CreateGroupUseCase
+import com.gorman.chatroom.domain.usecases.FindUserByGroupIdUseCase
+import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
+import com.gorman.chatroom.domain.usecases.MarkMessagesAsReadUseCase
+import com.gorman.chatroom.domain.usecases.SendGroupMessagesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +21,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GroupConversationViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    private val createGroupUseCase: CreateGroupUseCase,
+    private val findUserByGroupIdUseCase: FindUserByGroupIdUseCase,
+    private val getMessagesUseCase: GetMessagesUseCase,
+    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
+    private val sendGroupMessagesUseCase: SendGroupMessagesUseCase
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())
@@ -31,7 +39,7 @@ class GroupConversationViewModel @Inject constructor(
 
     fun setupNewConversation(currentUserId: String, getterUsers: List<String?>, groupName: String) {
         viewModelScope.launch {
-            val groupId = firebaseRepository.createGroup(currentUserId, getterUsers, groupName)
+            val groupId = createGroupUseCase(currentUserId, getterUsers, groupName)
             if (groupId != null) {
                 initializeGroup(groupId, currentUserId)
                 _groupId.value = groupId
@@ -42,27 +50,24 @@ class GroupConversationViewModel @Inject constructor(
     fun initializeGroup(groupId: String, currentUserId: String) {
         viewModelScope.launch {
             launch {
-                firebaseRepository.getMessages(groupId).collect { messagesList ->
+                getMessagesUseCase(groupId).collect { messagesList ->
                     _messages.value = messagesList
                 }
             }
-            val getterUsers = firebaseRepository.findUserByGroupId(groupId, currentUserId)
+            val getterUsers = findUserByGroupIdUseCase(groupId, currentUserId)
             _getterUsersData.value = getterUsers
             try {
-                firebaseRepository.markMessageAsRead(groupId, currentUserId)
+                markMessagesAsReadUseCase(groupId, currentUserId)
             } catch (e: Exception) {
                 Log.e("ConversationViewModel", "Ошибка при отметке сообщения как прочитанного: ${e.message}")
             }
         }
     }
 
-    fun sendMessage(groupId: String,
-                    currentUserId: String,
-                    getterUsers: List<UsersData?>,
-                    text: String) {
+    fun sendMessage(groupId: String, currentUserId: String, getterUsers: List<UsersData?>, text: String) {
         viewModelScope.launch {
             try {
-                firebaseRepository.sendGroupMessages(groupId, currentUserId, getterUsers, text)
+                sendGroupMessagesUseCase(groupId, currentUserId, getterUsers, text)
             } catch (e: Exception) {
                 Log.e("ConversationViewModel", "Ошибка при отправке сообщения ${e.message}")
             }

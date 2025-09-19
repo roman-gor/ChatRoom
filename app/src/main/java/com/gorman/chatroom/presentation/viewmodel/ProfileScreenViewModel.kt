@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.usecases.CurrentUserDataUseCase
+import com.gorman.chatroom.domain.usecases.UpdateUserDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(
-    val firebaseRepository: FirebaseRepository
+    currentUserDataUseCase: CurrentUserDataUseCase,
+    private val updateUserDataUseCase: UpdateUserDataUseCase
 ): ViewModel() {
 
     private val _userData = MutableStateFlow(UsersData())
@@ -27,7 +29,7 @@ class ProfileScreenViewModel @Inject constructor(
     private val _profileItems = mutableStateOf<Map<Int, String?>>(emptyMap())
     val profileItems: State<Map<Int, String?>> = _profileItems
 
-    val currentUserData: StateFlow<UsersData?> = firebaseRepository.currentUserData
+    val currentUserData: StateFlow<UsersData?> = currentUserDataUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -54,7 +56,7 @@ class ProfileScreenViewModel @Inject constructor(
 
     fun updateUserData(userId: String, user: UsersData?) {
         viewModelScope.launch {
-            firebaseRepository.updateUserData(userId, user)
+            updateUserDataUseCase(userId, user)
         }
     }
 }

@@ -7,8 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.presentation.MessengerUiState
 import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
 import com.gorman.chatroom.domain.repository.SettingsRepository
+import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
+import com.gorman.chatroom.domain.usecases.LoadNewUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val firebaseRepository: FirebaseRepository
+    private val loadNewUserUseCase: LoadNewUserUseCase,
+    private val findUserByPhoneNumberUseCase: FindUserByPhoneNumberUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<MessengerUiState>(MessengerUiState.Loading)
@@ -39,7 +41,6 @@ class MainScreenViewModel @Inject constructor(
     val isPhoneNumberExist: StateFlow<Boolean?> = _isPhoneNumberExist
 
     private val _isUserDataLoaded = MutableStateFlow(false)
-    val isUserDataLoaded: StateFlow<Boolean> = _isUserIdLoaded.asStateFlow()
 
     val userId: StateFlow<String> = settingsRepository.userIdFlow.stateIn(
         scope = viewModelScope,
@@ -64,7 +65,7 @@ class MainScreenViewModel @Inject constructor(
 
     fun loadNewUser(user: UsersData) {
         viewModelScope.launch {
-            val loadingResult = firebaseRepository.loadNewUser(user)
+            val loadingResult = loadNewUserUseCase(user)
             if (loadingResult && user.userId != null) {
                 _isUserDataLoaded.value = true
                 setUserId(user.userId)
@@ -82,7 +83,7 @@ class MainScreenViewModel @Inject constructor(
 
     fun findUserByPhoneNumber(phoneNumber: String) {
         viewModelScope.launch {
-            firebaseRepository.findUserByPhoneNumber(phoneNumber).collect { user ->
+            findUserByPhoneNumberUseCase(phoneNumber).collect { user ->
                 if (user != null) {
                     _userData.value = user
                     user.userId?.let {

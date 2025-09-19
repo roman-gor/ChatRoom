@@ -9,6 +9,7 @@ import com.gorman.chatroom.data.datasource.FirebaseDBImpl
 import com.gorman.chatroom.data.ExolveApiService
 import com.gorman.chatroom.data.datasource.FirebaseDB
 import com.gorman.chatroom.data.repositoryImpl.FirebaseRepositoryImpl
+import com.gorman.chatroom.data.repositoryImpl.SettingsRepositoryImpl
 import com.gorman.chatroom.data.repositoryImpl.SmsRepositoryImpl
 import com.gorman.chatroom.domain.repository.FirebaseRepository
 import com.gorman.chatroom.domain.repository.SettingsRepository
@@ -76,7 +77,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSettingRepository(@ApplicationContext context: Context): SettingsRepository {
-        return SettingsRepository(context)
+        return SettingsRepositoryImpl(context)
     }
 
     @Provides

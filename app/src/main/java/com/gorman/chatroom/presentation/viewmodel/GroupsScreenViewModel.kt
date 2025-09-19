@@ -5,7 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.entities.GroupPreviewData
 import com.gorman.chatroom.domain.entities.GroupsData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.usecases.FindUserByGroupIdUseCase
+import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
+import com.gorman.chatroom.domain.usecases.GetUnreadMessagesQuantityUseCase
+import com.gorman.chatroom.domain.usecases.GetUserGroupsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +19,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GroupsScreenViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    private val getMessagesUseCase: GetMessagesUseCase,
+    private val findUserByGroupIdUseCase: FindUserByGroupIdUseCase,
+    private val getUnreadMessagesQuantityUseCase: GetUnreadMessagesQuantityUseCase,
+    private val getUserGroupsUseCase: GetUserGroupsUseCase
 ): ViewModel() {
 
     private val _groupsState = MutableStateFlow<List<GroupsData?>>(emptyList())
@@ -29,10 +35,10 @@ class GroupsScreenViewModel @Inject constructor(
                          groupId: String) {
         viewModelScope.launch {
             Log.d("GroupsViewModel", "Start init")
-            val getterUsersData = firebaseRepository.findUserByGroupId(groupId, userId)
+            val getterUsersData = findUserByGroupIdUseCase(groupId, userId)
             val flow = combine(
-                firebaseRepository.getMessages(groupId),
-                firebaseRepository.getUnreadMessagesQuantity(groupId, userId)
+                getMessagesUseCase(groupId),
+                getUnreadMessagesQuantityUseCase(groupId, userId)
             ) { messagesList, quantity->
                 val lastMessage = messagesList.maxByOrNull {
                     runCatching { Instant.parse(it.timestamp).toEpochMilli() }.getOrDefault(0L)
@@ -64,7 +70,7 @@ class GroupsScreenViewModel @Inject constructor(
 
     fun getUserGroups(userId: String) {
         viewModelScope.launch {
-            firebaseRepository.getUserGroups(userId).collect {
+            getUserGroupsUseCase(userId).collect {
                 _groupsState.value = it
             }
         }

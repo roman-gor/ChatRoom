@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.entities.ChatPreviewData
 import com.gorman.chatroom.domain.entities.ChatsData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
 import com.gorman.chatroom.domain.usecases.DeleteChatUseCase
+import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
+import com.gorman.chatroom.domain.usecases.GetLastMessageUseCase
+import com.gorman.chatroom.domain.usecases.GetUnreadMessagesQuantityUseCase
+import com.gorman.chatroom.domain.usecases.GetUserChatsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +20,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatsScreenViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository,
+    private val getUserChatsUseCase: GetUserChatsUseCase,
+    private val findUserByChatIdUseCase: FindUserByChatIdUseCase,
+    private val getLastMessageUseCase: GetLastMessageUseCase,
+    private val getUnreadMessagesQuantityUseCase: GetUnreadMessagesQuantityUseCase,
     private val deleteChatUseCase: DeleteChatUseCase
 ): ViewModel() {
 
@@ -30,10 +36,10 @@ class ChatsScreenViewModel @Inject constructor(
     fun initChatPreview(chatId: String, currentUserId: String) {
         viewModelScope.launch {
             Log.d("ViewModel", "Init viewmodel")
-            val getterUserData = firebaseRepository.findUserByChatId(chatId, currentUserId)
+            val getterUserData = findUserByChatIdUseCase(chatId, currentUserId)
             val flow = combine(
-                firebaseRepository.getLastMessage(chatId),
-                firebaseRepository.getUnreadMessagesQuantity(chatId, currentUserId)
+                getLastMessageUseCase(chatId),
+                getUnreadMessagesQuantityUseCase(chatId, currentUserId)
             ) { lastMessage, quantity ->
                 Log.d("Last message", "$lastMessage")
                 if (lastMessage?.timestamp != "") {
@@ -61,7 +67,7 @@ class ChatsScreenViewModel @Inject constructor(
 
     fun getUserChats(userId: String) {
         viewModelScope.launch {
-            firebaseRepository.getUserChats(userId).collect { chatsList ->
+            getUserChatsUseCase(userId).collect { chatsList ->
                 _chatsList.value = chatsList
             }
         }

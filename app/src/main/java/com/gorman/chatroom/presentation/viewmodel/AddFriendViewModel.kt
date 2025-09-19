@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.entities.UsersData
 import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.usecases.CurrentUserDataUseCase
+import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,14 +17,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddFriendViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    currentUserDataUseCase: CurrentUserDataUseCase,
+    private val findUserByPhoneNumberUseCase: FindUserByPhoneNumberUseCase
 ): ViewModel() {
     private val _userData = MutableStateFlow<UsersData?>(UsersData())
     val usersData: StateFlow<UsersData?> = _userData
 
     private var searchJob: Job? = null
 
-    val currentUserData: StateFlow<UsersData?> = firebaseRepository.currentUserData
+    val currentUserData: StateFlow<UsersData?> = currentUserDataUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -32,7 +35,7 @@ class AddFriendViewModel @Inject constructor(
     fun findUserByPhoneNumber(phoneNumber: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            firebaseRepository.findUserByPhoneNumber(phoneNumber).collect { usersData ->
+            findUserByPhoneNumberUseCase(phoneNumber).collect { usersData ->
                 _userData.value = usersData
             }
         }

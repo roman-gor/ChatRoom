@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.presentation.ui.components.BottomSendMessageView
 import com.gorman.chatroom.presentation.ui.components.DateItem
 import com.gorman.chatroom.presentation.ui.components.MessageItem

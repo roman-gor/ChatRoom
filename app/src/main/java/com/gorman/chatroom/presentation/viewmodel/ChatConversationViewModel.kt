@@ -5,8 +5,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.domain.entities.MessagesData
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.MessagesData
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
 import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
 import com.gorman.chatroom.domain.usecases.MarkMessagesAsReadUseCase

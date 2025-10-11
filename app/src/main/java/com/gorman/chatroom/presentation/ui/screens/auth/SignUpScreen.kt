@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 import com.gorman.chatroom.presentation.ui.components.LeadingIconMenu
 import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel

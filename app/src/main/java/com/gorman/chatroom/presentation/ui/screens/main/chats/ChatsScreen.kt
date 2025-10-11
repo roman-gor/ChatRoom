@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.ChatPreviewData
-import com.gorman.chatroom.domain.entities.ChatsData
+import com.gorman.chatroom.domain.models.ChatPreviewData
+import com.gorman.chatroom.domain.models.ChatsData
 import com.gorman.chatroom.presentation.ui.components.formatMessageTimestamp
 import com.gorman.chatroom.presentation.ui.components.parseIso
 import com.gorman.chatroom.presentation.ui.fonts.mulishFont

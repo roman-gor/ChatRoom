@@ -3,8 +3,8 @@ package com.gorman.chatroom.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.domain.entities.ChatPreviewData
-import com.gorman.chatroom.domain.entities.ChatsData
+import com.gorman.chatroom.domain.models.ChatPreviewData
+import com.gorman.chatroom.domain.models.ChatsData
 import com.gorman.chatroom.domain.usecases.DeleteChatUseCase
 import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
 import com.gorman.chatroom.domain.usecases.GetLastMessageUseCase

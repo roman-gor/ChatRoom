@@ -1,7 +1,7 @@
 package com.gorman.chatroom.data
 
-import com.gorman.chatroom.domain.entities.networkData.SmsRequest
-import com.gorman.chatroom.domain.entities.networkData.SmsResponse
+import com.gorman.chatroom.domain.models.networkData.SmsRequest
+import com.gorman.chatroom.domain.models.networkData.SmsResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Headers

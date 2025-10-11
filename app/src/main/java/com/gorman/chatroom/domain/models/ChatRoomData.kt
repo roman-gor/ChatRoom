@@ -1,4 +1,4 @@
-package com.gorman.chatroom.domain.entities
+package com.gorman.chatroom.domain.models
 
 import com.google.firebase.database.IgnoreExtraProperties
 import com.gorman.chatroom.R

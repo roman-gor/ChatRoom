@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.presentation.MessengerUiState
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.repository.SettingsRepository
 import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
 import com.gorman.chatroom.domain.usecases.LoadNewUserUseCase

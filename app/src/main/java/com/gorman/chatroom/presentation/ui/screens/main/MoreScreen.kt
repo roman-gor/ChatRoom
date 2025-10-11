@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.MoreScreenData
+import com.gorman.chatroom.domain.models.MoreScreenData
 import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 import com.gorman.chatroom.presentation.viewmodel.MoreScreenViewModel
 

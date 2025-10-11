@@ -1,4 +1,4 @@
-package com.gorman.chatroom.domain.entities.networkData
+package com.gorman.chatroom.domain.models.networkData
 
 import com.google.gson.annotations.SerializedName
 

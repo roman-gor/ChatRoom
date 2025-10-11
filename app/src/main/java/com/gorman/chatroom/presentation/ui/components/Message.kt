@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.MessagesData
+import com.gorman.chatroom.domain.models.MessagesData
 import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 
 @Composable

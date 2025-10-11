@@ -26,7 +26,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 private const val BASE_URL = "https://api.exolve.ru/messaging/"
-private val apiKey: String? = null
 
 @Module
 @InstallIn(SingletonComponent::class)

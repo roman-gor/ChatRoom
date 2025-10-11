@@ -3,8 +3,8 @@ package com.gorman.chatroom.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.domain.entities.GroupPreviewData
-import com.gorman.chatroom.domain.entities.GroupsData
+import com.gorman.chatroom.domain.models.GroupPreviewData
+import com.gorman.chatroom.domain.models.GroupsData
 import com.gorman.chatroom.domain.usecases.FindUserByGroupIdUseCase
 import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
 import com.gorman.chatroom.domain.usecases.GetUnreadMessagesQuantityUseCase

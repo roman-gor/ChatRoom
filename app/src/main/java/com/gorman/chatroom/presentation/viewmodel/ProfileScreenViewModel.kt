@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.usecases.CurrentUserDataUseCase
 import com.gorman.chatroom.domain.usecases.UpdateUserDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

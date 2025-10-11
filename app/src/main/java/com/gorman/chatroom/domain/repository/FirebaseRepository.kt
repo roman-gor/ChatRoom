@@ -1,9 +1,9 @@
 package com.gorman.chatroom.domain.repository
 
-import com.gorman.chatroom.domain.entities.ChatsData
-import com.gorman.chatroom.domain.entities.GroupsData
-import com.gorman.chatroom.domain.entities.MessagesData
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.ChatsData
+import com.gorman.chatroom.domain.models.GroupsData
+import com.gorman.chatroom.domain.models.MessagesData
+import com.gorman.chatroom.domain.models.UsersData
 import kotlinx.coroutines.flow.Flow
 
 interface FirebaseRepository {

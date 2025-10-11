@@ -1,8 +1,8 @@
 package com.gorman.chatroom.data.repositoryImpl
 
 import com.gorman.chatroom.data.ExolveApiService
-import com.gorman.chatroom.domain.entities.networkData.SmsRequest
-import com.gorman.chatroom.domain.entities.networkData.SmsResponse
+import com.gorman.chatroom.domain.models.networkData.SmsRequest
+import com.gorman.chatroom.domain.models.networkData.SmsResponse
 import com.gorman.chatroom.domain.repository.SmsRepository
 import retrofit2.Response
 import javax.inject.Inject

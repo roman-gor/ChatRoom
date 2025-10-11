@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.UsersData
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.presentation.ui.fonts.mulishFont
 import com.gorman.chatroom.presentation.ui.components.LeadingIconMenu
 import com.gorman.chatroom.presentation.viewmodel.AddFriendViewModel

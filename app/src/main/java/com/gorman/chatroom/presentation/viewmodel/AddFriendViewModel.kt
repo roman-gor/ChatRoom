@@ -2,8 +2,7 @@ package com.gorman.chatroom.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.domain.entities.UsersData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.usecases.CurrentUserDataUseCase
 import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

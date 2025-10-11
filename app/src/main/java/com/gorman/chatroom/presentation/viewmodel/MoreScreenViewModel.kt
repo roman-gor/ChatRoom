@@ -3,7 +3,7 @@ package com.gorman.chatroom.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.entities.MoreScreenData
+import com.gorman.chatroom.domain.models.MoreScreenData
 import com.gorman.chatroom.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

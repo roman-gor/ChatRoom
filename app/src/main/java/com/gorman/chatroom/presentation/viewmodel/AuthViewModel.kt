@@ -3,7 +3,7 @@ package com.gorman.chatroom.presentation.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.domain.entities.networkData.SmsRequest
+import com.gorman.chatroom.domain.models.networkData.SmsRequest
 import com.gorman.chatroom.domain.repository.SmsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

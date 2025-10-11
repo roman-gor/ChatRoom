@@ -1,4 +1,4 @@
-package com.gorman.chatroom.domain.entities
+package com.gorman.chatroom.domain.models
 
 data class MoreScreenData(
     val id: Int = 0,

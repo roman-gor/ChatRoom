@@ -32,5 +32,3 @@ The app follows **Clean Architecture** and **MVVM**, with **Jetpack Compose** fo
 <p align="center">
   <img src="screenshots/chatroom_design.png" width="800"/>
 </p>
-5. Build and run the app on your device or emulator  
-

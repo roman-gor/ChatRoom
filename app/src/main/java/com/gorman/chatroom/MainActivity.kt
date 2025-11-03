@@ -16,10 +16,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.gorman.chatroom.presentation.navigation.AppNavigation
-import com.gorman.chatroom.presentation.ui.theme.ChatRoomTheme
-import com.gorman.chatroom.presentation.viewmodel.MainScreenViewModel
-import com.gorman.chatroom.presentation.viewmodel.MoreScreenViewModel
+import com.gorman.chatroom.ui.navigation.AppNavigation
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
+import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
+import com.gorman.chatroom.ui.viewmodel.MoreScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 

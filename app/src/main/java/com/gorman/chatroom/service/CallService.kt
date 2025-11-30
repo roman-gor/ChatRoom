@@ -1,0 +1,215 @@
+package com.gorman.chatroom.service
+
+import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Intent
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.gorman.chatroom.R
+import com.gorman.chatroom.domain.models.CallModel
+import com.gorman.chatroom.domain.models.CallModelType
+import com.gorman.chatroom.domain.models.isValid
+import com.gorman.chatroom.domain.repository.CallRepository
+import com.gorman.chatroom.webrtc.RTCAudioManager
+import dagger.hilt.android.AndroidEntryPoint
+import org.webrtc.SurfaceViewRenderer
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class CallService @Inject constructor(
+    private val callRepository: CallRepository
+): Service(), CallRepository.Listener {
+
+    private val TAG = "MainService"
+
+    private var isServiceRunning = false
+    private var username: String? = null
+
+    private lateinit var notificationManager: NotificationManager
+    private lateinit var rtcAudioManager: RTCAudioManager
+    private var isPreviousCallStateVideo = true
+
+
+    companion object {
+        var listener: Listener? = null
+        var endCallListener:EndCallListener?=null
+        var localSurfaceView: SurfaceViewRenderer?=null
+        var remoteSurfaceView: SurfaceViewRenderer?=null
+        var screenPermissionIntent : Intent?=null
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        rtcAudioManager = RTCAudioManager.create(this)
+        rtcAudioManager.setDefaultAudioDevice(RTCAudioManager.AudioDevice.SPEAKER_PHONE)
+        notificationManager = getSystemService(
+            NotificationManager::class.java
+        )
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.let { incomingIntent ->
+            when (incomingIntent.action) {
+                CallServiceActions.START_SERVICE.name -> handleStartService(incomingIntent)
+                CallServiceActions.SETUP_VIEWS.name -> handleSetupViews(incomingIntent)
+                CallServiceActions.END_CALL.name -> handleEndCall()
+                CallServiceActions.SWITCH_CAMERA.name -> handleSwitchCamera()
+                CallServiceActions.TOGGLE_AUDIO.name -> handleToggleAudio(incomingIntent)
+                CallServiceActions.TOGGLE_VIDEO.name -> handleToggleVideo(incomingIntent)
+                CallServiceActions.TOGGLE_AUDIO_DEVICE.name -> handleToggleAudioDevice(incomingIntent)
+                CallServiceActions.TOGGLE_SCREEN_SHARE.name -> handleToggleScreenShare(incomingIntent)
+                CallServiceActions.STOP_SERVICE.name -> handleStopService()
+                else -> Unit
+            }
+        }
+
+        return START_STICKY
+    }
+
+    private fun handleStopService() {
+        callRepository.endCall()
+    }
+
+    private fun handleToggleScreenShare(incomingIntent: Intent) {
+        val isStarting = incomingIntent.getBooleanExtra("isStarting",true)
+        if (isStarting){
+            // we should start screen share
+            //but we have to keep it in mind that we first should remove the camera streaming first
+            if (isPreviousCallStateVideo){
+                callRepository.toggleVideo(true)
+            }
+            callRepository.setScreenCaptureIntent(screenPermissionIntent!!)
+            callRepository.toggleScreenShare(true)
+
+        }else{
+            //we should stop screen share and check if camera streaming was on so we should make it on back again
+            callRepository.toggleScreenShare(false)
+            if (isPreviousCallStateVideo){
+                callRepository.toggleVideo(false)
+            }
+        }
+    }
+
+    private fun handleToggleAudioDevice(incomingIntent: Intent) {
+        val type = when(incomingIntent.getStringExtra("type")){
+            RTCAudioManager.AudioDevice.EARPIECE.name -> RTCAudioManager.AudioDevice.EARPIECE
+            RTCAudioManager.AudioDevice.SPEAKER_PHONE.name -> RTCAudioManager.AudioDevice.SPEAKER_PHONE
+            else -> null
+        }
+        type?.let {
+            rtcAudioManager.setDefaultAudioDevice(it)
+            rtcAudioManager.selectAudioDevice(it)
+            Log.d(TAG, "handleToggleAudioDevice: $it")
+        }
+    }
+
+    private fun handleToggleVideo(incomingIntent: Intent) {
+        val shouldBeMuted = incomingIntent.getBooleanExtra("shouldBeMuted",true)
+        this.isPreviousCallStateVideo = !shouldBeMuted
+        callRepository.toggleVideo(shouldBeMuted)
+    }
+
+    private fun handleToggleAudio(incomingIntent: Intent) {
+        val shouldBeMuted = incomingIntent.getBooleanExtra("shouldBeMuted",true)
+        callRepository.toggleAudio(shouldBeMuted)
+    }
+
+    private fun handleSwitchCamera() {
+        callRepository.switchCamera()
+    }
+
+    private fun handleEndCall() {
+        callRepository.sendEndCall()
+        endCallAndRestartRepository()
+    }
+
+    private fun endCallAndRestartRepository(){
+        callRepository.endCall()
+        endCallListener?.onCallEnded()
+        callRepository.initWebrtcClient(username!!)
+    }
+
+    private fun handleSetupViews(incomingIntent: Intent) {
+        val isCaller = incomingIntent.getBooleanExtra("isCaller",false)
+        val isVideoCall = incomingIntent.getBooleanExtra("isVideoCall",true)
+        val target = incomingIntent.getStringExtra("target")
+        this.isPreviousCallStateVideo = isVideoCall
+        callRepository.setTarget(target!!)
+        callRepository.initLocalSurfaceView(localSurfaceView!!,isVideoCall)
+        callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
+
+        if (!isCaller){
+            callRepository.startCall()
+        }
+
+    }
+
+    private fun handleStartService(incomingIntent: Intent) {
+        if (!isServiceRunning) {
+            isServiceRunning = true
+            username = incomingIntent.getStringExtra("username")
+            startServiceWithNotification()
+            callRepository.listener = this
+            callRepository.initFirebase()
+            callRepository.initWebrtcClient(username!!)
+
+        }
+    }
+
+    @SuppressLint("ObsoleteSdkInt")
+    private fun startServiceWithNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                "channel1", "foreground", NotificationManager.IMPORTANCE_HIGH
+            )
+
+            val intent = Intent(this, CallServiceReceiver::class.java).apply {
+                action = "ACTION_EXIT"
+            }
+            val pendingIntent : PendingIntent =
+                PendingIntent.getBroadcast(this,0 ,intent,PendingIntent.FLAG_IMMUTABLE)
+
+            notificationManager.createNotificationChannel(notificationChannel)
+            val notification = NotificationCompat.Builder(
+                this, "channel1"
+            ).setSmallIcon(R.mipmap.ic_launcher)
+                .addAction(R.drawable.ic_end_call,"Exit",pendingIntent)
+
+            startForeground(1, notification.build())
+        }
+    }
+
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onLatestEventReceived(data: CallModel) {
+        if (data.isValid()) {
+            when (data.type) {
+                CallModelType.StartVideoCall,
+                CallModelType.StartAudioCall -> {
+                    listener?.onCallReceived(data)
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    override fun endCall() {
+        endCallAndRestartRepository()
+    }
+
+    interface Listener {
+        fun onCallReceived(model: CallModel)
+    }
+
+    interface EndCallListener {
+        fun onCallEnded()
+    }
+}

@@ -4,6 +4,7 @@ enum class CallServiceActions {
     START_SERVICE,
     SETUP_VIEWS,
     END_CALL,
+    ACCEPT_CALL,
     SWITCH_CAMERA,
     TOGGLE_AUDIO,
     TOGGLE_VIDEO,

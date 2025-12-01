@@ -5,16 +5,21 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gorman.chatroom.domain.models.CallStartEvent
 import com.gorman.chatroom.domain.models.MessagesData
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.domain.usecases.EndCallUseCase
 import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
 import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
 import com.gorman.chatroom.domain.usecases.MarkMessagesAsReadUseCase
 import com.gorman.chatroom.domain.usecases.SendMessageUseCase
 import com.gorman.chatroom.domain.usecases.SetupNewConversationUseCase
+import com.gorman.chatroom.domain.usecases.StartCallUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +30,9 @@ class ChatConversationViewModel @Inject constructor(
     private val sendMessageUseCase: SendMessageUseCase,
     private val findUserByChatIdUseCase: FindUserByChatIdUseCase,
     private val setupNewConversationUseCase: SetupNewConversationUseCase,
-    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase
+    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
+    private val startCallUseCase: StartCallUseCase,
+    private val endCallUseCase: EndCallUseCase
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())
@@ -36,6 +43,9 @@ class ChatConversationViewModel @Inject constructor(
 
     private val _chatId = mutableStateOf<String?>("")
     val chatId: State<String?> = _chatId
+
+    private val _startCallEvent = MutableSharedFlow<CallStartEvent?>(0)
+    val startCallEvent = _startCallEvent.asSharedFlow()
 
     fun setupNewConversation(currentUserId: String, getterUserId: String) {
         viewModelScope.launch {
@@ -73,6 +83,18 @@ class ChatConversationViewModel @Inject constructor(
                 sendMessageUseCase(chatId, currentUserId, getterId, text)
             } catch (e: Exception) {
                 Log.e("ConversationViewModel", "Ошибка при отправке сообщения ${e.message}")
+            }
+        }
+    }
+
+    fun startCall(targetId: String, isVideoCall: Boolean) {
+        viewModelScope.launch {
+            val success = startCallUseCase(targetId, isVideoCall)
+            if (success) {
+                _startCallEvent.emit(CallStartEvent(targetId, isVideoCall))
+            }
+            else {
+                Log.e("ChatConversationViewModel", "Ошибка при запуске звонка")
             }
         }
     }

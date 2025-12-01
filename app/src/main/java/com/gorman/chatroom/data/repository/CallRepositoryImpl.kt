@@ -6,8 +6,8 @@ import com.gorman.chatroom.data.datasource.remote.FirebaseCallClient
 import com.gorman.chatroom.domain.models.CallModel
 import com.gorman.chatroom.domain.models.CallModelType
 import com.gorman.chatroom.domain.repository.CallRepository
-import com.gorman.chatroom.webrtc.MyPeerObserver
-import com.gorman.chatroom.webrtc.WebRTCClient
+import com.gorman.chatroom.data.datasource.webrtc.MyPeerObserver
+import com.gorman.chatroom.data.datasource.webrtc.WebRTCClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,46 +29,68 @@ class CallRepositoryImpl @Inject constructor(
     override var listener: CallRepository.Listener? = null
     private var remoteView: SurfaceViewRenderer? = null
 
-    override fun initFirebase() {
+    override fun initWebRTCAndFirebase(username: String) {
+        firebaseClient.setClientId(username)
         firebaseClient.subscribeForLatestEvent(object : FirebaseCallClient.Listener {
             override fun onLatestEventReceived(event: CallModel) {
                 listener?.onLatestEventReceived(event)
                 when (event.type) {
                     CallModelType.Offer ->{
                         webRTCClient.onRemoteSessionReceived(
-                            SessionDescription(
-                                SessionDescription.Type.OFFER,
-                                event.data.toString()
-                            )
+                            SessionDescription(SessionDescription.Type.OFFER, event.data.toString())
                         )
-                        webRTCClient.answer(target!!)
+                        target?.let { webRTCClient.answer(it) } // Безопасный вызов
                     }
                     CallModelType.Answer ->{
                         webRTCClient.onRemoteSessionReceived(
-                            SessionDescription(
-                                SessionDescription.Type.ANSWER,
-                                event.data.toString()
-                            )
+                            SessionDescription(SessionDescription.Type.ANSWER, event.data.toString())
                         )
                     }
                     CallModelType.IceCandidates ->{
                         val candidate: IceCandidate? = try {
                             gson.fromJson(event.data.toString(),IceCandidate::class.java)
-                        }catch (_ :Exception){
-                            null
-                        }
-                        candidate?.let {
-                            webRTCClient.addIceCandidateToPeer(it)
-                        }
+                        }catch (_ :Exception){ null }
+                        candidate?.let { webRTCClient.addIceCandidateToPeer(it) }
                     }
-                    CallModelType.EndCall ->{
-                        listener?.endCall()
-                    }
+                    CallModelType.EndCall -> listener?.endCall()
                     else -> Unit
                 }
             }
-
         })
+        webRTCClient.listener = this
+        webRTCClient.initializeWebrtcClient(username, object : MyPeerObserver() {
+            override fun onAddStream(p0: MediaStream?) {
+                super.onAddStream(p0)
+                try {
+                    p0?.videoTracks?.get(0)?.addSink(remoteView)
+                } catch (e:Exception) {
+                    e.printStackTrace()
+                }
+            }
+            override fun onIceCandidate(p0: IceCandidate?) {
+                super.onIceCandidate(p0)
+                p0?.let { candidate ->
+                    target?.let { targetUser -> // Безопасный вызов
+                        webRTCClient.sendIceCandidate(targetUser, candidate)
+                    }
+                }
+            }
+        })
+    }
+
+    override fun startCall() {
+        target?.let { webRTCClient.call(it) }
+    }
+
+    override fun sendEndCall() {
+        target?.let {
+            onTransferEventToSocket(
+                CallModel(
+                    type = CallModelType.EndCall,
+                    target = it
+                )
+            )
+        }
     }
 
     override suspend fun sendConnectionRequest(target: String, isVideoCall: Boolean): Boolean {
@@ -83,27 +105,6 @@ class CallRepositoryImpl @Inject constructor(
         this.target = target
     }
 
-    override fun initWebrtcClient(username: String) {
-        webRTCClient.listener = this
-        webRTCClient.initializeWebrtcClient(username, object : MyPeerObserver() {
-            override fun onAddStream(p0: MediaStream?) {
-                super.onAddStream(p0)
-                try {
-                    p0?.videoTracks?.get(0)?.addSink(remoteView)
-                }catch (e:Exception){
-                    e.printStackTrace()
-                }
-
-            }
-            override fun onIceCandidate(p0: IceCandidate?) {
-                super.onIceCandidate(p0)
-                p0?.let {
-                    webRTCClient.sendIceCandidate(target!!, it)
-                }
-            }
-        })
-    }
-
     override fun initLocalSurfaceView(view: SurfaceViewRenderer, isVideoCall: Boolean) {
         webRTCClient.initLocalSurfaceView(view, isVideoCall)
     }
@@ -113,21 +114,8 @@ class CallRepositoryImpl @Inject constructor(
         this.remoteView = view
     }
 
-    override fun startCall() {
-        webRTCClient.call(target!!)
-    }
-
     override fun endCall() {
         webRTCClient.closeConnection()
-    }
-
-    override fun sendEndCall() {
-        onTransferEventToSocket(
-            CallModel(
-                type = CallModelType.EndCall,
-                target = target!!
-            )
-        )
     }
 
     override fun toggleAudio(shouldBeMuted: Boolean) {

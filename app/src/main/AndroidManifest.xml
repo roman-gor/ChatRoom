@@ -8,10 +8,16 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicesPolicy" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.CAPTURE_VIDEO_OUTPUT"
         tools:ignore="ProtectedPermissions" />
+
 
     <application
         android:name=".MyApp"
@@ -34,9 +40,11 @@
         </activity>
         <receiver android:name=".service.CallServiceReceiver"
             tools:ignore="Instantiatable" />
-        <service android:name=".service.CallService"
-            android:foregroundServiceType="mediaProjection"
-            tools:ignore="ForegroundServicePermission" />
+        <service
+            android:name=".service.CallService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|camera|microphone|mediaProjection" >
+        </service>
     </application>
 
 </manifest>

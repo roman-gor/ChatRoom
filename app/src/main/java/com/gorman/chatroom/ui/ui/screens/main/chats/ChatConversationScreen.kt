@@ -54,13 +54,20 @@ import java.time.ZoneId
 fun ChatConversationScreen(mapId: Map<String, String>,
                            onBackClick: () -> Unit,
                            onMoreClick: () -> Unit,
-                           onPhoneClick: () -> Unit,
-                           onVideoClick: () -> Unit,
+                           onNavigateToCall: (targetId: String, isVideoCall: Boolean) -> Unit,
                            onPlusClick: () -> Unit) {
     val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
     val currentUserId = mapId["currentUserId"]
     val getterUserId = mapId["getterUserId"]
     val chatId = chatConversationViewModel.chatId.value
+
+    LaunchedEffect(Unit) {
+        chatConversationViewModel.startCallEvent.collect { event->
+            event?.let {
+                onNavigateToCall(it.targetId, it.isVideoCall)
+            }
+        }
+    }
 
     LaunchedEffect(chatId, currentUserId, getterUserId) {
         if (!mapId["chatId"].isNullOrEmpty() && currentUserId != null) {
@@ -105,7 +112,18 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                 .background(color = colorResource(R.color.white)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            InfoChat(onVideoClick = onVideoClick, onPhoneClick = onPhoneClick, getterUser = getterUser)
+            InfoChat(
+                onVideoClick = {
+                    getterUserId?.let {
+                        chatConversationViewModel.startCall(it, true)
+                    }
+                },
+                onPhoneClick = {
+                    getterUserId?.let {
+                        chatConversationViewModel.startCall(it, false)
+                    }
+                },
+                getterUser = getterUser)
             LazyColumn (
                 modifier = Modifier
                     .weight(1f)

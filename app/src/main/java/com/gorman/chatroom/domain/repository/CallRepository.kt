@@ -6,13 +6,11 @@ import org.webrtc.SurfaceViewRenderer
 
 interface CallRepository {
 
-    fun initFirebase()
+    fun initWebRTCAndFirebase(username: String)
 
     suspend fun sendConnectionRequest(target: String, isVideoCall: Boolean): Boolean
 
     fun setTarget(target: String)
-
-    fun initWebrtcClient(username: String)
 
     fun initLocalSurfaceView(view: SurfaceViewRenderer, isVideoCall: Boolean)
 

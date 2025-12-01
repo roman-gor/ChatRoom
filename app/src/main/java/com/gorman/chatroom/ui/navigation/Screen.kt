@@ -17,11 +17,11 @@ sealed class Screen(){
         object Group: AddScreenItem("add_group", R.string.add_group, R.drawable.add_group)
     }
 
-    sealed class ConversationItem(val cRoute: String)
-        : Screen () {
-            object ChatConversation: ConversationItem("chat_conversation")
-            object GroupConversation: ConversationItem("group_conversation")
-        }
+    sealed class ConversationItem(val cRoute: String) : Screen () {
+        object ChatConversation: ConversationItem("chat_conversation")
+        object GroupConversation: ConversationItem("group_conversation")
+        object CallScreen: ConversationItem("call_screen")
+    }
 
     companion object {
         val bItems = listOf<BottomNavItem>(

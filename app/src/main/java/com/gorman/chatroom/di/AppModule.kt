@@ -9,6 +9,7 @@ import com.gorman.chatroom.data.datasource.remote.FirebaseCallClient
 import com.gorman.chatroom.data.datasource.remote.FirebaseCallClientImpl
 import com.gorman.chatroom.data.datasource.remote.FirebaseDBImpl
 import com.gorman.chatroom.data.datasource.remote.FirebaseDB
+import com.gorman.chatroom.data.datasource.webrtc.WebRTCClient
 import com.gorman.chatroom.data.repository.CallRepositoryImpl
 import com.gorman.chatroom.data.repository.FirebaseRepositoryImpl
 import com.gorman.chatroom.data.repository.SettingsRepositoryImpl
@@ -44,7 +45,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideCallRepository(firebaseClient: FirebaseCallClient,
-                              webRtcClient: WebRtcClient,
+                              webRtcClient: WebRTCClient,
                               gson: Gson): CallRepository =
         CallRepositoryImpl(firebaseClient, webRtcClient, gson)
 

@@ -9,13 +9,12 @@ import javax.inject.Inject
 class CallServiceRepository @Inject constructor(
     private val context: Context
 ){
-    fun startService(username:String){
-        Thread{
-            val intent = Intent(context, CallService::class.java)
-            intent.putExtra("username",username)
-            intent.action = CallServiceActions.START_SERVICE.name
-            startServiceIntent(intent)
-        }.start()
+    fun startService(username: String) {
+        val intent = Intent(context, CallService::class.java).apply {
+            action = CallServiceActions.START_SERVICE.name
+            putExtra("username", username)
+        }
+        startServiceIntent(intent)
     }
 
     @SuppressLint("ObsoleteSdkInt")
@@ -25,6 +24,12 @@ class CallServiceRepository @Inject constructor(
         }else{
             context.startService(intent)
         }
+    }
+
+    fun acceptCall() {
+        val intent = Intent(context, CallService::class.java)
+        intent.action = CallServiceActions.ACCEPT_CALL.name
+        startServiceIntent(intent)
     }
 
     fun setupViews(videoCall: Boolean, caller: Boolean, target: String) {

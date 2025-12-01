@@ -1,13 +1,12 @@
 package com.gorman.chatroom.domain.usecases
 
 import com.gorman.chatroom.domain.repository.CallRepository
+import com.gorman.chatroom.service.CallServiceRepository
 import javax.inject.Inject
 
 class EndCallUseCase @Inject constructor(
-    private val callRepository: CallRepository
-) {
+    private val serviceRepository: CallServiceRepository) {
     operator fun invoke() {
-        callRepository.sendEndCall()
-        callRepository.endCall()
+        serviceRepository.sendEndCall()
     }
 }

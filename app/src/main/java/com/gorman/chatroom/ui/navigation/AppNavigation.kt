@@ -5,13 +5,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.gorman.chatroom.ui.ui.screens.add.AddFriendScreen
 import com.gorman.chatroom.ui.ui.screens.add.CreateGroupScreen
 import com.gorman.chatroom.ui.ui.screens.auth.LoginScreen
 import com.gorman.chatroom.ui.ui.screens.auth.SignUpScreen
+import com.gorman.chatroom.ui.ui.screens.call.CallScreen
 import com.gorman.chatroom.ui.ui.screens.main.chats.ChatConversationScreen
 import com.gorman.chatroom.ui.ui.screens.main.groups.GroupConversationScreen
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
@@ -66,14 +69,14 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                 when (aItem) {
                     Screen.AddScreenItem.Friend -> AddFriendScreen (
                         onBack = { navController.popBackStack() },
-                        onStartChatClick = {it->
+                        onStartChatClick = {
                             navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$it") {
                                 popUpTo("main_screen")
                             }
                         })
                     Screen.AddScreenItem.Group -> CreateGroupScreen(
                         onBack = { navController.popBackStack() },
-                        onGroupStart = {it->
+                        onGroupStart = {
                             navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$it")  {
                                 popUpTo("main_screen")
                             }
@@ -88,11 +91,28 @@ fun AppNavigation(onLangChange: (String) -> Unit){
                 .associate { it[0] to it[1] }
             ChatConversationScreen(
                 mapId = restoredMap,
-                onVideoClick = {},
                 onPlusClick = {},
-                onPhoneClick = {},
                 onBackClick = { navController.popBackStack() },
+                onNavigateToCall = { id, isVideo ->
+                    navController.navigate("${Screen.ConversationItem.CallScreen.cRoute}/$id/$isVideo")
+                },
                 onMoreClick = {}
+            )
+        }
+        composable(
+            route = "${Screen.ConversationItem.CallScreen.cRoute}/{id}/{isVideo}",
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType },
+                navArgument("isVideo") { type = NavType.BoolType }
+            )
+        ) { backStackEntry ->
+            val targetId = backStackEntry.arguments?.getString("id") ?: ""
+            val isVideoCall = backStackEntry.arguments?.getBoolean("isVideo") ?: false
+            CallScreen(
+                targetId = targetId,
+                isCaller = true,
+                isVideoCall = isVideoCall,
+                onEndCall = { navController.popBackStack() }
             )
         }
         composable(Screen.ConversationItem.GroupConversation.cRoute + "/{map_id}") { backStackEntry ->

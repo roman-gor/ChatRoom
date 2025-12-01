@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -15,20 +16,17 @@ import com.gorman.chatroom.domain.models.CallModel
 import com.gorman.chatroom.domain.models.CallModelType
 import com.gorman.chatroom.domain.models.isValid
 import com.gorman.chatroom.domain.repository.CallRepository
-import com.gorman.chatroom.webrtc.RTCAudioManager
+import com.gorman.chatroom.data.datasource.webrtc.RTCAudioManager
 import dagger.hilt.android.AndroidEntryPoint
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CallService @Inject constructor(
-    private val callRepository: CallRepository
-): Service(), CallRepository.Listener {
+class CallService: Service(), CallRepository.Listener {
 
     private val TAG = "MainService"
-
+    @Inject lateinit var callRepository: CallRepository
     private var isServiceRunning = false
-    private var username: String? = null
 
     private lateinit var notificationManager: NotificationManager
     private lateinit var rtcAudioManager: RTCAudioManager
@@ -58,6 +56,7 @@ class CallService @Inject constructor(
                 CallServiceActions.START_SERVICE.name -> handleStartService(incomingIntent)
                 CallServiceActions.SETUP_VIEWS.name -> handleSetupViews(incomingIntent)
                 CallServiceActions.END_CALL.name -> handleEndCall()
+                CallServiceActions.ACCEPT_CALL.name -> handleAcceptCall()
                 CallServiceActions.SWITCH_CAMERA.name -> handleSwitchCamera()
                 CallServiceActions.TOGGLE_AUDIO.name -> handleToggleAudio(incomingIntent)
                 CallServiceActions.TOGGLE_VIDEO.name -> handleToggleVideo(incomingIntent)
@@ -71,25 +70,48 @@ class CallService @Inject constructor(
         return START_STICKY
     }
 
+    private fun handleAcceptCall() {
+        callRepository.startCall()
+    }
+
     private fun handleStopService() {
         callRepository.endCall()
     }
 
     private fun handleToggleScreenShare(incomingIntent: Intent) {
-        val isStarting = incomingIntent.getBooleanExtra("isStarting",true)
-        if (isStarting){
-            // we should start screen share
-            //but we have to keep it in mind that we first should remove the camera streaming first
-            if (isPreviousCallStateVideo){
+        val isStarting = incomingIntent.getBooleanExtra("isStarting", true)
+        if (isStarting) {
+            if (screenPermissionIntent == null) {
+                return
+            }
+            if (Build.VERSION.SDK_INT >= 34) {
+                val notification = NotificationCompat.Builder(this, "channel1")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentText("Screen Sharing Active")
+                    .build()
+
+                try {
+                    startForeground(
+                        1,
+                        notification,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or
+                                ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or
+                                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    return
+                }
+            }
+            if (isPreviousCallStateVideo) {
                 callRepository.toggleVideo(true)
             }
             callRepository.setScreenCaptureIntent(screenPermissionIntent!!)
             callRepository.toggleScreenShare(true)
 
-        }else{
-            //we should stop screen share and check if camera streaming was on so we should make it on back again
+        } else {
             callRepository.toggleScreenShare(false)
-            if (isPreviousCallStateVideo){
+            if (isPreviousCallStateVideo) {
                 callRepository.toggleVideo(false)
             }
         }
@@ -124,63 +146,99 @@ class CallService @Inject constructor(
     }
 
     private fun handleEndCall() {
-        callRepository.sendEndCall()
+        if (::callRepository.isInitialized) {
+            callRepository.sendEndCall()
+        }
         endCallAndRestartRepository()
     }
 
     private fun endCallAndRestartRepository(){
-        callRepository.endCall()
+        if (::callRepository.isInitialized) {
+            callRepository.endCall()
+        }
         endCallListener?.onCallEnded()
-        callRepository.initWebrtcClient(username!!)
     }
 
     private fun handleSetupViews(incomingIntent: Intent) {
-        val isCaller = incomingIntent.getBooleanExtra("isCaller",false)
-        val isVideoCall = incomingIntent.getBooleanExtra("isVideoCall",true)
+        val isCaller = incomingIntent.getBooleanExtra("isCaller", false)
+        val isVideoCall = incomingIntent.getBooleanExtra("isVideoCall", true)
         val target = incomingIntent.getStringExtra("target")
         this.isPreviousCallStateVideo = isVideoCall
-        callRepository.setTarget(target!!)
-        callRepository.initLocalSurfaceView(localSurfaceView!!,isVideoCall)
-        callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // Q для ServiceInfo.FOREGROUND_SERVICE_TYPE_*
+            try {
+                val serviceType = if (isVideoCall) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                } else {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                }
+                val notification = NotificationCompat.Builder(this, "channel1")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .build()
+                startForeground(1, notification, serviceType)
 
-        if (!isCaller){
-            callRepository.startCall()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error upgrading foreground service", e)
+            }
         }
-
+        if (::callRepository.isInitialized && target != null && localSurfaceView != null && remoteSurfaceView != null) {
+            callRepository.setTarget(target)
+            callRepository.initLocalSurfaceView(localSurfaceView!!, isVideoCall)
+            callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
+            if (!isCaller) {
+                callRepository.startCall()
+            }
+        }
     }
+
 
     private fun handleStartService(incomingIntent: Intent) {
         if (!isServiceRunning) {
             isServiceRunning = true
-            username = incomingIntent.getStringExtra("username")
+            val username = incomingIntent.getStringExtra("username")
             startServiceWithNotification()
-            callRepository.listener = this
-            callRepository.initFirebase()
-            callRepository.initWebrtcClient(username!!)
-
+            if (::callRepository.isInitialized && username != null) {
+                callRepository.listener = this
+                callRepository.initWebRTCAndFirebase(username)
+            }
         }
     }
 
     @SuppressLint("ObsoleteSdkInt")
     private fun startServiceWithNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                "channel1", "foreground", NotificationManager.IMPORTANCE_HIGH
-            )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return
+        }
 
-            val intent = Intent(this, CallServiceReceiver::class.java).apply {
-                action = "ACTION_EXIT"
+        val notificationChannel = NotificationChannel(
+            "channel1", "foreground", NotificationManager.IMPORTANCE_HIGH
+        )
+        val intent = Intent(this, CallServiceReceiver::class.java).apply {
+            action = "ACTION_EXIT"
+        }
+        val pendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        notificationManager.createNotificationChannel(notificationChannel)
+
+        val notification = NotificationCompat.Builder(this, "channel1")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .addAction(R.drawable.ic_end_call, "Exit", pendingIntent)
+            .build()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                startForeground(
+                    1,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } catch (e: Exception) {
+                if (Build.VERSION.SDK_INT < 34) { // На 34+ старый метод точно не сработает
+                    startForeground(1, notification)
+                }
+                Log.e(TAG, "Error starting foreground service with type", e)
             }
-            val pendingIntent : PendingIntent =
-                PendingIntent.getBroadcast(this,0 ,intent,PendingIntent.FLAG_IMMUTABLE)
-
-            notificationManager.createNotificationChannel(notificationChannel)
-            val notification = NotificationCompat.Builder(
-                this, "channel1"
-            ).setSmallIcon(R.mipmap.ic_launcher)
-                .addAction(R.drawable.ic_end_call,"Exit",pendingIntent)
-
-            startForeground(1, notification.build())
+        } else {
+            startForeground(1, notification)
         }
     }
 

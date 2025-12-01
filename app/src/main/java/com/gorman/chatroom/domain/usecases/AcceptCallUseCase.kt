@@ -1,13 +1,13 @@
 package com.gorman.chatroom.domain.usecases
 
 import com.gorman.chatroom.domain.repository.CallRepository
+import com.gorman.chatroom.service.CallServiceRepository
 import javax.inject.Inject
 
 class AcceptCallUseCase @Inject constructor(
-    private val callRepository: CallRepository
+    private val serviceRepository: CallServiceRepository
 ) {
-    operator fun invoke(targetId: String) {
-        callRepository.setTarget(targetId)
-        callRepository.startCall()
+    operator fun invoke() {
+        serviceRepository.acceptCall()
     }
 }

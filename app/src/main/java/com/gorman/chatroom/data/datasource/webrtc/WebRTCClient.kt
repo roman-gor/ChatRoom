@@ -1,4 +1,4 @@
-package com.gorman.chatroom.webrtc
+package com.gorman.chatroom.data.datasource.webrtc
 
 import android.content.Context
 import android.content.Intent
@@ -26,10 +26,11 @@ class WebRTCClient @Inject constructor(
     private var peerConnection: PeerConnection? = null
 
     private val iceServers = listOf(
-        PeerConnection.IceServer.builder("turn:a.relay.metered.ca:443?transport=tcp")
-            .setUsername("83eebabf8b4cce9d5dbcb649")
-            .setPassword("2D7JvfkOQtBdYW3R")
-            .createIceServer()
+        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun3.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun4.l.google.com:19302").createIceServer()
     )
 
     private val localVideoSource by lazy { peerConnectionFactory.createVideoSource(false) }
@@ -181,22 +182,16 @@ class WebRTCClient @Inject constructor(
         localVideoTrack?.setEnabled(!shouldBeMuted)
     }
 
-    private fun initSurfaceView(view: SurfaceViewRenderer) {
-        view.run {
-            setMirror(false)
-            setEnableHardwareScaler(true)
-            init(eglBaseContext, null)
-        }
-    }
-
     fun initRemoteSurfaceView(view: SurfaceViewRenderer) {
         this.remoteSurfaceView = view
-        initSurfaceView(view)
+        view.init(eglBaseContext, null) // <-- Правильная инициализация    view.setEnableHardwareScaler(true)
     }
 
     fun initLocalSurfaceView(localView: SurfaceViewRenderer, isVideoCall: Boolean) {
         this.localSurfaceView = localView
-        initSurfaceView(localView)
+        localView.init(eglBaseContext, null) // <-- Правильная инициализация
+        localView.setMirror(true) // Для селфи-камеры лучше включить зеркалирование
+        localView.setEnableHardwareScaler(true)
         startLocalStreaming(localView, isVideoCall)
     }
 
@@ -244,6 +239,7 @@ class WebRTCClient @Inject constructor(
         this.permissionIntent = screenPermissionIntent
     }
 
+    @Suppress("DEPRECATION")
     fun startScreenCapturing() {
         val displayMetrics = DisplayMetrics()
         val windowsManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

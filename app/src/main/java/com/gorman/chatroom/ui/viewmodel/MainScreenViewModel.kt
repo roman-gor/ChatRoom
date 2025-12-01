@@ -10,6 +10,7 @@ import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.repository.SettingsRepository
 import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
 import com.gorman.chatroom.domain.usecases.LoadNewUserUseCase
+import com.gorman.chatroom.service.CallServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class MainScreenViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val loadNewUserUseCase: LoadNewUserUseCase,
-    private val findUserByPhoneNumberUseCase: FindUserByPhoneNumberUseCase
+    private val findUserByPhoneNumberUseCase: FindUserByPhoneNumberUseCase,
+    private val callServiceRepository: CallServiceRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<MessengerUiState>(MessengerUiState.Loading)
@@ -48,6 +50,10 @@ class MainScreenViewModel @Inject constructor(
         initialValue = ""
     )
 
+    companion object {
+        private var isServiceStarted = false
+    }
+
     init {
         viewModelScope.launch {
             _uiState.value = MessengerUiState.Loading
@@ -55,6 +61,10 @@ class MainScreenViewModel @Inject constructor(
             val currentUserId = settingsRepository.userIdFlow.first()
 
             if (currentUserId.isNotEmpty()) {
+                if (!isServiceStarted) {
+                    callServiceRepository.startService(currentUserId)
+                    isServiceStarted = true
+                }
                 _uiState.value = MessengerUiState.Success
             } else {
                 _uiState.value = MessengerUiState.Login

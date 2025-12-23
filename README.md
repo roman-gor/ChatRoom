@@ -27,6 +27,14 @@ The app follows **Clean Architecture** and **MVVM**, with **Jetpack Compose** fo
 - **Coroutines & Flow** — asynchronous and reactive operations  
 - **Coil** — image loading  
 
+## Setup
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/ChatRoom.git
+    ```
+2. Open the project in Android Studio
+3. Sync Gradle and run the project.
+
 ## Design
 <p align="center">
   <img src="screenshots/chatroom.png" width="800"/>

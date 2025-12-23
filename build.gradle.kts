@@ -15,14 +15,3 @@ buildscript {
         classpath(libs.hilt.android.gradle.plugin)
     }
 }
-
-fun getExolveApiKey(): String {
-    val properties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        properties.load(localPropertiesFile.inputStream())
-    }
-    return properties.getProperty("EXOLVE_API_KEY", "")
-}
-
-extra["exolveApiKey"] = getExolveApiKey()

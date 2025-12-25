@@ -47,4 +47,7 @@
     <string name="groupName">Name Group</string>
     <string name="add_members_to_group">Add members to group</string>
     <string name="add">Add</string>
+    <string name="errorChatsLoading">Error When Chats Loading</string>
+    <string name="errorGroupsLoading">Error When Groups Loading</string>
+    <string name="errorProfileLoading">Error When Profile Loading</string>
 </resources>

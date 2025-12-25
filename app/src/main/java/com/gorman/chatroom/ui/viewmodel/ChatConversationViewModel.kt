@@ -36,7 +36,7 @@ class ChatConversationViewModel @Inject constructor(
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())
-    val messages: StateFlow<List<MessagesData>> = _messages.asStateFlow()
+    val messages = _messages.asStateFlow()
 
     private val _getterUserData = mutableStateOf<UsersData?>(null)
     val getterUserData: State<UsersData?> = _getterUserData

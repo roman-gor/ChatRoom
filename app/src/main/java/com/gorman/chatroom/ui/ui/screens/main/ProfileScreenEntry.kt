@@ -33,7 +33,6 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,11 +53,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.ui.states.ProfileUiState
+import com.gorman.chatroom.ui.ui.components.ErrorLoading
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
+import com.gorman.chatroom.ui.ui.components.LoadingStub
 import com.gorman.chatroom.ui.ui.components.RoundedButton
 import com.gorman.chatroom.ui.ui.screens.auth.DatePickerDocked
 import com.gorman.chatroom.ui.ui.screens.auth.DefaultOutlinedTextField
@@ -66,16 +69,47 @@ import com.gorman.chatroom.ui.ui.screens.auth.GenderDropDown
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.ProfileScreenViewModel
 
+@Composable
+fun ProfileScreenEntry(
+    profileScreenViewModel: ProfileScreenViewModel = hiltViewModel(),
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
+    onLogoutClick: () -> Unit
+){
+    val uiState by profileScreenViewModel.profileUiState.collectAsStateWithLifecycle()
+    when (val state = uiState) {
+        is ProfileUiState.Error -> ErrorLoading(stringResource(R.string.errorProfileLoading))
+        ProfileUiState.Idle -> LoadingStub()
+        ProfileUiState.Loading -> LoadingStub()
+        is ProfileUiState.Success -> {
+            ProfileScreen(
+                onLogoutClick = {
+                    mainScreenViewModel.setUserId("")
+                    onLogoutClick()
+                },
+                userData = state.usersData,
+                profileItems = state.profileItems,
+                onSaveClick = { userData ->
+                    userData?.userId?.let { userId->
+                        profileScreenViewModel.updateUserData(userId, userData)
+                    }
+                }
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onLogoutClick: () -> Unit){
-    val profileScreenViewModel: ProfileScreenViewModel = hiltViewModel()
-    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
-    val userData by profileScreenViewModel.userData.collectAsState()
-    val profileItems = profileScreenViewModel.profileItems.value
+fun ProfileScreen(
+    onLogoutClick: () -> Unit,
+    userData: UsersData,
+    profileItems: Map<Int, String?>,
+    onSaveClick: (UsersData?) -> Unit
+){
     val editSheetState = rememberModalBottomSheetState()
     var showSheet by remember { mutableStateOf(false) }
-    Column (modifier = Modifier.fillMaxSize()
+    Column (modifier = Modifier
+        .fillMaxSize()
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -117,34 +151,31 @@ fun ProfileScreen(onLogoutClick: () -> Unit){
         }
         Spacer(modifier = Modifier.height(10.dp))
         ProfileButtons(
-            onClick = {showSheet = !showSheet},
+            onClick = { showSheet = !showSheet },
             containerColor = colorResource(R.color.selected_indicator_color),
             icon = painterResource(R.drawable.edit_profile),
             iconTint = colorResource(R.color.white),
             text = "Edit Profile",
             textColor = colorResource(R.color.white),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 2.dp))
         ProfileButtons(
-            onClick = {
-                mainScreenViewModel.setUserId("")
-                onLogoutClick()
-            },
+            onClick = onLogoutClick,
             containerColor = colorResource(R.color.logout_background_color),
             icon = painterResource(R.drawable.logout_icon),
             iconTint = colorResource(R.color.red_logout_color),
             text = "Logout",
             textColor = colorResource(R.color.red_logout_color),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp))
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 10.dp))
     }
     if(showSheet) {
         BottomSheetDialog(onDismiss = {showSheet = !showSheet},
             sheetState = editSheetState,
             user = userData,
-            onSave = { newUserData->
-                userData.userId?.let { userId->
-                    profileScreenViewModel.updateUserData(userId, newUserData)
-                }
-            })
+            onSave = { newUserData-> onSaveClick(newUserData) })
     }
 }
 
@@ -185,7 +216,9 @@ fun ProfileButtons(onClick: () -> Unit,
 fun ProfileItem(name: Int, value: String?){
     val context = LocalContext.current
     Row (
-        modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ){
@@ -342,7 +375,9 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                     modifier = Modifier.fillMaxWidth())
             }
             Row (
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ){
                 RoundedButton(onClick = {

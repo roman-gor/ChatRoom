@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,34 +40,57 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.MoreScreenData
+import com.gorman.chatroom.ui.states.MoreScreenUiState
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.viewmodel.MoreScreenViewModel
 
 @Composable
-fun MoreScreen(onLangChange: (String) -> Unit){
-    val moreScreenViewModel: MoreScreenViewModel = hiltViewModel()
-    val language by moreScreenViewModel.language.collectAsState()
-    val darkMode by moreScreenViewModel.darkMode.collectAsState()
-    val mute by moreScreenViewModel.notificationsMute.collectAsState()
-    val hideChatHistory by moreScreenViewModel.hideChatHistory.collectAsState()
-    val security by moreScreenViewModel.security.collectAsState()
-    var specialPadding by remember { mutableStateOf(2.dp) }
+fun MoreScreenEntry(
+    moreScreenViewModel: MoreScreenViewModel = hiltViewModel(),
+    onLangChange: (String) -> Unit
+){
+    val uiState by moreScreenViewModel.uiState.collectAsStateWithLifecycle()
+    val items = moreScreenViewModel.items
+    MoreScreen(
+        state = uiState,
+        items = items,
+        onLangChange = onLangChange,
+        onChangeChatHistory = { history -> moreScreenViewModel.setHideChatHistory(history) },
+        onChangeSecurity = { security -> moreScreenViewModel.setSecurity(security) },
+        onChangeNotifications = { muted -> moreScreenViewModel.changeNotificationsState(muted) },
+        onChangeDarkMode = { darkMode -> moreScreenViewModel.changeDarkModeState(darkMode) }
+    )
+}
 
+@Composable
+fun MoreScreen(
+    state: MoreScreenUiState,
+    items: List<MoreScreenData>,
+    onLangChange: (String) -> Unit,
+    onChangeChatHistory: (Boolean) -> Unit,
+    onChangeSecurity: (Boolean) -> Unit,
+    onChangeNotifications: (Boolean) -> Unit,
+    onChangeDarkMode: (Boolean) -> Unit
+){
     LazyColumn (modifier = Modifier.padding(16.dp)){
-        itemsIndexed(moreScreenViewModel.items) { index, item ->
-            specialPadding = if (index > 2 && index != 5 && index != 6) 12.dp else 0.dp
+        itemsIndexed(items) { index, item ->
+            val specialPadding = if (index > 2 && index != 5 && index != 6) 12.dp else 0.dp
             MoreItem(
                 item = item,
                 index = index,
                 onLangChange = onLangChange,
-                viewModel = moreScreenViewModel,
-                language = language,
-                darkMode = darkMode,
-                mute = mute,
-                hideChatHistory = hideChatHistory,
-                security = security,
+                onChangeDarkMode = onChangeDarkMode,
+                onChangeNotifications = onChangeNotifications,
+                onChangeSecurity = onChangeSecurity,
+                onChangeChatHistory = onChangeChatHistory,
+                language = state.language,
+                darkMode = state.isDarkMode,
+                mute = state.isNotificationsMuted,
+                hideChatHistory = state.isChatHistoryHidden,
+                security = state.isSecurityEnabled,
                 specialPadding = specialPadding)
             if (index == 2) {
                 HorizontalDivider(
@@ -86,7 +108,10 @@ fun MoreScreen(onLangChange: (String) -> Unit){
 fun MoreItem(item: MoreScreenData,
              index: Int,
              onLangChange: (String) -> Unit,
-             viewModel: MoreScreenViewModel,
+             onChangeDarkMode: (Boolean) -> Unit,
+             onChangeNotifications: (Boolean) -> Unit,
+             onChangeChatHistory: (Boolean) -> Unit,
+             onChangeSecurity: (Boolean) -> Unit,
              language: String,
              darkMode: Boolean,
              mute: Boolean,
@@ -97,8 +122,8 @@ fun MoreItem(item: MoreScreenData,
         modifier = Modifier.fillMaxWidth()
             .clickable(onClick = {
                 when (index) {
-                    1 -> viewModel.changeDarkModeState(!darkMode)
-                    2 -> viewModel.changeNotificationsState(!mute)
+                    1 -> onChangeDarkMode(!darkMode)
+                    2 -> onChangeNotifications(!mute)
                     else -> {}
                 }
             })
@@ -148,14 +173,14 @@ fun MoreItem(item: MoreScreenData,
                     language = language,
                     onLangChange = onLangChange)
                 1 -> SwitchMode(
-                    onClick = { viewModel.changeDarkModeState(!darkMode) },
+                    onClick = { onChangeDarkMode(!darkMode) },
                     checked = darkMode)
                 2 -> SwitchMode(
-                    onClick = { viewModel.changeNotificationsState(!mute) },
+                    onClick = { onChangeNotifications(!mute) },
                     checked = mute)
                 5 -> {
                     SwitchMode(
-                        onClick = { viewModel.setHideChatHistory(!hideChatHistory) },
+                        onClick = { onChangeChatHistory(!hideChatHistory) },
                         checked = hideChatHistory
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -163,7 +188,7 @@ fun MoreItem(item: MoreScreenData,
                 }
                 6 -> {
                     SwitchMode(
-                        onClick = { viewModel.setSecurity(!security) },
+                        onClick = { onChangeSecurity(!security) },
                         checked = security
                     )
                     Spacer(modifier = Modifier.width(8.dp))

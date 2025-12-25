@@ -1,18 +1,16 @@
 package com.gorman.chatroom.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.models.ChatPreviewData
-import com.gorman.chatroom.domain.models.ChatsData
 import com.gorman.chatroom.domain.usecases.DeleteChatUseCase
 import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
 import com.gorman.chatroom.domain.usecases.GetLastMessageUseCase
 import com.gorman.chatroom.domain.usecases.GetUnreadMessagesQuantityUseCase
 import com.gorman.chatroom.domain.usecases.GetUserChatsUseCase
+import com.gorman.chatroom.ui.states.ChatsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -27,48 +25,41 @@ class ChatsScreenViewModel @Inject constructor(
     private val deleteChatUseCase: DeleteChatUseCase
 ): ViewModel() {
 
-    private val _chatsList = MutableStateFlow<List<ChatsData?>>(emptyList())
-    val chatsList: StateFlow<List<ChatsData?>> = _chatsList.asStateFlow()
+    private val _chatsUiState = MutableStateFlow<ChatsUiState>(ChatsUiState.Idle)
+    val chatsUiState = _chatsUiState.asStateFlow()
 
-    private val _chatPreviews = MutableStateFlow<Map<String, ChatPreviewData>>(emptyMap())
-    val chatPreviews: StateFlow<Map<String, ChatPreviewData>> = _chatPreviews.asStateFlow()
-
-    fun initChatPreview(chatId: String, currentUserId: String) {
+    fun loadAllChats(userId: String) {
         viewModelScope.launch {
-            Log.d("ViewModel", "Init viewmodel")
-            val getterUserData = findUserByChatIdUseCase(chatId, currentUserId)
-            val flow = combine(
-                getLastMessageUseCase(chatId),
-                getUnreadMessagesQuantityUseCase(chatId, currentUserId)
-            ) { lastMessage, quantity ->
-                Log.d("Last message", "$lastMessage")
-                if (lastMessage?.timestamp != "") {
-                    ChatPreviewData(
-                        user = getterUserData,
-                        lastMessage = lastMessage,
-                        unreadQuantity = quantity
-                    )
-                }
-                else {
-                    ChatPreviewData(
-                        user = getterUserData,
-                        lastMessage = null,
-                        unreadQuantity = quantity
-                    )
-                }
-            }
-            flow.collect { data ->
-                _chatPreviews.value = _chatPreviews.value.toMutableMap().apply {
-                    this[chatId] = data
-                }
-            }
-        }
-    }
+            _chatsUiState.value = ChatsUiState.Loading
+            try {
+                getUserChatsUseCase(userId).collect { chatsDataList ->
+                    if (chatsDataList.isEmpty()) {
+                        _chatsUiState.value = ChatsUiState.Success(emptyList())
+                        return@collect
+                    }
+                    val previewFlows = chatsDataList.filterNotNull().map { chat ->
+                        val getterUserData = findUserByChatIdUseCase(chat.chatId!!, userId)
 
-    fun getUserChats(userId: String) {
-        viewModelScope.launch {
-            getUserChatsUseCase(userId).collect { chatsList ->
-                _chatsList.value = chatsList
+                        combine(
+                            getLastMessageUseCase(chat.chatId),
+                            getUnreadMessagesQuantityUseCase(chat.chatId, userId)
+                        ) { lastMessage, quantity ->
+                            chat.chatId to ChatPreviewData(
+                                chatId = chat.chatId,
+                                user = getterUserData,
+                                lastMessage = if (lastMessage?.timestamp != "") lastMessage else null,
+                                unreadQuantity = quantity
+                            )
+                        }
+                    }
+                    combine(previewFlows) { previews ->
+                        previews.map { it.second }
+                    }.collect { fullPreviewList ->
+                        _chatsUiState.value = ChatsUiState.Success(fullPreviewList)
+                    }
+                }
+            } catch (e: Exception) {
+                _chatsUiState.value = ChatsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }

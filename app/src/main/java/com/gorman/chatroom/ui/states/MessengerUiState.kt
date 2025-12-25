@@ -1,4 +1,4 @@
-package com.gorman.chatroom.ui
+package com.gorman.chatroom.ui.states
 
 sealed class MessengerUiState {
     object Loading: MessengerUiState()

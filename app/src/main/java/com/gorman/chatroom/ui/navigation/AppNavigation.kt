@@ -2,29 +2,31 @@ package com.gorman.chatroom.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.gorman.chatroom.ui.ui.screens.add.AddFriendScreen
-import com.gorman.chatroom.ui.ui.screens.add.CreateGroupScreen
-import com.gorman.chatroom.ui.ui.screens.auth.LoginScreen
-import com.gorman.chatroom.ui.ui.screens.auth.SignUpScreen
+import com.gorman.chatroom.ui.ui.screens.add.AddFriendScreenEntry
+import com.gorman.chatroom.ui.ui.screens.add.CreateGroupScreenEntry
+import com.gorman.chatroom.ui.ui.screens.auth.LoginScreenEntry
+import com.gorman.chatroom.ui.ui.screens.auth.SignUpScreenEntry
 import com.gorman.chatroom.ui.ui.screens.call.CallScreen
-import com.gorman.chatroom.ui.ui.screens.main.chats.ChatConversationScreen
-import com.gorman.chatroom.ui.ui.screens.main.groups.GroupConversationScreen
+import com.gorman.chatroom.ui.ui.screens.main.chats.ChatConversationScreenEntry
+import com.gorman.chatroom.ui.ui.screens.main.groups.GroupConversationScreenEntry
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
 @Composable
-fun AppNavigation(onLangChange: (String) -> Unit){
+fun AppNavigation(
+    onLangChange: (String) -> Unit,
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel()
+){
     val navController = rememberNavController()
-    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
-    val userId = mainScreenViewModel.userId.collectAsState().value
-    val isUserIdLoaded by mainScreenViewModel.isUserIdLoaded.collectAsState()
+    val userId = mainScreenViewModel.userId.collectAsStateWithLifecycle().value
+    val isUserIdLoaded by mainScreenViewModel.isUserIdLoaded.collectAsStateWithLifecycle()
 
     LaunchedEffect(isUserIdLoaded) {
         if (isUserIdLoaded) {
@@ -40,18 +42,18 @@ fun AppNavigation(onLangChange: (String) -> Unit){
     NavHost(navController = navController, startDestination = "loading_placeholder") {
         composable("loading_placeholder") {}
         composable("sign_up") {
-            SignUpScreen({
+            SignUpScreenEntry(onStartClick = {
                 navController.navigate("main_screen"){
                     popUpTo("sign_up") { inclusive = true }
                 }
-            }, {
+            }, onLoginClick = {
                 navController.navigate("login"){
                     popUpTo("sign_up") { inclusive = true }
                 }
             })
         }
         composable("login") {
-            LoginScreen (onStartClick = {
+            LoginScreenEntry (onStartClick = {
                 navController.navigate("main_screen"){
                     popUpTo("login") { inclusive = true }
                 }
@@ -67,14 +69,14 @@ fun AppNavigation(onLangChange: (String) -> Unit){
         Screen.aItems.forEach { aItem ->
             composable(aItem.aRoute) {
                 when (aItem) {
-                    Screen.AddScreenItem.Friend -> AddFriendScreen (
+                    Screen.AddScreenItem.Friend -> AddFriendScreenEntry (
                         onBack = { navController.popBackStack() },
                         onStartChatClick = {
                             navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$it") {
                                 popUpTo("main_screen")
                             }
                         })
-                    Screen.AddScreenItem.Group -> CreateGroupScreen(
+                    Screen.AddScreenItem.Group -> CreateGroupScreenEntry(
                         onBack = { navController.popBackStack() },
                         onGroupStart = {
                             navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$it")  {
@@ -89,7 +91,7 @@ fun AppNavigation(onLangChange: (String) -> Unit){
             val restoredMap = mapId.split(";")
                 .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
                 .associate { it[0] to it[1] }
-            ChatConversationScreen(
+            ChatConversationScreenEntry(
                 mapId = restoredMap,
                 onPlusClick = {},
                 onBackClick = { navController.popBackStack() },
@@ -120,7 +122,7 @@ fun AppNavigation(onLangChange: (String) -> Unit){
             val restoredMap = mapId.split(";")
                 .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
                 .associate { it[0] to it[1] }
-            GroupConversationScreen(
+            GroupConversationScreenEntry(
                 mapId = restoredMap,
                 onVideoClick = {},
                 onPlusClick = {},

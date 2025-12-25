@@ -29,7 +29,7 @@ class GroupConversationViewModel @Inject constructor(
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())
-    val messages: StateFlow<List<MessagesData>> = _messages.asStateFlow()
+    val messages = _messages.asStateFlow()
 
     private val _getterUsersData = mutableStateOf<List<UsersData?>>(emptyList())
     val getterUsersData: State<List<UsersData?>> = _getterUsersData

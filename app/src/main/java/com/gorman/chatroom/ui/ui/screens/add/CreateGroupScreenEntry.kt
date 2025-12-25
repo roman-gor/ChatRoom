@@ -1,5 +1,6 @@
 package com.gorman.chatroom.ui.ui.screens.add
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -40,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -64,36 +64,65 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.ChatsData
+import com.gorman.chatroom.domain.models.ChatPreviewData
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.ui.states.ChatsUiState
+import com.gorman.chatroom.ui.ui.components.ErrorLoading
+import com.gorman.chatroom.ui.ui.components.LoadingStub
 import com.gorman.chatroom.ui.ui.components.RoundedButton
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
-import kotlin.collections.get
+
+@Composable
+fun CreateGroupScreenEntry(
+    chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
+    mainScreenViewModel: MainScreenViewModel =  hiltViewModel(),
+    onBack: () -> Unit,
+    onGroupStart: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
+    LaunchedEffect(userId) {
+        if (userId.isNotEmpty()) {
+            chatsScreenViewModel.loadAllChats(userId)
+            Log.d("Loading chats", "Loading")
+        }
+    }
+    val uiState by chatsScreenViewModel.chatsUiState.collectAsStateWithLifecycle()
+    when(val state = uiState) {
+        is ChatsUiState.Error -> ErrorLoading(stringResource(R.string.errorGroupsLoading))
+        ChatsUiState.Idle -> LoadingStub()
+        ChatsUiState.Loading -> LoadingStub()
+        is ChatsUiState.Success -> {
+            CreateGroupScreen(
+                onBack = onBack,
+                userId = userId,
+                context = context,
+                chatsList = state.chats,
+                onGroupStart = onGroupStart
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateGroupScreen(onBack: () -> Unit,
-                      onGroupStart: (String) -> Unit){
-    val chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel()
-    val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
-    val userId by mainScreenViewModel.userId.collectAsState()
+fun CreateGroupScreen(
+    onBack: () -> Unit,
+    userId: String,
+    context: Context,
+    chatsList: List<ChatPreviewData?>,
+    onGroupStart: (String) -> Unit
+){
     var groupName by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val addList = remember { mutableStateListOf<UsersData?>() }
     val addListSize = remember { mutableIntStateOf(addList.size) }
-    val context = LocalContext.current
-    LaunchedEffect(userId) {
-        if (userId.isNotEmpty()) {
-            chatsScreenViewModel.getUserChats(userId)
-            Log.d("Loading chats", "Loading")
-        }
-    }
-    val chatsList by chatsScreenViewModel.chatsList.collectAsState()
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         topBar = { AppTopBar(title = R.string.add_group, onBack = { onBack() }) }
@@ -218,9 +247,7 @@ fun CreateGroupScreen(onBack: () -> Unit,
         BottomAddMembersSheetDialog(
             onDismiss = {menuExpanded = !menuExpanded},
             sheetState = sheetState,
-            chatsScreenViewModel = chatsScreenViewModel,
             chatsList = chatsList,
-            userId = userId,
             onConfirm = {
                 addList.clear()
                 addList.addAll(it)
@@ -235,9 +262,8 @@ fun BottomAddMembersSheetDialog(
     onDismiss: () -> Unit,
     onConfirm: (List<UsersData?>) -> Unit,
     sheetState: SheetState,
-    chatsList: List<ChatsData?>,
-    chatsScreenViewModel: ChatsScreenViewModel,
-    userId: String) {
+    chatsList: List<ChatPreviewData?>
+) {
     var friendName by remember { mutableStateOf("") }
     val addList = remember { mutableStateListOf<UsersData?>() }
     val isExpanded = sheetState.currentValue == SheetValue.Expanded
@@ -299,25 +325,17 @@ fun BottomAddMembersSheetDialog(
                         modifier = Modifier.weight(1f)
                     ) {
                         items(chatsList) { item ->
-                            LaunchedEffect(item?.chatId, item?.lastMessageId) {
-                                if (item?.chatId != null && item.lastMessageId != null) {
-                                    chatsScreenViewModel.initChatPreview(item.chatId, userId)
-                                    Log.d("Item", item.chatId)
-                                }
-                            }
-                            val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
-                            val user = chatMap[item?.chatId]?.user
-                            if (user != null) {
+                            if (item?.user != null) {
                                 ContactListItem(
-                                    user = user,
+                                    user = item.user,
                                     onBoxChange = { isChecked ->
                                         if (isChecked) {
-                                            addList.add(user)
+                                            addList.add(item.user)
                                         } else {
-                                            addList.remove(user)
+                                            addList.remove(item.user)
                                         }
                                     },
-                                    isChecked = addList.contains(user)
+                                    isChecked = addList.contains(item.user)
                                 )
                             }
                         }
@@ -325,25 +343,17 @@ fun BottomAddMembersSheetDialog(
                 } else {
                     LazyColumn {
                         items(chatsList) { item ->
-                            LaunchedEffect(item?.chatId, item?.lastMessageId) {
-                                if (item?.chatId != null && item.lastMessageId != null) {
-                                    chatsScreenViewModel.initChatPreview(item.chatId, userId)
-                                    Log.d("Item", item.chatId)
-                                }
-                            }
-                            val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
-                            val user = chatMap[item?.chatId]?.user
-                            if (user != null) {
+                            if (item?.user != null) {
                                 ContactListItem(
-                                    user = user,
+                                    user = item.user,
                                     onBoxChange = { isChecked ->
                                         if (isChecked) {
-                                            addList.add(user)
+                                            addList.add(item.user)
                                         } else {
-                                            addList.remove(user)
+                                            addList.remove(item.user)
                                         }
                                     },
-                                    isChecked = addList.contains(user)
+                                    isChecked = addList.contains(item.user)
                                 )
                             }
                         }

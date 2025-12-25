@@ -41,17 +41,19 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.gorman.chatroom.R
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
 @Composable
-fun TopBar(navController: NavHostController) {
-
-    val viewModel: MainScreenViewModel = hiltViewModel()
+fun TopBar(
+    viewModel: MainScreenViewModel = hiltViewModel(),
+    navController: NavHostController
+) {
     var isSearchBar by remember { mutableStateOf(false) }
-
+    val searchText by viewModel.searchState.collectAsStateWithLifecycle()
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -67,10 +69,14 @@ fun TopBar(navController: NavHostController) {
         if (!isSearchBar) {
             DefaultTopBar(navController = navController, onSearchClick = {isSearchBar = !isSearchBar})
         } else {
-            SearchBar(viewModel = viewModel,
+            SearchBar(
                 onCloseClick = {
                     isSearchBar = !isSearchBar
                     viewModel.onSearchValueChanged("")
+                },
+                searchText = searchText,
+                onSearchValueChange = { text ->
+                    viewModel.onSearchValueChanged(text)
                 })
         }
     }
@@ -129,7 +135,11 @@ fun DefaultTopBar(navController: NavHostController, onSearchClick: () -> Unit){
 }
 
 @Composable
-fun SearchBar(viewModel: MainScreenViewModel, onCloseClick: () -> Unit){
+fun SearchBar(
+    onCloseClick: () -> Unit,
+    searchText: String,
+    onSearchValueChange: (String) -> Unit
+){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -138,8 +148,8 @@ fun SearchBar(viewModel: MainScreenViewModel, onCloseClick: () -> Unit){
         verticalAlignment = Alignment.CenterVertically
     ) {
         SearchTextField(
-            value = viewModel.searchState.value,
-            onValueChange = { viewModel.onSearchValueChanged(it) },
+            value = searchText,
+            onValueChange = { text -> onSearchValueChange(text) },
             modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.width(12.dp))
         CloseIcon(onCloseClick = { onCloseClick() })

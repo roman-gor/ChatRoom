@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
@@ -74,23 +74,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@SuppressLint("ContextCastToActivity")
 @Composable
-fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
+fun SignUpScreenEntry(
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
+    onStartClick: () -> Unit,
+    onLoginClick: () -> Unit
+) {
     val context = LocalContext.current
-
-    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
-    val isPhoneNumberExist = mainScreenViewModel.isPhoneNumberExist.collectAsState().value
-
-    var phoneNumber by remember { mutableStateOf("") }
-    var phoneCode by remember { mutableStateOf("+375") }
-    var userName by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var alpha by remember { mutableFloatStateOf(0.2f) }
+    val isPhoneNumberExist by mainScreenViewModel.isPhoneNumberExist.collectAsStateWithLifecycle()
     var isPhoneNumberTrue by remember { mutableStateOf(false) }
-
     LaunchedEffect(isPhoneNumberExist) {
         when (isPhoneNumberExist) {
             true -> Toast.makeText(context, "Пользователь с таким номером существует!", Toast.LENGTH_LONG).show()
@@ -98,6 +90,31 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
             null -> {}
         }
     }
+    SignUpScreen(
+        onStartClick = onStartClick,
+        onLoginClick = onLoginClick,
+        isPhoneNumberTrue = isPhoneNumberTrue,
+        onFindUserClick = { phone -> mainScreenViewModel.findUserByPhoneNumber(phone) },
+        onLoadNewUser = { user -> mainScreenViewModel.loadNewUser(user) }
+    )
+}
+
+@SuppressLint("ContextCastToActivity")
+@Composable
+fun SignUpScreen(
+    onStartClick: () -> Unit,
+    onLoginClick: () -> Unit,
+    isPhoneNumberTrue: Boolean,
+    onFindUserClick: (String) -> Unit,
+    onLoadNewUser: (UsersData) -> Unit
+) {
+    var phoneNumber by remember { mutableStateOf("") }
+    var phoneCode by remember { mutableStateOf("+375") }
+    var userName by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("") }
+    var birthday by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var alpha by remember { mutableFloatStateOf(0.2f) }
     Column(modifier = Modifier.systemBarsPadding().fillMaxSize().padding(top = 64.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = stringResource(R.string.sign_up),
@@ -140,35 +157,6 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                     singleLine = true
                 )
             }
-                //TODO CODE FOR SMS AUTH
-//            else if (isPhoneNumberTrue.value) {
-//                Text(text = stringResource(R.string.enter_sms),
-//                    fontFamily = mulishFont(),
-//                    fontSize = 16.sp,
-//                    color = colorResource(R.color.unselected_item_color),
-//                    fontWeight = FontWeight.Medium,
-//                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 2.dp))
-//                OutlinedTextField(
-//                    value = smsCode,
-//                    onValueChange = { code->
-//                        smsCode = code
-//                    },
-//                    leadingIcon = { LeadingIconMenu(onItemClick = {phoneCode = it}) },
-//                    textStyle = TextStyle(
-//                        fontFamily = mulishFont(),
-//                        fontSize = 14.sp
-//                    ),
-//                    colors = OutlinedTextFieldDefaults.colors(
-//                        focusedTextColor = colorResource(R.color.black),
-//                        focusedBorderColor = colorResource(R.color.unselected_item_color)
-//                    ),
-//                    shape = RoundedCornerShape(12.dp),
-//                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-//                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 2.dp).fillMaxWidth(),
-//                    singleLine = true
-//                )
-//            }
-            //TODO END CODE FOR SMS AUTH
             else {
                 ItemsAfterPhoneNumber(
                     onUserNameChange = {userName = it},
@@ -186,7 +174,7 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                     if ((phoneCode + phoneNumber).length >= 13) {
                         val phone = phoneCode + phoneNumber
                         Log.d("Phone", phone)
-                        mainScreenViewModel.findUserByPhoneNumber(phone)
+                        onFindUserClick(phone)
                     }
                 }
                 else {
@@ -204,7 +192,7 @@ fun SignUpScreen(onStartClick: () -> Unit, onLoginClick: () -> Unit) {
                             unreadMessagesCount = 0
                         )
                         Log.d("UsersData","$userName, $gender, $birthday, $email")
-                        mainScreenViewModel.loadNewUser(user)
+                        onLoadNewUser(user)
                         onStartClick()
                     }
                     Log.d("UsersData","$userName, $gender, $birthday, $email")

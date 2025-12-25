@@ -1,6 +1,5 @@
 package com.gorman.chatroom.ui.ui.screens.main.groups
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,56 +29,66 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.GroupPreviewData
-import com.gorman.chatroom.domain.models.GroupsData
+import com.gorman.chatroom.ui.states.GroupsUiState
+import com.gorman.chatroom.ui.ui.components.ErrorLoading
+import com.gorman.chatroom.ui.ui.components.LoadingStub
 import com.gorman.chatroom.ui.ui.components.formatMessageTimestamp
 import com.gorman.chatroom.ui.ui.components.parseIso
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.screens.main.chats.TextField
 import com.gorman.chatroom.ui.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
-import kotlin.collections.get
 
 @Composable
-fun GroupsScreen(onItemClick: (String) -> Unit) {
-    val groupsViewModel: GroupsScreenViewModel = hiltViewModel()
-    val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
-    val userId by mainScreenViewModel.userId.collectAsState()
+fun GroupsScreenEntry(
+    groupsViewModel: GroupsScreenViewModel = hiltViewModel(),
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
+    onItemClick: (String) -> Unit
+) {
+    val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
+    val uiState by groupsViewModel.groupUiState.collectAsStateWithLifecycle()
     LaunchedEffect(userId) {
-        groupsViewModel.getUserGroups(userId)
+        groupsViewModel.loadAllGroups(userId)
     }
-    val groupsList = groupsViewModel.groupsState.collectAsState().value
-    val sortedGroupsList = groupsList.sortedByDescending {
-        parseIso(it?.lastMessageTimestamp)
+    when(val state = uiState) {
+        is GroupsUiState.Error -> ErrorLoading(stringResource(R.string.errorGroupsLoading))
+        GroupsUiState.Idle -> LoadingStub()
+        GroupsUiState.Loading -> LoadingStub()
+        is GroupsUiState.Success -> {
+            val sortedGroupsList = state.groups.sortedByDescending {
+                parseIso(it.lastMessage?.timestamp)
+            }
+            GroupsScreen(
+                userId = userId,
+                onItemClick = onItemClick,
+                sortedGroupsList = sortedGroupsList
+            )
+        }
     }
+}
+
+@Composable
+fun GroupsScreen(
+    userId: String,
+    onItemClick: (String) -> Unit,
+    sortedGroupsList: List<GroupPreviewData>
+) {
     LazyColumn (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
         items(sortedGroupsList){ item->
-            LaunchedEffect(item?.groupId, item?.lastMessageId) {
-                if (item?.groupId != null && item.lastMessageId != null) {
-                    groupsViewModel.initGroupPreview(
-                        userId,
-                        item.groupId
-                    )
-                    Log.d("Item", item.groupId)
-                }
-            }
-            val datetime = formatMessageTimestamp(item?.lastMessageTimestamp)
-            val chatMap = groupsViewModel.groupPreview.collectAsState().value
-            val preview = chatMap[item?.groupId]
-            val text = preview?.lastMessage?.text
-            Log.d("Text", "$text")
-            Log.d("Getters", "${chatMap[item?.groupId]?.users?.size}")
+            val datetime = formatMessageTimestamp(item.lastMessage?.timestamp)
             GroupPreviewItem(
                 item = item,
-                chatMap = chatMap,
                 userId = userId,
                 datetime = datetime,
                 onItemClick = onItemClick)
@@ -89,14 +97,13 @@ fun GroupsScreen(onItemClick: (String) -> Unit) {
 }
 
 @Composable
-fun GroupPreviewItem(item: GroupsData?,
-                     chatMap: Map<String, GroupPreviewData>,
+fun GroupPreviewItem(item: GroupPreviewData?,
                      userId: String,
                      datetime: String,
                      onItemClick: (String) -> Unit){
-    val lastMessage = chatMap[item?.groupId]?.lastMessage
-    val unreadQuantity = chatMap[item?.groupId]?.unreadQuantity
-    val getterUsers = chatMap[item?.groupId]?.users
+    val lastMessage = item?.lastMessage
+    val unreadQuantity = item?.unreadQuantity
+    val getterUsers = item?.users
     val usersAvatars = mutableListOf<String?>()
     if (getterUsers != null) {
         for (user in getterUsers) {
@@ -109,8 +116,7 @@ fun GroupPreviewItem(item: GroupsData?,
             .clickable(
                 onClick = {
                     if (item?.groupId != null && getterUsers != null) {
-                        val serialized =
-                            "groupName=${item.groupName};currentUserId=${userId};groupId=${item.groupId}"
+                        val serialized = "groupName=${item.groupName};currentUserId=${userId};groupId=${item.groupId}"
                         onItemClick(serialized)
                     }
                 }

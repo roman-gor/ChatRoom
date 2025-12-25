@@ -23,7 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,9 +37,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.ui.states.ConversationUiState
 import com.gorman.chatroom.ui.ui.components.BottomSendMessageView
 import com.gorman.chatroom.ui.ui.components.DateItem
 import com.gorman.chatroom.ui.ui.components.MessageItem
@@ -51,16 +53,17 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Composable
-fun ChatConversationScreen(mapId: Map<String, String>,
-                           onBackClick: () -> Unit,
-                           onMoreClick: () -> Unit,
-                           onNavigateToCall: (targetId: String, isVideoCall: Boolean) -> Unit,
-                           onPlusClick: () -> Unit) {
-    val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
+fun ChatConversationScreenEntry(
+    chatConversationViewModel: ChatConversationViewModel = hiltViewModel(),
+    mapId: Map<String, String>,
+    onBackClick: () -> Unit,
+    onMoreClick: () -> Unit,
+    onPlusClick: () -> Unit,
+    onNavigateToCall: (targetId: String, isVideoCall: Boolean) -> Unit,
+) {
     val currentUserId = mapId["currentUserId"]
     val getterUserId = mapId["getterUserId"]
     val chatId = chatConversationViewModel.chatId.value
-
     LaunchedEffect(Unit) {
         chatConversationViewModel.startCallEvent.collect { event->
             event?.let {
@@ -68,7 +71,6 @@ fun ChatConversationScreen(mapId: Map<String, String>,
             }
         }
     }
-
     LaunchedEffect(chatId, currentUserId, getterUserId) {
         if (!mapId["chatId"].isNullOrEmpty() && currentUserId != null) {
             chatConversationViewModel.initializeChat(mapId["chatId"]!!, currentUserId)
@@ -78,7 +80,7 @@ fun ChatConversationScreen(mapId: Map<String, String>,
             Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUserId=$getterUserId")
         }
     }
-    val messagesList = chatConversationViewModel.messages.collectAsState().value
+    val messagesList by chatConversationViewModel.messages.collectAsStateWithLifecycle()
     val getterUser = chatConversationViewModel.getterUserData.value
     val sortedMessages = messagesList.sortedByDescending {
         if (it.timestamp.isNullOrEmpty()) {
@@ -87,21 +89,48 @@ fun ChatConversationScreen(mapId: Map<String, String>,
             parseIso(it.timestamp)
         }
     }
+    ChatConversationScreen(
+        state = ConversationUiState(
+            mapId = mapId,
+            getterUser = getterUser,
+            getterUserId = getterUserId,
+            currentUserId = currentUserId,
+            chatId = chatId,
+            sortedMessages = sortedMessages
+        ),
+        onBackClick = onBackClick,
+        onMoreClick = onMoreClick,
+        onPlusClick = onPlusClick,
+        onSendMessage = { message ->
+            if (chatId != null && currentUserId != null && getterUserId != null) {
+                chatConversationViewModel.sendMessage(
+                    chatId = chatId.ifBlank { mapId["chatId"]!! },
+                    currentUserId = currentUserId,
+                    getterId = getterUserId,
+                    text = message)
+            }
+        },
+        onStartCallClick = { isVideo ->
+            getterUserId?.let { chatConversationViewModel.startCall(it, isVideo) }
+        }
+    )
+}
 
+@Composable
+fun ChatConversationScreen(
+    state: ConversationUiState,
+    onBackClick: () -> Unit,
+    onMoreClick: () -> Unit,
+    onPlusClick: () -> Unit,
+    onSendMessage: (String) -> Unit,
+    onStartCallClick: (Boolean) -> Unit
+) {
     Scaffold (
         topBar = { ChatTopBar(onBackClick = onBackClick, onMoreClick = onMoreClick) },
         bottomBar = {
             BottomSendMessageView(
                 onPlusClick = onPlusClick,
-                onSendMessageClick = {
-                    if (chatId != null && currentUserId != null && getterUserId != null) {
-                        chatConversationViewModel.sendMessage(
-                            chatId = chatId.ifBlank { mapId["chatId"]!! },
-                            currentUserId = currentUserId,
-                            getterId = getterUserId,
-                            text = it)
-                    }
-                },
+                onSendMessageClick = { text -> onSendMessage(text) },
                 modifier = Modifier)
         }
     ){ innerPaddings ->
@@ -114,16 +143,12 @@ fun ChatConversationScreen(mapId: Map<String, String>,
         ) {
             InfoChat(
                 onVideoClick = {
-                    getterUserId?.let {
-                        chatConversationViewModel.startCall(it, true)
-                    }
+                    onStartCallClick(true)
                 },
                 onPhoneClick = {
-                    getterUserId?.let {
-                        chatConversationViewModel.startCall(it, false)
-                    }
+                    onStartCallClick(false)
                 },
-                getterUser = getterUser)
+                getterUser = state.getterUser)
             LazyColumn (
                 modifier = Modifier
                     .weight(1f)
@@ -132,28 +157,28 @@ fun ChatConversationScreen(mapId: Map<String, String>,
                     .background(color = colorResource(R.color.chat_bg)),
                 reverseLayout = true,
             ) {
-                itemsIndexed(sortedMessages) { index, message ->
+                itemsIndexed(state.sortedMessages) { index, message ->
                     val messageDate = runCatching { Instant.parse(message.timestamp)
                         .atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
-                    val nextMessageDate = sortedMessages.getOrNull(index + 1)?.timestamp
+                    val nextMessageDate = state.sortedMessages.getOrNull(index + 1)?.timestamp
                         ?.takeIf { it.isNotBlank() }
                         ?.let {
                             runCatching { Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
                         }
-                    if (message.timestamp != "" && getterUser?.username != null) {
-                        currentUserId?.let {
+                    if (message.timestamp != "" && state.getterUser?.username != null) {
+                        state.currentUserId?.let {
                             val isFirstMessage = index == 0
-                            val isLastMessage = index == sortedMessages.lastIndex
+                            val isLastMessage = index == state.sortedMessages.lastIndex
                             MessageItem(
                                 message,
-                                currentUserId,
+                                state.currentUserId,
                                 isFirstMessage,
                                 isLastMessage,
-                                getterUser.username,
+                                state.getterUser.username,
                                 false)
                         }
                     }
-                    if (index == sortedMessages.lastIndex || messageDate != nextMessageDate) {
+                    if (index == state.sortedMessages.lastIndex || messageDate != nextMessageDate) {
                         messageDate?.let { DateItem(it) }
                     }
                 }

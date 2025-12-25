@@ -1,6 +1,5 @@
 package com.gorman.chatroom.ui.ui.screens.main.chats
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,15 +37,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.ChatPreviewData
-import com.gorman.chatroom.domain.models.ChatsData
+import com.gorman.chatroom.ui.states.ChatsUiState
+import com.gorman.chatroom.ui.ui.components.ErrorLoading
+import com.gorman.chatroom.ui.ui.components.LoadingStub
 import com.gorman.chatroom.ui.ui.components.formatMessageTimestamp
 import com.gorman.chatroom.ui.ui.components.parseIso
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
@@ -55,85 +57,86 @@ import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
 @Composable
-fun ChatsScreen(onItemClick: (String) -> Unit){
-    val chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel()
-    val mainScreenViewModel: MainScreenViewModel =  hiltViewModel()
-
-    val userId by mainScreenViewModel.userId.collectAsState()
+fun ChatsScreenEntry(
+    chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
+    onItemClick: (String) -> Unit
+) {
+    val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
+    val uiState by chatsScreenViewModel.chatsUiState.collectAsStateWithLifecycle()
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
-            chatsScreenViewModel.getUserChats(userId)
-            Log.d("Loading chats", "Loading")
+            chatsScreenViewModel.loadAllChats(userId)
         }
     }
-    val chatsList by chatsScreenViewModel.chatsList.collectAsState()
-    val sortedChatsList = chatsList.sortedByDescending { chat->
-        parseIso(chat?.lastMessageTimestamp)
+    when(val state = uiState) {
+        is ChatsUiState.Error -> ErrorLoading(stringResource(R.string.errorChatsLoading))
+        ChatsUiState.Idle -> Box(modifier = Modifier.fillMaxSize())
+        ChatsUiState.Loading -> LoadingStub()
+        is ChatsUiState.Success -> {
+            val sortedChats = state.chats.sortedByDescending {
+                parseIso(it.lastMessage?.timestamp)
+            }
+            ChatsScreen(
+                userId = userId,
+                chatPreviews = sortedChats,
+                onItemClick = onItemClick,
+                onDeleteChat = { chatId -> chatsScreenViewModel.deleteChat(chatId) },
+            )
+        }
     }
+}
 
+@Composable
+fun ChatsScreen(
+    userId: String,
+    chatPreviews: List<ChatPreviewData>,
+    onItemClick: (String) -> Unit,
+    onDeleteChat: (String) -> Unit
+){
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         itemsIndexed(
-            items = sortedChatsList,
-            key = { _, item -> item?.chatId ?: "" }
+            items = chatPreviews,
+            key = { _, item -> item.user?.userId ?: "" }
         ) { index, item ->
-            LaunchedEffect(item?.chatId, item?.lastMessageId) {
-                if (item?.chatId != null && item.lastMessageId != null) {
-                    chatsScreenViewModel.initChatPreview(
-                        item.chatId,
-                        userId
-                    )
-                    Log.d("Item", item.chatId)
-                }
-            }
-            val datetime = formatMessageTimestamp(item?.lastMessageTimestamp)
-            val chatMap by chatsScreenViewModel.chatPreviews.collectAsState()
-            val preview = chatMap[item?.chatId]
-            val text = preview?.lastMessage?.text
-            if (!text.isNullOrBlank()) {
-                DismissibleChatPreviewItem(
-                    item = item,
-                    onDeleteChat = {
-                        if (item?.chatId != null)
-                            chatsScreenViewModel.deleteChat(item.chatId)
-                    },
-                    onItemClick = onItemClick,
-                    userId = userId,
-                    chatMap = chatMap,
-                    datetime = datetime
+            val datetime = formatMessageTimestamp(item.lastMessage?.timestamp)
+            DismissibleChatPreviewItem(
+                item = item,
+                onDeleteChat = {
+                    if (item.chatId != null)
+                        onDeleteChat(item.chatId)
+                },
+                onItemClick = onItemClick,
+                userId = userId,
+                datetime = datetime
+            )
+            if (index < chatPreviews.size - 1)
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colorResource(R.color.chat_bg)
                 )
-                if (index < chatsList.lastIndex)
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = colorResource(R.color.chat_bg)
-                    )
-            }
         }
     }
 }
 
 @Composable
 fun DismissibleChatPreviewItem(
-    item: ChatsData?,
+    item: ChatPreviewData,
     onDeleteChat: (String) -> Unit,
     onItemClick: (String) -> Unit,
     userId: String,
-    chatMap: Map<String, ChatPreviewData>,
     datetime: String
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         initialValue = SwipeToDismissBoxValue.Settled,
         confirmValueChange = {
             if (it == SwipeToDismissBoxValue.EndToStart) {
-                if (item?.chatId != null) {
-                    onDeleteChat(item.chatId)
-                }
+                item.chatId?.let { id -> onDeleteChat(id) }
                 true
-            } else {
-                false
-            }
+            } else false
         },
         positionalThreshold = { it / 2 }
     )
@@ -164,7 +167,6 @@ fun DismissibleChatPreviewItem(
             item = item,
             onItemClick = onItemClick,
             userId = userId,
-            chatMap = chatMap,
             datetime = datetime
         )
     }
@@ -172,28 +174,20 @@ fun DismissibleChatPreviewItem(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChatPreviewItem(item: ChatsData?,
+fun ChatPreviewItem(item: ChatPreviewData,
                     onItemClick: (String) -> Unit,
                     userId: String,
-                    chatMap: Map<String, ChatPreviewData>,
                     datetime: String) {
-    val mapId = mutableMapOf<String, String>()
-    val user = chatMap[item?.chatId]?.user
-    val lastMessage = chatMap[item?.chatId]?.lastMessage
-    val unreadMessages = chatMap[item?.chatId]?.unreadQuantity
-    if (item?.chatId != null && user?.userId != null) {
-        mapId.put("getterUserId", user.userId)
-        mapId.put("currentUserId", userId)
-        mapId.put("chatId", item.chatId)
-    }
+    val user = item.user
+    val lastMessage = item.lastMessage
+    val unreadMessages = item.unreadQuantity
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
                 onClick = {
-                    if (item?.chatId != null && user?.userId != null) {
-                        val serialized =
-                            "getterUserId=${user.userId};currentUserId=${userId};chatId=${item.chatId}"
+                    if (item.chatId != null && user?.userId != null) {
+                        val serialized = "getterUserId=${user.userId};currentUserId=${userId};chatId=${item.chatId}"
                         onItemClick(serialized)
                     }
                 }

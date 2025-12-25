@@ -22,7 +22,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
@@ -49,12 +49,34 @@ import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
 import com.gorman.chatroom.ui.viewmodel.AddFriendViewModel
 
 @Composable
-fun AddFriendScreen(onBack: () -> Unit, onStartChatClick: (String) -> Unit){
-    val addFriendViewModel: AddFriendViewModel = hiltViewModel()
+fun AddFriendScreenEntry(
+    addFriendViewModel: AddFriendViewModel = hiltViewModel(),
+    onBack: () -> Unit,
+    onStartChatClick: (String) -> Unit
+){
+    val user by addFriendViewModel.usersData.collectAsStateWithLifecycle()
+    val currentUser by addFriendViewModel.currentUserData.collectAsStateWithLifecycle()
+    AddFriendScreen(
+        onBack = onBack,
+        user = user,
+        currentUser = currentUser,
+        onStartChatClick = onStartChatClick,
+        onFindUserClick = { number ->
+            addFriendViewModel.findUserByPhoneNumber(number)
+        }
+    )
+}
+
+@Composable
+fun AddFriendScreen(
+    onBack: () -> Unit,
+    user: UsersData?,
+    currentUser: UsersData?,
+    onStartChatClick: (String) -> Unit,
+    onFindUserClick: (String) -> Unit
+){
     var phoneNumber by remember { mutableStateOf("") }
     var phoneCode by remember { mutableStateOf("+375") }
-    val user = addFriendViewModel.usersData.collectAsState().value
-    val currentUser = addFriendViewModel.currentUserData.collectAsState().value
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         topBar = { AppTopBar(title = R.string.add_friend, onBack = { onBack() }) }
@@ -67,7 +89,7 @@ fun AddFriendScreen(onBack: () -> Unit, onStartChatClick: (String) -> Unit){
                 value = phoneNumber,
                 onValueChange = { number->
                     phoneNumber = number
-                    addFriendViewModel.findUserByPhoneNumber(phoneCode + number)
+                    onFindUserClick(phoneCode + number)
                 },
                 leadingIcon = { LeadingIconMenu(onItemClick = {phoneCode = it}) },
                 textStyle = TextStyle(

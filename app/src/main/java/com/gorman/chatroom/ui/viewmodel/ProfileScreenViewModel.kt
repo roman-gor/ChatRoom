@@ -1,17 +1,17 @@
 package com.gorman.chatroom.ui.viewmodel
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.usecases.CurrentUserDataUseCase
 import com.gorman.chatroom.domain.usecases.UpdateUserDataUseCase
+import com.gorman.chatroom.ui.states.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,11 +23,8 @@ class ProfileScreenViewModel @Inject constructor(
     private val updateUserDataUseCase: UpdateUserDataUseCase
 ): ViewModel() {
 
-    private val _userData = MutableStateFlow(UsersData())
-    val userData: StateFlow<UsersData> = _userData
-
-    private val _profileItems = mutableStateOf<Map<Int, String?>>(emptyMap())
-    val profileItems: State<Map<Int, String?>> = _profileItems
+    private val _profileUiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Idle)
+    val profileUiState = _profileUiState.asStateFlow()
 
     val currentUserData: StateFlow<UsersData?> = currentUserDataUseCase()
         .stateIn(
@@ -38,9 +35,16 @@ class ProfileScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            currentUserData.filterNotNull().collect { user ->
-                _userData.value = user
-                _profileItems.value = getProfileItemsFromObject(user)
+            _profileUiState.value = ProfileUiState.Loading
+            try {
+                currentUserData.filterNotNull().collect { user ->
+                    _profileUiState.value = ProfileUiState.Success(
+                        usersData = user,
+                        profileItems = getProfileItemsFromObject(user)
+                    )
+                }
+            } catch (e: Exception) {
+                _profileUiState.value = ProfileUiState.Error(e.message ?: "Unknown Error")
             }
         }
     }

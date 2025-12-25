@@ -10,10 +10,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gorman.chatroom.ui.ui.screens.main.chats.ChatsScreen
-import com.gorman.chatroom.ui.ui.screens.main.groups.GroupsScreen
-import com.gorman.chatroom.ui.ui.screens.main.MoreScreen
-import com.gorman.chatroom.ui.ui.screens.main.ProfileScreen
+import com.gorman.chatroom.ui.ui.screens.main.chats.ChatsScreenEntry
+import com.gorman.chatroom.ui.ui.screens.main.groups.GroupsScreenEntry
+import com.gorman.chatroom.ui.ui.screens.main.MoreScreenEntry
+import com.gorman.chatroom.ui.ui.screens.main.ProfileScreenEntry
 
 @Composable
 fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit){
@@ -38,16 +38,16 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
             Screen.bItems.forEach { bItem ->
                 composable(bItem.bRoute) {
                     when (bItem) {
-                        Screen.BottomNavItem.Chats -> ChatsScreen(onItemClick = {mapId ->
+                        Screen.BottomNavItem.Chats -> ChatsScreenEntry(onItemClick = { mapId ->
                             navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$mapId")
                         })
-                        Screen.BottomNavItem.Groups -> GroupsScreen(onItemClick = {mapId->
+                        Screen.BottomNavItem.Groups -> GroupsScreenEntry(onItemClick = { mapId->
                             navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$mapId")
                         })
-                        Screen.BottomNavItem.Profile -> ProfileScreen(onLogoutClick = {
+                        Screen.BottomNavItem.Profile -> ProfileScreenEntry(onLogoutClick = {
                             navController.navigate("login")
                         })
-                        Screen.BottomNavItem.More -> MoreScreen(onLangChange = onLangChange)
+                        Screen.BottomNavItem.More -> MoreScreenEntry(onLangChange = onLangChange)
                     }
                 }
             }

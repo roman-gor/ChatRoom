@@ -9,9 +9,10 @@ import com.gorman.chatroom.domain.usecases.FindUserByGroupIdUseCase
 import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
 import com.gorman.chatroom.domain.usecases.GetUnreadMessagesQuantityUseCase
 import com.gorman.chatroom.domain.usecases.GetUserGroupsUseCase
+import com.gorman.chatroom.ui.states.GroupsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -25,53 +26,46 @@ class GroupsScreenViewModel @Inject constructor(
     private val getUserGroupsUseCase: GetUserGroupsUseCase
 ): ViewModel() {
 
-    private val _groupsState = MutableStateFlow<List<GroupsData?>>(emptyList())
-    val groupsState: StateFlow<List<GroupsData?>> = _groupsState
+    private val _groupUiState = MutableStateFlow<GroupsUiState>(GroupsUiState.Idle)
+    val groupUiState = _groupUiState.asStateFlow()
 
-    private val _groupPreview = MutableStateFlow<Map<String, GroupPreviewData>>(emptyMap())
-    val groupPreview: StateFlow<Map<String, GroupPreviewData>> = _groupPreview
-
-    fun initGroupPreview(userId: String,
-                         groupId: String) {
+    fun loadAllGroups(userId: String) {
         viewModelScope.launch {
-            Log.d("GroupsViewModel", "Start init")
-            val getterUsersData = findUserByGroupIdUseCase(groupId, userId)
-            val flow = combine(
-                getMessagesUseCase(groupId),
-                getUnreadMessagesQuantityUseCase(groupId, userId)
-            ) { messagesList, quantity->
-                val lastMessage = messagesList.maxByOrNull {
-                    runCatching { Instant.parse(it.timestamp).toEpochMilli() }.getOrDefault(0L)
+            _groupUiState.value = GroupsUiState.Loading
+            try {
+                getUserGroupsUseCase(userId).collect { groupsDataList ->
+                    if (groupsDataList.isEmpty()) {
+                        _groupUiState.value = GroupsUiState.Success(emptyList())
+                        return@collect
+                    }
+                    val previewsFlow = groupsDataList.filterNotNull().map { group ->
+                        val getterUsersData = findUserByGroupIdUseCase(group.groupId!!, userId)
+                        combine(
+                            getMessagesUseCase(group.groupId),
+                            getUnreadMessagesQuantityUseCase(group.groupId, userId)
+                        ) { messagesList, quantity ->
+                            val lastMessage = messagesList.maxByOrNull {
+                                runCatching {
+                                    Instant.parse(it.timestamp).toEpochMilli()
+                                }.getOrDefault(0L)
+                            }
+                            group.groupId to GroupPreviewData(
+                                groupId = group.groupId,
+                                groupName = group.groupName,
+                                users = getterUsersData,
+                                lastMessage = lastMessage,
+                                unreadQuantity = quantity
+                            )
+                        }
+                    }
+                    combine(previewsFlow) { previews ->
+                        previews.map { it.second }
+                    }.collect { fullPreviewList ->
+                        _groupUiState.value = GroupsUiState.Success(fullPreviewList)
+                    }
                 }
-                Log.d("Last message", "$lastMessage")
-                if (lastMessage?.timestamp != "") {
-                    GroupPreviewData(
-                        users = getterUsersData,
-                        lastMessage = lastMessage,
-                        unreadQuantity = quantity
-                    )
-                }
-                else {
-                    GroupPreviewData(
-                        users = getterUsersData,
-                        lastMessage = null,
-                        unreadQuantity = quantity
-                    )
-                }
-            }
-            flow.collect { data->
-                Log.d("Last message", "$data")
-                _groupPreview.value = _groupPreview.value.toMutableMap().apply {
-                    this[groupId] = data
-                }
-            }
-        }
-    }
-
-    fun getUserGroups(userId: String) {
-        viewModelScope.launch {
-            getUserGroupsUseCase(userId).collect {
-                _groupsState.value = it
+            } catch (e: Exception) {
+                _groupUiState.value = GroupsUiState.Error(e.message ?: "Unknown Error")
             }
         }
     }

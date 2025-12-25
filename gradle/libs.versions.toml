@@ -23,6 +23,7 @@ playServicesAuth = "21.2.0"
 retrofit = "2.9.0"
 ui = "1.6.8"
 webrtcVersion = "1.1.10"
+runtime = "1.10.0"
 
 [libraries]
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
@@ -58,6 +59,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePlugin" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 
 [bundles]
 compose = [

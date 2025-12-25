@@ -49,4 +49,7 @@
     <string name="groupName">Название группы</string>
     <string name="add_members_to_group">Добавить участников</string>
     <string name="add">Добавить</string>
+    <string name="errorChatsLoading">Ошибка при загрузке чатов</string>
+    <string name="errorGroupsLoading">Ошибка при загрузке групп</string>
+    <string name="errorProfileLoading">Ошибка при загрузке профиля</string>
 </resources>

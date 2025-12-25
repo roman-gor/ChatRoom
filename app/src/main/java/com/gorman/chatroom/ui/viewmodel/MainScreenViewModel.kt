@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.ui.MessengerUiState
+import com.gorman.chatroom.ui.states.MessengerUiState
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.domain.repository.SettingsRepository
 import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
@@ -34,8 +34,8 @@ class MainScreenViewModel @Inject constructor(
     private val _isUserIdLoaded = MutableStateFlow(false)
     val isUserIdLoaded: StateFlow<Boolean> = _isUserIdLoaded.asStateFlow()
 
-    private val _searchState = mutableStateOf("")
-    val searchState: State<String> = _searchState
+    private val _searchState = MutableStateFlow("")
+    val searchState = _searchState.asStateFlow()
 
     private val _userData = MutableStateFlow<UsersData?>(UsersData())
 
@@ -108,5 +108,4 @@ class MainScreenViewModel @Inject constructor(
             }
         }
     }
-
 }

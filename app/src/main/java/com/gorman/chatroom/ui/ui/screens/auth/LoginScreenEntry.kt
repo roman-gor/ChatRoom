@@ -26,7 +26,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,24 +43,42 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
 @Composable
-fun LoginScreen(onStartClick: () -> Unit, onSignUpClick: () -> Unit) {
-    val mainScreenViewModel: MainScreenViewModel = hiltViewModel()
-    var phoneNumber by remember { mutableStateOf("") }
-    var phoneCode by remember { mutableStateOf("+375") }
-    var alpha by remember { mutableFloatStateOf(0.2f) }
-    val userId = mainScreenViewModel.userId.collectAsState().value
+fun LoginScreenEntry(
+    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
+    onStartClick: () -> Unit,
+    onSignUpClick: () -> Unit
+) {
+    val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
             Log.d("UserLogin", "UserID: $userId")
             onStartClick()
         }
     }
+    LoginScreen(
+        onStartClick = { phone ->
+            mainScreenViewModel.findUserByPhoneNumber(phone)
+            Log.d("UserLogin", "UserID: ${mainScreenViewModel.userId.value}")
+        },
+        onSignUpClick = onSignUpClick
+    )
+}
+
+@Composable
+fun LoginScreen(
+    onStartClick: (String) -> Unit,
+    onSignUpClick: () -> Unit,
+) {
+    var phoneNumber by remember { mutableStateOf("") }
+    var phoneCode by remember { mutableStateOf("+375") }
+    var alpha by remember { mutableFloatStateOf(0.2f) }
     Column(modifier = Modifier.systemBarsPadding().fillMaxSize().padding(top = 64.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = stringResource(R.string.login),
@@ -98,10 +115,7 @@ fun LoginScreen(onStartClick: () -> Unit, onSignUpClick: () -> Unit) {
             singleLine = true
         )
         ConfirmAndSignUpButton(onSignUpClick = {onSignUpClick()}, onStartClick = {
-            if ((phoneCode+phoneNumber).length >= 13) {
-                Log.d("UserLogin", "UserID: ${mainScreenViewModel.userId.value}")
-                mainScreenViewModel.findUserByPhoneNumber(phoneCode + phoneNumber)
-            }
+            if ((phoneCode+phoneNumber).length >= 13) { onStartClick(phoneCode + phoneNumber) }
         }, alpha = alpha)
     }
 }

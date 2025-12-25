@@ -20,7 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,8 +32,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.ui.states.GroupConversationUiState
 import com.gorman.chatroom.ui.ui.components.BottomSendMessageView
 import com.gorman.chatroom.ui.ui.components.DateItem
 import com.gorman.chatroom.ui.ui.components.MessageItem
@@ -43,19 +45,21 @@ import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.viewmodel.GroupConversationViewModel
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.let
 
 @Composable
-fun GroupConversationScreen(mapId: Map<String, String>,
-                           onBackClick: () -> Unit,
-                           onMoreClick: () -> Unit,
-                           onPhoneClick: () -> Unit,
-                           onVideoClick: () -> Unit,
-                           onPlusClick: () -> Unit) {
-    val groupConversationViewModel: GroupConversationViewModel = hiltViewModel()
+fun GroupConversationScreenEntry(
+    groupConversationViewModel: GroupConversationViewModel = hiltViewModel(),
+    mapId: Map<String, String>,
+    onBackClick: () -> Unit,
+    onMoreClick: () -> Unit,
+    onPhoneClick: () -> Unit,
+    onVideoClick: () -> Unit,
+    onPlusClick: () -> Unit
+) {
     val currentUserId = mapId["currentUserId"]
     val groupId = groupConversationViewModel.groupId.value
     val getterUsers = groupConversationViewModel.getterUsersData.value
-
     LaunchedEffect(groupId, currentUserId) {
         if (!mapId["groupId"].isNullOrEmpty() && currentUserId != null) {
             groupConversationViewModel.initializeGroup(mapId["groupId"]!!, currentUserId)
@@ -67,7 +71,7 @@ fun GroupConversationScreen(mapId: Map<String, String>,
             Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUsers=${getterUsers.size}")
         }
     }
-    val messagesList = groupConversationViewModel.messages.collectAsState().value
+    val messagesList by groupConversationViewModel.messages.collectAsStateWithLifecycle()
     val sortedMessages = messagesList.sortedByDescending {
         if (it.timestamp.isNullOrEmpty()) {
             0L
@@ -78,20 +82,48 @@ fun GroupConversationScreen(mapId: Map<String, String>,
     val userMap = remember(getterUsers) {
         getterUsers.filterNotNull().associateBy { it.userId }
     }
+    GroupConversationScreen(
+        state = GroupConversationUiState(
+            mapId = mapId,
+            userMap = userMap,
+            getterUsers = getterUsers,
+            sortedMessages = sortedMessages,
+            currentUserId = currentUserId
+        ),
+        onBackClick = onBackClick,
+        onMoreClick = onMoreClick,
+        onPlusClick = onPlusClick,
+        onCallClick = { isVideo ->
+            if (isVideo) onVideoClick() else onPhoneClick()
+        },
+        onSendMessageClick = {
+            if (groupId != null && currentUserId != null && getterUsers.isNotEmpty()) {
+                groupConversationViewModel.sendMessage(
+                    groupId = groupId.ifBlank { mapId["groupId"]!! },
+                    currentUserId = currentUserId,
+                    getterUsers = getterUsers,
+                    text = it)
+            }
+        }
+    )
+}
 
+@Composable
+fun GroupConversationScreen(
+    state: GroupConversationUiState,
+    onBackClick: () -> Unit,
+    onMoreClick: () -> Unit,
+    onCallClick: (Boolean) -> Unit,
+    onPlusClick: () -> Unit,
+    onSendMessageClick: (String) -> Unit
+) {
     Scaffold (
         topBar = { ChatTopBar(onBackClick = onBackClick, onMoreClick = onMoreClick) },
         bottomBar = {
             BottomSendMessageView(
                 onPlusClick = onPlusClick,
-                onSendMessageClick = {
-                    if (groupId != null && currentUserId != null && getterUsers.isNotEmpty()) {
-                        groupConversationViewModel.sendMessage(
-                            groupId = groupId.ifBlank { mapId["groupId"]!! },
-                            currentUserId = currentUserId,
-                            getterUsers = getterUsers,
-                            text = it)
-                    }
+                onSendMessageClick = { text ->
+                    onSendMessageClick(text)
                 },
                 modifier = Modifier)
         }
@@ -103,7 +135,7 @@ fun GroupConversationScreen(mapId: Map<String, String>,
                 .background(color = colorResource(R.color.white)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            InfoChat(onVideoClick = onVideoClick, onPhoneClick = onPhoneClick, getterUsers = getterUsers, groupName = mapId["groupName"])
+            InfoChat(onCallClick = onCallClick, getterUsers = state.getterUsers, groupName = state.mapId["groupName"])
             LazyColumn (
                 modifier = Modifier
                     .weight(1f)
@@ -112,29 +144,29 @@ fun GroupConversationScreen(mapId: Map<String, String>,
                     .background(color = colorResource(R.color.chat_bg)),
                 reverseLayout = true,
             ) {
-                itemsIndexed(sortedMessages) { index, message ->
+                itemsIndexed(state.sortedMessages) { index, message ->
                     val messageDate = runCatching { Instant.parse(message.timestamp)
                         .atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
-                    val nextMessageDate = sortedMessages.getOrNull(index + 1)?.timestamp
+                    val nextMessageDate = state.sortedMessages.getOrNull(index + 1)?.timestamp
                         ?.takeIf { it.isNotBlank() }
                         ?.let {
                             runCatching { Instant.parse(it).atZone(ZoneId.systemDefault()).toLocalDate() }.getOrNull()
                         }
                     if (message.timestamp != "") {
-                        currentUserId?.let {
+                        state.currentUserId?.let {
                             val isFirstMessage = index == 0
-                            val isLastMessage = index == sortedMessages.lastIndex
-                            val senderName = userMap[message.senderId]?.username ?: "Неизвестный"
+                            val isLastMessage = index == state.sortedMessages.lastIndex
+                            val senderName = state.userMap[message.senderId]?.username ?: "Неизвестный"
                             MessageItem(
                                 message,
-                                currentUserId,
+                                state.currentUserId,
                                 isFirstMessage,
                                 isLastMessage,
                                 senderName,
                                 true)
                         }
                     }
-                    if (index == sortedMessages.lastIndex || messageDate != nextMessageDate) {
+                    if (index == state.sortedMessages.lastIndex || messageDate != nextMessageDate) {
                         messageDate?.let { DateItem(it) }
                     }
                 }
@@ -179,7 +211,7 @@ fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
 }
 
 @Composable
-fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUsers: List<UsersData?>, groupName: String?){
+fun InfoChat(onCallClick: (Boolean) -> Unit, getterUsers: List<UsersData?>, groupName: String?){
     val membersResource = if (getterUsers.size % 100 in 11..14) {
         stringResource(R.string.membersX5_X0)
     } else {
@@ -224,7 +256,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUsers: Li
             }
         }
         Row {
-            IconButton(onClick = { onVideoClick() }) {
+            IconButton(onClick = { onCallClick(true) }) {
                 Icon(
                     painter = painterResource(R.drawable.camera_icon),
                     contentDescription = "VideoCall",
@@ -235,7 +267,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUsers: Li
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
-            IconButton(onClick = { onPhoneClick() }) {
+            IconButton(onClick = { onCallClick(false) }) {
                 Icon(painter = painterResource(R.drawable.phone_icon),
                     contentDescription = "VideoCall",
                     tint = colorResource(R.color.black),

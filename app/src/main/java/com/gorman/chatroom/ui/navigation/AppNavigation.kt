@@ -14,7 +14,7 @@ import com.gorman.chatroom.ui.ui.screens.add.AddFriendScreenEntry
 import com.gorman.chatroom.ui.ui.screens.add.CreateGroupScreenEntry
 import com.gorman.chatroom.ui.ui.screens.auth.LoginScreenEntry
 import com.gorman.chatroom.ui.ui.screens.auth.SignUpScreenEntry
-import com.gorman.chatroom.ui.ui.screens.call.CallScreen
+import com.gorman.chatroom.ui.ui.screens.call.CallScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.chats.ChatConversationScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.groups.GroupConversationScreenEntry
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
@@ -110,7 +110,7 @@ fun AppNavigation(
         ) { backStackEntry ->
             val targetId = backStackEntry.arguments?.getString("id") ?: ""
             val isVideoCall = backStackEntry.arguments?.getBoolean("isVideo") ?: false
-            CallScreen(
+            CallScreenEntry(
                 targetId = targetId,
                 isCaller = true,
                 isVideoCall = isVideoCall,

@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gorman.chatroom.R
 
 @Composable
 fun IncomingCallScreen(
@@ -32,7 +34,7 @@ fun IncomingCallScreen(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
             Text(
-                "Входящий звонок",
+                stringResource(R.string.incoming_call),
                 color = Color.White,
                 fontSize = 26.sp,
                 modifier = Modifier.padding(bottom = 40.dp)
@@ -45,7 +47,7 @@ fun IncomingCallScreen(
                     .fillMaxWidth(0.7f)
                     .height(60.dp)
             ) {
-                Text("Принять")
+                Text(stringResource(R.string.accept))
             }
 
             Spacer(Modifier.height(20.dp))
@@ -57,7 +59,7 @@ fun IncomingCallScreen(
                     .fillMaxWidth(0.7f)
                     .height(60.dp)
             ) {
-                Text("Отклонить")
+                Text(stringResource(R.string.decline))
             }
         }
     }

@@ -1,10 +1,12 @@
 package com.gorman.chatroom.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.gorman.chatroom.service.CallService
+import com.gorman.chatroom.service.CallServiceConstants
 import com.gorman.chatroom.service.CallServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
@@ -12,12 +14,20 @@ import javax.inject.Inject
 class CallViewModel @Inject constructor(
     private val serviceRepository: CallServiceRepository
 ): ViewModel() {
-    val isMicrophoneMuted = mutableStateOf(false)
-    val isCameraMuted = mutableStateOf(false)
-    val isScreenSharing = mutableStateOf(false)
-    val isSpeakerPhoneOn = mutableStateOf(true)
-    val remoteSurfaceView = mutableStateOf<SurfaceViewRenderer?>(null)
-    val localSurfaceView = mutableStateOf<SurfaceViewRenderer?>(null)
+    private val _isMicrophoneMuted = MutableStateFlow(false)
+    val isMicrophoneMuted = _isMicrophoneMuted.asStateFlow()
+
+    private val _isCameraMuted = MutableStateFlow(false)
+    val isCameraMuted = _isCameraMuted.asStateFlow()
+
+    private val _isScreenSharing = MutableStateFlow(false)
+    val isScreenSharing = _isScreenSharing.asStateFlow()
+
+    private val _isSpeakerPhoneOn = MutableStateFlow(true)
+    val isSpeakerPhoneOn = _isSpeakerPhoneOn.asStateFlow()
+
+    val remoteSurfaceView = MutableStateFlow<SurfaceViewRenderer?>(null)
+    val localSurfaceView = MutableStateFlow<SurfaceViewRenderer?>(null)
 
     fun init(targetId: String, isCaller: Boolean, isVideoCall: Boolean) {
         CallService.remoteSurfaceView = remoteSurfaceView.value
@@ -36,12 +46,12 @@ class CallViewModel @Inject constructor(
     }
 
     fun onToggleMicClicked() {
-        isMicrophoneMuted.value = !isMicrophoneMuted.value
+        _isMicrophoneMuted.value = !isMicrophoneMuted.value
         serviceRepository.toggleAudio(isMicrophoneMuted.value)
     }
 
     fun onToggleCameraClicked() {
-        isCameraMuted.value = !isCameraMuted.value
+        _isCameraMuted.value = !isCameraMuted.value
         serviceRepository.toggleVideo(isCameraMuted.value)
     }
 
@@ -50,13 +60,15 @@ class CallViewModel @Inject constructor(
     }
 
     fun onToggleAudioDeviceClicked() {
-        isSpeakerPhoneOn.value = !isSpeakerPhoneOn.value
-        val deviceType = if (isSpeakerPhoneOn.value) "SPEAKER_PHONE" else "EARPIECE"
+        _isSpeakerPhoneOn.value = !isSpeakerPhoneOn.value
+        val deviceType =
+            if (isSpeakerPhoneOn.value) CallServiceConstants.SPEAKER_PHONE.value
+            else CallServiceConstants.EARPIECE.value
         serviceRepository.toggleAudioDevice(deviceType)
     }
 
     fun onToggleScreenShareClicked() {
-        isScreenSharing.value = !isScreenSharing.value
+        _isScreenSharing.value = !isScreenSharing.value
         serviceRepository.toggleScreenShare(isScreenSharing.value)
     }
 }

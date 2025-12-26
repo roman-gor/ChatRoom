@@ -21,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
-private const val TAG = "MainService"
+private val TAG = CallServiceConstants.SERVICE_NAME.value
 
 @AndroidEntryPoint
 class CallService: Service(), CallRepository.Listener {
@@ -137,7 +137,7 @@ class CallService: Service(), CallRepository.Listener {
 
     private fun handleToggleAudioDevice(incomingIntent: Intent) {
         val type = incomingIntent.getStringExtra("type")
-        val useSpeaker = type == "SPEAKER_PHONE"
+        val useSpeaker = type == CallServiceConstants.SPEAKER_PHONE.value
         callAudioManager.setSpeakerphoneOn(useSpeaker)
     }
 

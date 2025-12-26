@@ -50,4 +50,8 @@
     <string name="errorChatsLoading">Error When Chats Loading</string>
     <string name="errorGroupsLoading">Error When Groups Loading</string>
     <string name="errorProfileLoading">Error When Profile Loading</string>
+    <string name="call">Call</string>
+    <string name="accept">Accept</string>
+    <string name="incoming_call">Incoming Call</string>
+    <string name="decline">Decline</string>
 </resources>

@@ -52,4 +52,8 @@
     <string name="errorChatsLoading">Ошибка при загрузке чатов</string>
     <string name="errorGroupsLoading">Ошибка при загрузке групп</string>
     <string name="errorProfileLoading">Ошибка при загрузке профиля</string>
+    <string name="call">Звонок</string>
+    <string name="incoming_call">Входящий звонок</string>
+    <string name="accept">Принять</string>
+    <string name="decline">Отклонить</string>
 </resources>

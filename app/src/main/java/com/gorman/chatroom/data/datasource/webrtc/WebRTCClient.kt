@@ -184,13 +184,14 @@ class WebRTCClient @Inject constructor(
 
     fun initRemoteSurfaceView(view: SurfaceViewRenderer) {
         this.remoteSurfaceView = view
-        view.init(eglBaseContext, null) // <-- Правильная инициализация    view.setEnableHardwareScaler(true)
+        view.init(eglBaseContext, null)
+        view.setEnableHardwareScaler(true)
     }
 
     fun initLocalSurfaceView(localView: SurfaceViewRenderer, isVideoCall: Boolean) {
         this.localSurfaceView = localView
-        localView.init(eglBaseContext, null) // <-- Правильная инициализация
-        localView.setMirror(true) // Для селфи-камеры лучше включить зеркалирование
+        localView.init(eglBaseContext, null)
+        localView.setMirror(true)
         localView.setEnableHardwareScaler(true)
         startLocalStreaming(localView, isVideoCall)
     }
@@ -198,11 +199,9 @@ class WebRTCClient @Inject constructor(
     private fun startLocalStreaming(localView: SurfaceViewRenderer, isVideoCall: Boolean) {
         localStream = peerConnectionFactory.createLocalMediaStream(localStreamId)
 
-        // Audio
         localAudioTrack = peerConnectionFactory.createAudioTrack(localTrackId + "_audio", localAudioSource)
         localStream?.addTrack(localAudioTrack)
 
-        // Video
         if (isVideoCall) {
             startCapturingCamera(localView)
         }

@@ -24,8 +24,8 @@ class FirebaseCallClientImpl @Inject constructor(
 
     override fun subscribeForLatestEvent(listener: FirebaseCallClient.Listener) {
         if (clientId == null) return
-        val myRef = db.child("WebRTCSignaling").child(clientId!!)
-        myRef.child("latest_event").addValueEventListener(object : MyEventListener() {
+        val myRef = db.child(FirebaseConstants.SIGNALING_PATH.value).child(clientId!!)
+        myRef.child(FirebaseConstants.LATEST_EVENT.value).addValueEventListener(object : MyEventListener() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 super.onDataChange(snapshot)
                 if (!snapshot.exists()) return
@@ -40,7 +40,7 @@ class FirebaseCallClientImpl @Inject constructor(
                 event?.let { listener.onLatestEventReceived(it) }
             }
         })
-        myRef.child("candidates").addChildEventListener(object : ChildEventListener {
+        myRef.child(FirebaseConstants.CANDIDATES.value).addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val event = try {
                     gson.fromJson(snapshot.value.toString(), CallModel::class.java)
@@ -64,19 +64,19 @@ class FirebaseCallClientImpl @Inject constructor(
     ): Boolean = suspendCancellableCoroutine { continuation ->
 
         val convertedMessage = gson.toJson(message.copy(sender = clientId))
-        val targetRef = db.child("WebRTCSignaling").child(message.target)
+        val targetRef = db.child(FirebaseConstants.SIGNALING_PATH.value).child(message.target)
 
         val task = if (message.type == CallModelType.IceCandidates) {
-            targetRef.child("candidates")
+            targetRef.child(FirebaseConstants.CANDIDATES.value)
                 .push()
                 .setValue(convertedMessage)
         } else {
             if (message.type == CallModelType.Offer) {
-                targetRef.child("candidates").removeValue()
-                targetRef.child("latest_event").removeValue()
+                targetRef.child(FirebaseConstants.CANDIDATES.value).removeValue()
+                targetRef.child(FirebaseConstants.LATEST_EVENT.value).removeValue()
             }
 
-            targetRef.child("latest_event")
+            targetRef.child(FirebaseConstants.LATEST_EVENT.value)
                 .setValue(convertedMessage)
         }
         task.addOnCompleteListener { result ->

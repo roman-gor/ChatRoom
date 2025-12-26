@@ -46,6 +46,7 @@ android {
 
 dependencies {
 
+    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.compose.runtime)
     ksp(libs.hilt.compiler)
 

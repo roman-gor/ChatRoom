@@ -169,7 +169,7 @@ fun CallScreen(
             IconButton(onClick = { viewModel.onToggleAudioDeviceClicked() }) {
                 Icon(
                     painter = painterResource(
-                        if (viewModel.currentAudioDevice.value.name == "SPEAKER_PHONE") R.drawable.ic_speaker
+                        if (viewModel.isSpeakerPhoneOn.value) R.drawable.ic_speaker
                             else R.drawable.ic_ear),
                     contentDescription = null,
                     tint = Color.Unspecified

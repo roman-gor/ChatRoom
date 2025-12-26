@@ -32,6 +32,8 @@ interface CallRepository {
 
     fun toggleScreenShare(isStarting: Boolean)
 
+    fun clearViews()
+
     var listener: Listener?
 
     interface Listener {

@@ -23,7 +23,8 @@ navigationCompose = "2.9.2"
 playServicesAuth = "21.2.0"
 retrofit = "2.9.0"
 ui = "1.6.8"
-webrtcVersion = "1.1.10"
+webrtcVersion = "1.3.10"
+audioSwitch = "1.2.4"
 runtime = "1.10.0"
 
 [libraries]
@@ -50,7 +51,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-api-webrtc = { module = "com.mesibo.api:webrtc", version.ref = "webrtcVersion" }
+api-webrtc = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtcVersion" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
@@ -62,6 +63,7 @@ hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-p
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
+audioswitch = { module = "com.twilio:audioswitch", version.ref = "audioSwitch" }
 
 [bundles]
 compose = [

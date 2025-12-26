@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.bundles.hilt)
 
     implementation(libs.api.webrtc)
+    implementation(libs.audioswitch)
     implementation(libs.coil.compose)
 
     implementation(platform(libs.firebase.bom))

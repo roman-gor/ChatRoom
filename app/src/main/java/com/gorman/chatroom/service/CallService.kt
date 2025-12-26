@@ -12,24 +12,24 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.gorman.chatroom.R
+import com.gorman.chatroom.data.datasource.webrtc.CallAudioManager
 import com.gorman.chatroom.domain.models.CallModel
 import com.gorman.chatroom.domain.models.CallModelType
 import com.gorman.chatroom.domain.models.isValid
 import com.gorman.chatroom.domain.repository.CallRepository
-import com.gorman.chatroom.data.datasource.webrtc.RTCAudioManager
 import dagger.hilt.android.AndroidEntryPoint
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
+private const val TAG = "MainService"
+
 @AndroidEntryPoint
 class CallService: Service(), CallRepository.Listener {
-
-    private val TAG = "MainService"
     @Inject lateinit var callRepository: CallRepository
     private var isServiceRunning = false
 
     private lateinit var notificationManager: NotificationManager
-    private lateinit var rtcAudioManager: RTCAudioManager
+    private lateinit var callAudioManager: CallAudioManager
     private var isPreviousCallStateVideo = true
 
 
@@ -43,11 +43,8 @@ class CallService: Service(), CallRepository.Listener {
 
     override fun onCreate() {
         super.onCreate()
-        rtcAudioManager = RTCAudioManager.create(this)
-        rtcAudioManager.setDefaultAudioDevice(RTCAudioManager.AudioDevice.SPEAKER_PHONE)
-        notificationManager = getSystemService(
-            NotificationManager::class.java
-        )
+        callAudioManager = CallAudioManager(this)
+        notificationManager = getSystemService(NotificationManager::class.java)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -72,6 +69,27 @@ class CallService: Service(), CallRepository.Listener {
 
     private fun handleAcceptCall() {
         callRepository.startCall()
+    }
+
+    private fun handleEndCall() {
+        callAudioManager.stop()
+        if (::callRepository.isInitialized) {
+            callRepository.sendEndCall()
+        }
+        endCallAndRestartRepository()
+    }
+
+    private fun handleStartService(incomingIntent: Intent) {
+        if (!isServiceRunning) {
+            isServiceRunning = true
+            val username = incomingIntent.getStringExtra("username")
+            startServiceWithNotification()
+            callAudioManager.start()
+            if (::callRepository.isInitialized && username != null) {
+                callRepository.listener = this
+                callRepository.initWebRTCAndFirebase(username)
+            }
+        }
     }
 
     private fun handleStopService() {
@@ -118,16 +136,9 @@ class CallService: Service(), CallRepository.Listener {
     }
 
     private fun handleToggleAudioDevice(incomingIntent: Intent) {
-        val type = when(incomingIntent.getStringExtra("type")){
-            RTCAudioManager.AudioDevice.EARPIECE.name -> RTCAudioManager.AudioDevice.EARPIECE
-            RTCAudioManager.AudioDevice.SPEAKER_PHONE.name -> RTCAudioManager.AudioDevice.SPEAKER_PHONE
-            else -> null
-        }
-        type?.let {
-            rtcAudioManager.setDefaultAudioDevice(it)
-            rtcAudioManager.selectAudioDevice(it)
-            Log.d(TAG, "handleToggleAudioDevice: $it")
-        }
+        val type = incomingIntent.getStringExtra("type")
+        val useSpeaker = type == "SPEAKER_PHONE"
+        callAudioManager.setSpeakerphoneOn(useSpeaker)
     }
 
     private fun handleToggleVideo(incomingIntent: Intent) {
@@ -145,13 +156,6 @@ class CallService: Service(), CallRepository.Listener {
         callRepository.switchCamera()
     }
 
-    private fun handleEndCall() {
-        if (::callRepository.isInitialized) {
-            callRepository.sendEndCall()
-        }
-        endCallAndRestartRepository()
-    }
-
     private fun endCallAndRestartRepository(){
         if (::callRepository.isInitialized) {
             callRepository.endCall()
@@ -164,7 +168,7 @@ class CallService: Service(), CallRepository.Listener {
         val isVideoCall = incomingIntent.getBooleanExtra("isVideoCall", true)
         val target = incomingIntent.getStringExtra("target")
         this.isPreviousCallStateVideo = isVideoCall
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // Q для ServiceInfo.FOREGROUND_SERVICE_TYPE_*
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 val serviceType = if (isVideoCall) {
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
@@ -186,19 +190,6 @@ class CallService: Service(), CallRepository.Listener {
             callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
             if (!isCaller) {
                 callRepository.startCall()
-            }
-        }
-    }
-
-
-    private fun handleStartService(incomingIntent: Intent) {
-        if (!isServiceRunning) {
-            isServiceRunning = true
-            val username = incomingIntent.getStringExtra("username")
-            startServiceWithNotification()
-            if (::callRepository.isInitialized && username != null) {
-                callRepository.listener = this
-                callRepository.initWebRTCAndFirebase(username)
             }
         }
     }

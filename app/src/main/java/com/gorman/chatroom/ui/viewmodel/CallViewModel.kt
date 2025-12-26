@@ -2,7 +2,6 @@ package com.gorman.chatroom.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.gorman.chatroom.data.datasource.webrtc.RTCAudioManager
 import com.gorman.chatroom.service.CallService
 import com.gorman.chatroom.service.CallServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,19 +15,20 @@ class CallViewModel @Inject constructor(
     val isMicrophoneMuted = mutableStateOf(false)
     val isCameraMuted = mutableStateOf(false)
     val isScreenSharing = mutableStateOf(false)
-    val currentAudioDevice = mutableStateOf(RTCAudioManager.AudioDevice.SPEAKER_PHONE)
+    val isSpeakerPhoneOn = mutableStateOf(true)
     val remoteSurfaceView = mutableStateOf<SurfaceViewRenderer?>(null)
     val localSurfaceView = mutableStateOf<SurfaceViewRenderer?>(null)
 
     fun init(targetId: String, isCaller: Boolean, isVideoCall: Boolean) {
         CallService.remoteSurfaceView = remoteSurfaceView.value
         CallService.localSurfaceView = localSurfaceView.value
-
-        serviceRepository.setupViews(
-            videoCall = isVideoCall,
-            caller = isCaller,
-            target = targetId
-        )
+        localSurfaceView.let {
+            serviceRepository.setupViews(
+                videoCall = isVideoCall,
+                caller = isCaller,
+                target = targetId
+            )
+        }
     }
 
     fun onEndCallClicked() {
@@ -50,12 +50,9 @@ class CallViewModel @Inject constructor(
     }
 
     fun onToggleAudioDeviceClicked() {
-        if (currentAudioDevice.value == RTCAudioManager.AudioDevice.SPEAKER_PHONE) {
-            currentAudioDevice.value = RTCAudioManager.AudioDevice.EARPIECE
-        } else {
-            currentAudioDevice.value = RTCAudioManager.AudioDevice.SPEAKER_PHONE
-        }
-        serviceRepository.toggleAudioDevice(currentAudioDevice.value.name)
+        isSpeakerPhoneOn.value = !isSpeakerPhoneOn.value
+        val deviceType = if (isSpeakerPhoneOn.value) "SPEAKER_PHONE" else "EARPIECE"
+        serviceRepository.toggleAudioDevice(deviceType)
     }
 
     fun onToggleScreenShareClicked() {

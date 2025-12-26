@@ -28,6 +28,7 @@ class CallRepositoryImpl @Inject constructor(
     private var target: String? = null
     override var listener: CallRepository.Listener? = null
     private var remoteView: SurfaceViewRenderer? = null
+    private var localView: SurfaceViewRenderer? = null
 
     override fun initWebRTCAndFirebase(username: String) {
         firebaseClient.setClientId(username)
@@ -70,7 +71,7 @@ class CallRepositoryImpl @Inject constructor(
             override fun onIceCandidate(p0: IceCandidate?) {
                 super.onIceCandidate(p0)
                 p0?.let { candidate ->
-                    target?.let { targetUser -> // Безопасный вызов
+                    target?.let { targetUser ->
                         webRTCClient.sendIceCandidate(targetUser, candidate)
                     }
                 }
@@ -106,12 +107,13 @@ class CallRepositoryImpl @Inject constructor(
     }
 
     override fun initLocalSurfaceView(view: SurfaceViewRenderer, isVideoCall: Boolean) {
+        this.localView = view
         webRTCClient.initLocalSurfaceView(view, isVideoCall)
     }
 
     override fun initRemoteSurfaceView(view: SurfaceViewRenderer) {
-        webRTCClient.initRemoteSurfaceView(view)
         this.remoteView = view
+        webRTCClient.initRemoteSurfaceView(view)
     }
 
     override fun endCall() {
@@ -146,5 +148,10 @@ class CallRepositoryImpl @Inject constructor(
         }else{
             webRTCClient.stopScreenCapturing()
         }
+    }
+
+    override fun clearViews() {
+        this.localView = null
+        this.remoteView = null
     }
 }

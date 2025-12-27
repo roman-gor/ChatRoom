@@ -96,7 +96,6 @@ class WebRTCClient @Inject constructor(
                 peerConnection?.setLocalDescription(object : MySdpObserver() {
                     override fun onSetSuccess() {
                         super.onSetSuccess()
-                        // Отправляем Offer только после того, как установили его локально
                         listener?.onTransferEventToSocket(
                             CallModel(
                                 type = CallModelType.Offer,

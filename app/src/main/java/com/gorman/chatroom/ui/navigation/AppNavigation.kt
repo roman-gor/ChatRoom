@@ -3,6 +3,7 @@ package com.gorman.chatroom.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -10,6 +11,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.gorman.chatroom.R
+import com.gorman.chatroom.service.CallPermissionsWrapper
+import com.gorman.chatroom.ui.ui.components.ErrorLoading
 import com.gorman.chatroom.ui.ui.screens.add.AddFriendScreenEntry
 import com.gorman.chatroom.ui.ui.screens.add.CreateGroupScreenEntry
 import com.gorman.chatroom.ui.ui.screens.auth.LoginScreenEntry
@@ -110,11 +114,20 @@ fun AppNavigation(
         ) { backStackEntry ->
             val targetId = backStackEntry.arguments?.getString("id") ?: ""
             val isVideoCall = backStackEntry.arguments?.getBoolean("isVideo") ?: false
-            CallScreenEntry(
-                targetId = targetId,
-                isCaller = true,
-                isVideoCall = isVideoCall,
-                onEndCall = { navController.popBackStack() }
+            CallPermissionsWrapper(
+                onPermissionsGranted = {
+                    CallScreenEntry(
+                        targetId = targetId,
+                        isCaller = true,
+                        isVideoCall = isVideoCall,
+                        onEndCall = { navController.popBackStack() }
+                    )
+                },
+                onPermissionsDenied = {
+                    ErrorLoading(
+                        text = stringResource(R.string.callPermissionsDenied)
+                    )
+                }
             )
         }
         composable(Screen.ConversationItem.GroupConversation.cRoute + "/{map_id}") { backStackEntry ->

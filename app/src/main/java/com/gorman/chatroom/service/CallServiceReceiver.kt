@@ -13,7 +13,7 @@ class CallServiceReceiver: BroadcastReceiver() {
     lateinit var serviceRepository: CallServiceRepository
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action == "ACTION_EXIT") {
+        if (intent?.action == CallServiceConstants.ACTION_EXIT.value) {
             serviceRepository.stopService()
             val openIntent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP

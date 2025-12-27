@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.gorman.chatroom.R
 import com.gorman.chatroom.data.datasource.webrtc.CallAudioManager
@@ -47,6 +48,7 @@ class CallService: Service(), CallRepository.Listener {
         notificationManager = getSystemService(NotificationManager::class.java)
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let { incomingIntent ->
             when (incomingIntent.action) {
@@ -163,6 +165,8 @@ class CallService: Service(), CallRepository.Listener {
         endCallListener?.onCallEnded()
     }
 
+    @SuppressLint("ObsoleteSdkInt")
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun handleSetupViews(incomingIntent: Intent) {
         val isCaller = incomingIntent.getBooleanExtra("isCaller", false)
         val isVideoCall = incomingIntent.getBooleanExtra("isVideoCall", true)
@@ -223,7 +227,7 @@ class CallService: Service(), CallRepository.Listener {
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
                 )
             } catch (e: Exception) {
-                if (Build.VERSION.SDK_INT < 34) { // На 34+ старый метод точно не сработает
+                if (Build.VERSION.SDK_INT < 34) {
                     startForeground(1, notification)
                 }
                 Log.e(TAG, "Error starting foreground service with type", e)

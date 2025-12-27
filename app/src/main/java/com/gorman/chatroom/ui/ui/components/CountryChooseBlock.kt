@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,7 +60,7 @@ fun LeadingIconMenu(onItemClick: (String) -> Unit) {
                 contentDescription = "Country Flag")
             Icon(imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "Drop Down",
-                tint = colorResource(R.color.black)
+                tint = MaterialTheme.colorScheme.secondary
             )
             Text(text = phoneCodePlaceholder,
                 fontFamily = mulishFont(),

@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gorman.chatroom.R
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 
 @Composable
 fun AppTopBar(onBack: () -> Unit, title: Int){
@@ -33,7 +34,7 @@ fun AppTopBar(onBack: () -> Unit, title: Int){
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
-            .background(color = colorResource(R.color.white)),
+            .background(color = MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -44,7 +45,11 @@ fun AppTopBar(onBack: () -> Unit, title: Int){
         )
         Row(
             modifier = Modifier.fillMaxWidth()
-                .padding(top = 40.dp, start = 24.dp, end = 24.dp, bottom = 20.dp),
+                .padding(
+                    top = ChatRoomTheme.dimens.paddingTopTopBar,
+                    start = ChatRoomTheme.dimens.paddingExtraLarge,
+                    end = ChatRoomTheme.dimens.paddingExtraLarge,
+                    bottom = ChatRoomTheme.dimens.paddingBottomTopBar),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -59,7 +64,7 @@ fun AppTopBar(onBack: () -> Unit, title: Int){
                     )
                     .size(42.dp)
                     .background(
-                        color = Color.White.copy(alpha = 0.1f),
+                        color = MaterialTheme.colorScheme.background.copy(alpha = 0.1f),
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -69,7 +74,7 @@ fun AppTopBar(onBack: () -> Unit, title: Int){
                     contentDescription = "Add",
                     modifier = Modifier
                         .size(24.dp),
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
             Text(
@@ -77,7 +82,7 @@ fun AppTopBar(onBack: () -> Unit, title: Int){
                 fontFamily = mulishFont(),
                 fontSize = 16.sp,
                 fontStyle = FontStyle.Normal,
-                color = Color.White
+                color = MaterialTheme.colorScheme.secondary
             )
             Box(modifier = Modifier.size(42.dp).background(color = Color.Transparent)) {}
         }

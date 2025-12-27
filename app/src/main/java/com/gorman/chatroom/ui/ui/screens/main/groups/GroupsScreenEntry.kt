@@ -1,6 +1,5 @@
 package com.gorman.chatroom.ui.ui.screens.main.groups
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,8 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,7 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.GroupPreviewData
 import com.gorman.chatroom.ui.states.GroupsUiState
@@ -46,6 +49,7 @@ import com.gorman.chatroom.ui.ui.components.formatMessageTimestamp
 import com.gorman.chatroom.ui.ui.components.parseIso
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.screens.main.chats.TextField
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
@@ -85,13 +89,18 @@ fun GroupsScreen(
 ) {
     LazyColumn (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        items(sortedGroupsList){ item->
+        itemsIndexed(sortedGroupsList){ index, item->
             val datetime = formatMessageTimestamp(item.lastMessage?.timestamp)
             GroupPreviewItem(
                 item = item,
                 userId = userId,
                 datetime = datetime,
                 onItemClick = onItemClick)
+            if (index < sortedGroupsList.size - 1)
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
         }
     }
 }
@@ -121,8 +130,8 @@ fun GroupPreviewItem(item: GroupPreviewData?,
                     }
                 }
             )
-            .background(colorResource(R.color.white))
-            .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(ChatRoomTheme.dimens.paddingLarge)
     ) {
         Row (modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,7 +150,7 @@ fun GroupPreviewItem(item: GroupPreviewData?,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = mulishFont(),
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.secondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -151,7 +160,7 @@ fun GroupPreviewItem(item: GroupPreviewData?,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             fontFamily = mulishFont(),
-                            color = colorResource(R.color.unselected_item_color),
+                            color = MaterialTheme.colorScheme.tertiary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -168,6 +177,7 @@ fun GroupPreviewItem(item: GroupPreviewData?,
                         text = datetime,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontFamily = mulishFont()
                     )
                     if (unreadQuantity != 0) {
@@ -185,7 +195,7 @@ fun GroupPreviewItem(item: GroupPreviewData?,
 fun OverlappingAvatars(
     avatarsList: MutableList<String?>
 ) {
-    val avatarSize = 50.dp
+    val avatarSize = ChatRoomTheme.dimens.avatarSize
     val overlapOffset = (-35).dp
     val remainingUsersCount = avatarsList.size - 3
     val displayedAvatars = if (remainingUsersCount <= 0) avatarsList.take(3) else avatarsList.take(2)
@@ -196,30 +206,32 @@ fun OverlappingAvatars(
         horizontalArrangement = Arrangement.spacedBy(overlapOffset)
     ) {
         displayedAvatars.forEach { resId ->
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = resId
-                ),
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(resId)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Profile Avatar",
+                placeholder = painterResource(R.drawable.default_ava),
                 modifier = Modifier
                     .size(avatarSize)
                     .clip(CircleShape)
-                    .border(2.dp, Color.White, CircleShape)
+                    .border(2.dp, Color.White, CircleShape),
+                contentScale = ContentScale.Crop
             )
         }
         if (remainingUsersCount > 0) {
             Box(
                 modifier = Modifier
-                    .size(avatarSize - 5.dp)
+                    .size(avatarSize)
                     .clip(CircleShape)
-                    .border(1.dp, Color.Black, CircleShape)
-                    .background(Color.White),
+                    .border(1.dp, MaterialTheme.colorScheme.secondary, CircleShape)
+                    .background(MaterialTheme.colorScheme.onSecondary),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "+${remainingUsersCount + 1}",
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = mulishFont()

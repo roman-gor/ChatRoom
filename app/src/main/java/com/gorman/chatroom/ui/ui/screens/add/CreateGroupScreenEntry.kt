@@ -31,6 +31,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -74,6 +75,7 @@ import com.gorman.chatroom.ui.ui.components.ErrorLoading
 import com.gorman.chatroom.ui.ui.components.LoadingStub
 import com.gorman.chatroom.ui.ui.components.RoundedButton
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
@@ -130,20 +132,24 @@ fun CreateGroupScreen(
         Column (modifier = Modifier
             .fillMaxSize()
             .padding(innerPaddings)
-            .background(color = colorResource(R.color.white)),
+            .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Column (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                        vertical = ChatRoomTheme.dimens.paddingMedium),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ){
                 Text(text = stringResource(R.string.groupName),
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.placeholder_message),
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+                    modifier = Modifier.padding(
+                        start = ChatRoomTheme.dimens.paddingSmall,
+                        bottom = ChatRoomTheme.dimens.paddingSmall))
                 OutlinedTextField(
                     value = groupName,
                     onValueChange = { name->
@@ -156,12 +162,12 @@ fun CreateGroupScreen(
                     placeholder = { Text(text = stringResource(R.string.enterGroupName),
                         fontFamily = mulishFont(),
                         fontSize = 14.sp,
-                        color = colorResource(R.color.unselected_item_color)) },
+                        color = MaterialTheme.colorScheme.tertiary) },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorResource(R.color.black),
-                        focusedBorderColor = colorResource(R.color.unselected_item_color)
+                        focusedTextColor = MaterialTheme.colorScheme.secondary,
+                        focusedBorderColor = MaterialTheme.colorScheme.tertiary
                     ),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(ChatRoomTheme.dimens.cornerRadius),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -170,25 +176,29 @@ fun CreateGroupScreen(
             Column (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                        vertical = ChatRoomTheme.dimens.paddingMedium),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ){
                 Text(text = stringResource(R.string.members),
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.placeholder_message),
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+                    modifier = Modifier.padding(
+                        start = ChatRoomTheme.dimens.paddingSmall,
+                        bottom = ChatRoomTheme.dimens.paddingSmall))
                 Card (
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = {
                             menuExpanded = !menuExpanded
                         }),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(ChatRoomTheme.dimens.cornerRadius),
                     colors = CardDefaults.cardColors(
-                        containerColor = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f),
-                        contentColor = colorResource(R.color.selected_indicator_color)
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
                 ){
                     Row (
@@ -200,18 +210,21 @@ fun CreateGroupScreen(
                     ){
                         Icon(painter = painterResource(R.drawable.plus),
                             contentDescription = "Plus",
-                            tint = colorResource(R.color.selected_indicator_color),
-                            modifier = Modifier.size(18.dp))
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(ChatRoomTheme.dimens.iconSizeSmall))
                         Spacer(Modifier.width(8.dp))
                         Text(text = stringResource(R.string.add_members_to_group),
                             fontFamily = mulishFont(),
                             fontWeight = FontWeight.Medium,
-                            color = colorResource(R.color.selected_indicator_color),
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 16.sp)
                     }
                 }
             }
-            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 32.dp, vertical = 16.dp),
+            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)
+                .padding(
+                    horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                    vertical = ChatRoomTheme.dimens.paddingLarge),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 items(addList) { item ->
                     ContactAddedItem(item, onDeleteItem = {addList.remove(item)})
@@ -229,15 +242,19 @@ fun CreateGroupScreen(
                     }
                 },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.selected_indicator_color)
+                        containerColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(36.dp),
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 32.dp)) {
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(
+                            start = ChatRoomTheme.dimens.paddingLarge,
+                            end = ChatRoomTheme.dimens.paddingLarge,
+                            bottom = ChatRoomTheme.dimens.paddingExtraLarge)) {
                     Text(text = stringResource(R.string.add_group),
                         fontFamily = mulishFont(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = colorResource(R.color.white),
+                        color = MaterialTheme.colorScheme.background,
                         modifier = Modifier.padding(12.dp))
                 }
             }
@@ -270,11 +287,11 @@ fun BottomAddMembersSheetDialog(
     ModalBottomSheet(
         onDismissRequest = {onDismiss()},
         sheetState = sheetState,
-        containerColor = colorResource(R.color.chat_bg)
+        containerColor = MaterialTheme.colorScheme.onSecondary
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
+                modifier = Modifier.fillMaxSize().padding(ChatRoomTheme.dimens.paddingLarge),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -282,9 +299,9 @@ fun BottomAddMembersSheetDialog(
                     fontFamily = mulishFont(),
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 18.sp,
-                    color = colorResource(R.color.black)
+                    color = MaterialTheme.colorScheme.secondary
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(ChatRoomTheme.dimens.paddingLarge))
                 OutlinedTextField(
                     value = friendName,
                     onValueChange = { name ->
@@ -294,7 +311,7 @@ fun BottomAddMembersSheetDialog(
                         Icon(
                             painter = painterResource(R.drawable.search_magnifier),
                             contentDescription = "Search",
-                            tint = colorResource(R.color.unselected_item_color),
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(22.dp)
                         )
                     },
@@ -307,19 +324,19 @@ fun BottomAddMembersSheetDialog(
                             text = stringResource(R.string.search),
                             fontFamily = mulishFont(),
                             fontSize = 14.sp,
-                            color = colorResource(R.color.unselected_item_color)
+                            color = MaterialTheme.colorScheme.tertiary
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorResource(R.color.black),
-                        focusedBorderColor = colorResource(R.color.unselected_item_color)
+                        focusedTextColor = MaterialTheme.colorScheme.secondary,
+                        focusedBorderColor = MaterialTheme.colorScheme.tertiary
                     ),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(ChatRoomTheme.dimens.cornerRadius),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(ChatRoomTheme.dimens.paddingLarge))
                 if (isExpanded) {
                     LazyColumn(
                         modifier = Modifier.weight(1f)
@@ -360,24 +377,25 @@ fun BottomAddMembersSheetDialog(
                     }
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(ChatRoomTheme.dimens.paddingLarge),
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     RoundedButton(
                         onClick = { onDismiss() },
                         modifier = Modifier.weight(1f),
-                        color = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                         text = R.string.cancel,
-                        textColor = colorResource(R.color.selected_indicator_color)
+                        textColor = MaterialTheme.colorScheme.primary
                     )
                     RoundedButton(
                         onClick = {
                             onConfirm(addList)
                             onDismiss()},
                         modifier = Modifier.weight(1f),
-                        color = colorResource(R.color.selected_indicator_color),
+                        color = MaterialTheme.colorScheme.primary,
                         text = R.string.add,
-                        textColor = colorResource(R.color.white)
+                        textColor = MaterialTheme.colorScheme.background
                     )
                 }
             }
@@ -393,7 +411,8 @@ fun ContactListItem(user: UsersData?,
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onBoxChange(!isChecked) }
-            .padding(bottom = 16.dp)
+            .padding(horizontal = ChatRoomTheme.dimens.paddingLarge,
+                vertical = ChatRoomTheme.dimens.paddingMedium)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -408,9 +427,9 @@ fun ContactListItem(user: UsersData?,
                     onCheckedChange = {
                         onBoxChange(it) },
                     colors = CheckboxDefaults.colors(
-                        checkmarkColor = colorResource(R.color.white),
-                        checkedColor = colorResource(R.color.selected_indicator_color),
-                        uncheckedColor = colorResource(R.color.unselected_item_color)
+                        checkmarkColor = MaterialTheme.colorScheme.background,
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.tertiary
                     )
                 )
             }
@@ -424,7 +443,7 @@ fun ContactAddedItem(user: UsersData?,
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(bottom = ChatRoomTheme.dimens.paddingLarge)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -471,7 +490,7 @@ fun DefaultContactInfo(modifier: Modifier, user: UsersData?) {
             contentDescription = "Avatar",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(50.dp)
+                .size(ChatRoomTheme.dimens.avatarSize)
                 .clip(CircleShape)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -484,7 +503,7 @@ fun DefaultContactInfo(modifier: Modifier, user: UsersData?) {
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = mulishFont(),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -495,7 +514,7 @@ fun DefaultContactInfo(modifier: Modifier, user: UsersData?) {
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

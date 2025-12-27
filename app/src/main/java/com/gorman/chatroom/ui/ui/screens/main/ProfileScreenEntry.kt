@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -54,7 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.states.ProfileUiState
@@ -66,6 +69,7 @@ import com.gorman.chatroom.ui.ui.components.RoundedButton
 import com.gorman.chatroom.ui.ui.screens.auth.DatePickerDocked
 import com.gorman.chatroom.ui.ui.screens.auth.DefaultOutlinedTextField
 import com.gorman.chatroom.ui.ui.screens.auth.GenderDropDown
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.ProfileScreenViewModel
 
@@ -115,14 +119,18 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box (modifier = Modifier.size(160.dp)){
-            Image(painter = rememberAsyncImagePainter(
-                model = userData.profileImageUrl
-            ),
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(userData.profileImageUrl)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = "Profile Avatar",
+                placeholder = painterResource(R.drawable.default_ava),
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .size(160.dp)
-                    .clickable(onClick = {}))
+                    .size(ChatRoomTheme.dimens.profileAvatarSize)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
             Image(painter = painterResource(R.drawable.edit_ava),
                 contentDescription = "Edit Avatar",
                 modifier = Modifier
@@ -136,7 +144,7 @@ fun ProfileScreen(
                 fontFamily = mulishFont(),
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                color = colorResource(R.color.black))
+                color = MaterialTheme.colorScheme.secondary)
         }
         Spacer(modifier = Modifier.height(20.dp))
         profileItems.forEach { item ->
@@ -152,11 +160,11 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(10.dp))
         ProfileButtons(
             onClick = { showSheet = !showSheet },
-            containerColor = colorResource(R.color.selected_indicator_color),
+            containerColor = MaterialTheme.colorScheme.primary,
             icon = painterResource(R.drawable.edit_profile),
-            iconTint = colorResource(R.color.white),
+            iconTint = MaterialTheme.colorScheme.background,
             text = "Edit Profile",
-            textColor = colorResource(R.color.white),
+            textColor = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 2.dp))
@@ -227,7 +235,7 @@ fun ProfileItem(name: Int, value: String?){
                 fontFamily = mulishFont(),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = colorResource(R.color.unselected_item_color),
+                color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(end = 8.dp)
             )
             value?.let {
@@ -235,7 +243,7 @@ fun ProfileItem(name: Int, value: String?){
                     fontFamily = mulishFont(),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = colorResource(R.color.black),
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -248,7 +256,7 @@ fun ProfileItem(name: Int, value: String?){
             }) {
                 Icon(painter = painterResource(R.drawable.copy),
                     contentDescription = "Copy",
-                    tint = colorResource(R.color.black))
+                    tint = MaterialTheme.colorScheme.secondary)
             }
         }
     }
@@ -283,7 +291,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
     ModalBottomSheet(
         onDismissRequest = {onDismiss()},
         sheetState = sheetState,
-        containerColor = colorResource(R.color.chat_bg)
+        containerColor = MaterialTheme.colorScheme.onSecondary
     ) {
         Column(
             Modifier
@@ -296,7 +304,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 Text(text = stringResource(R.string.enter_username),
                     fontSize = 12.sp,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(8.dp))
                 DefaultOutlinedTextField(
                     value = newUsername,
@@ -312,7 +320,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 Text(text = stringResource(R.string.phone),
                     fontSize = 12.sp,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(8.dp))
                 OutlinedTextField(
                     value = newPhone,
@@ -325,8 +333,9 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                         fontSize = 14.sp
                     ),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorResource(R.color.black),
-                        focusedBorderColor = colorResource(R.color.unselected_item_color)
+                        focusedContainerColor = MaterialTheme.colorScheme.onSecondary,
+                        focusedTextColor = MaterialTheme.colorScheme.secondary,
+                        focusedBorderColor = MaterialTheme.colorScheme.tertiary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -340,7 +349,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 Text(text = stringResource(R.string.gender),
                     fontSize = 12.sp,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(8.dp))
                 GenderDropDown(gender = newGender, onGenderChange = {
                     newGender = it },
@@ -352,7 +361,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 Text(text = stringResource(R.string.birthday),
                     fontSize = 12.sp,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(8.dp))
                 DatePickerDocked(onBirthdayChange = { newBirthday = it },
                     modifier = Modifier.fillMaxWidth())
@@ -363,7 +372,7 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 Text(text = stringResource(R.string.email),
                     fontSize = 12.sp,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(8.dp))
                 DefaultOutlinedTextField(
                     value = newEmail,
@@ -383,9 +392,9 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                 RoundedButton(onClick = {
                     onDismiss() },
                     modifier = Modifier.weight(1f),
-                    color = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     text = R.string.cancel,
-                    textColor = colorResource(R.color.selected_indicator_color))
+                    textColor = MaterialTheme.colorScheme.primary)
                 RoundedButton(onClick = {
                     val newUser = user?.copy(
                         username = newUsername,
@@ -397,9 +406,9 @@ fun BottomSheetDialog(onDismiss: () -> Unit, sheetState: SheetState, user: Users
                     onDismiss()
                     onSave(newUser) },
                     modifier = Modifier.weight(1f),
-                    color = colorResource(R.color.selected_indicator_color),
+                    color = MaterialTheme.colorScheme.primary,
                     text = R.string.save,
-                    textColor = colorResource(R.color.white))
+                    textColor = MaterialTheme.colorScheme.background)
             }
         }
     }

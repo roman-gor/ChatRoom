@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -34,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
 @Composable
@@ -84,14 +85,14 @@ fun LoginScreen(
         Text(text = stringResource(R.string.login),
             fontFamily = mulishFont(),
             fontSize = 42.sp,
-            color = colorResource(R.color.selected_indicator_color),
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = stringResource(R.string.enter_phone_for_sms),
             fontFamily = mulishFont(),
             fontSize = 16.sp,
-            color = colorResource(R.color.unselected_item_color),
+            color = MaterialTheme.colorScheme.tertiary,
             fontWeight = FontWeight.Medium
         )
         OutlinedTextField(
@@ -106,12 +107,15 @@ fun LoginScreen(
                 fontSize = 14.sp
             ),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = colorResource(R.color.black),
-                focusedBorderColor = colorResource(R.color.unselected_item_color)
+                focusedTextColor = MaterialTheme.colorScheme.secondary,
+                focusedBorderColor = MaterialTheme.colorScheme.tertiary
             ),
             shape = RoundedCornerShape(12.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth(),
+            modifier = Modifier.padding(
+                horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                vertical = ChatRoomTheme.dimens.paddingLarge
+            ).fillMaxWidth(),
             singleLine = true
         )
         ConfirmAndSignUpButton(onSignUpClick = {onSignUpClick()}, onStartClick = {
@@ -122,7 +126,7 @@ fun LoginScreen(
 
 @Composable
 fun ConfirmAndSignUpButton(onSignUpClick: () -> Unit, onStartClick: () -> Unit, alpha: Float) {
-    Row (modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+    Row (modifier = Modifier.fillMaxWidth().padding(top = ChatRoomTheme.dimens.paddingLarge),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ){
@@ -134,13 +138,13 @@ fun ConfirmAndSignUpButton(onSignUpClick: () -> Unit, onStartClick: () -> Unit, 
             elevation = ButtonDefaults.buttonElevation(6.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.selected_indicator_color)
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(text = stringResource(R.string.sign_up),
                 fontFamily = mulishFont(),
                 fontSize = 14.sp,
-                color = colorResource(R.color.white),
+                color = MaterialTheme.colorScheme.background,
                 fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(25.dp))

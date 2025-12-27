@@ -1,7 +1,6 @@
 package com.gorman.chatroom.ui.ui.screens.main.chats
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,7 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.ChatPreviewData
 import com.gorman.chatroom.ui.states.ChatsUiState
@@ -53,6 +55,7 @@ import com.gorman.chatroom.ui.ui.components.LoadingStub
 import com.gorman.chatroom.ui.ui.components.formatMessageTimestamp
 import com.gorman.chatroom.ui.ui.components.parseIso
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
@@ -116,7 +119,7 @@ fun ChatsScreen(
             if (index < chatPreviews.size - 1)
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
-                    color = colorResource(R.color.chat_bg)
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
         }
     }
@@ -152,7 +155,7 @@ fun DismissibleChatPreviewItem(
                             .fillMaxSize()
                             .background(colorResource(R.color.logout_background_color))
                             .wrapContentSize(Alignment.CenterEnd)
-                            .padding(end = 24.dp),
+                            .padding(end = ChatRoomTheme.dimens.paddingExtraLarge),
                         tint = colorResource(R.color.red_logout_color)
                     )
                 }
@@ -192,8 +195,8 @@ fun ChatPreviewItem(item: ChatPreviewData,
                     }
                 }
             )
-            .background(colorResource(R.color.white))
-            .padding(start = 24.dp, end = 30.dp, top = 16.dp, bottom = 16.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(ChatRoomTheme.dimens.paddingLarge)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -203,15 +206,17 @@ fun ChatPreviewItem(item: ChatPreviewData,
                 modifier = Modifier.weight(1f, fill = false),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = user?.profileImageUrl
-                    ),
-                    contentDescription = "Avatar",
-                    contentScale = ContentScale.Crop,
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(user?.profileImageUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Profile Avatar",
+                    placeholder = painterResource(R.drawable.default_ava),
                     modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
+                        .size(ChatRoomTheme.dimens.avatarSize)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(
@@ -223,7 +228,7 @@ fun ChatPreviewItem(item: ChatPreviewData,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = mulishFont(),
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.secondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -251,6 +256,7 @@ fun ChatPreviewItem(item: ChatPreviewData,
                         text = datetime,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.tertiary,
                         fontFamily = mulishFont()
                     )
                     if (unreadMessages != 0) {
@@ -271,7 +277,7 @@ fun TextField(value: String){
             .wrapContentSize()
             .padding(top = 0.dp),
         colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.selected_indicator_color)
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ){
         Text(text = value,
@@ -279,6 +285,6 @@ fun TextField(value: String){
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
             color = Color.White,
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp))
+            modifier = Modifier.padding(horizontal = ChatRoomTheme.dimens.paddingMedium))
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -132,7 +132,7 @@ fun GroupConversationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPaddings)
-                .background(color = colorResource(R.color.white)),
+                .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             InfoChat(onCallClick = onCallClick, getterUsers = state.getterUsers, groupName = state.mapId["groupName"])
@@ -141,7 +141,7 @@ fun GroupConversationScreen(
                     .weight(1f)
                     .fillMaxSize()
                     .padding(start = 16.dp, end = 16.dp)
-                    .background(color = colorResource(R.color.chat_bg)),
+                    .background(color = MaterialTheme.colorScheme.onSecondary),
                 reverseLayout = true,
             ) {
                 itemsIndexed(state.sortedMessages) { index, message ->
@@ -180,14 +180,14 @@ fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = colorResource(R.color.white))
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(start = 24.dp, end = 24.dp, bottom = 16.dp, top = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = colorResource(R.color.white))
+                .background(color = MaterialTheme.colorScheme.background)
                 .height(80.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
@@ -200,7 +200,7 @@ fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
                 IconButton(R.drawable.back_icon, onClick = { onBackClick() })
                 Text(text = stringResource(R.string.group),
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.black),
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
@@ -241,7 +241,7 @@ fun InfoChat(onCallClick: (Boolean) -> Unit, getterUsers: List<UsersData?>, grou
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.black),
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -249,7 +249,7 @@ fun InfoChat(onCallClick: (Boolean) -> Unit, getterUsers: List<UsersData?>, grou
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -260,7 +260,7 @@ fun InfoChat(onCallClick: (Boolean) -> Unit, getterUsers: List<UsersData?>, grou
                 Icon(
                     painter = painterResource(R.drawable.camera_icon),
                     contentDescription = "VideoCall",
-                    tint = colorResource(R.color.black),
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .width(24.dp)
                         .height(19.dp)
@@ -270,7 +270,7 @@ fun InfoChat(onCallClick: (Boolean) -> Unit, getterUsers: List<UsersData?>, grou
             IconButton(onClick = { onCallClick(false) }) {
                 Icon(painter = painterResource(R.drawable.phone_icon),
                     contentDescription = "VideoCall",
-                    tint = colorResource(R.color.black),
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .width(21.dp)
                         .height(20.dp))

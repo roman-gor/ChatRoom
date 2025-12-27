@@ -1,7 +1,6 @@
 package com.gorman.chatroom.ui.ui.screens.main.chats
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +18,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,9 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.states.ConversationUiState
@@ -48,6 +48,7 @@ import com.gorman.chatroom.ui.ui.components.MessageItem
 import com.gorman.chatroom.ui.ui.components.parseIso
 import com.gorman.chatroom.ui.ui.components.IconButton
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatConversationViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -138,7 +139,7 @@ fun ChatConversationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPaddings)
-                .background(color = colorResource(R.color.white)),
+                .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             InfoChat(
@@ -154,7 +155,7 @@ fun ChatConversationScreen(
                     .weight(1f)
                     .fillMaxSize()
                     .padding(start = 16.dp, end = 16.dp)
-                    .background(color = colorResource(R.color.chat_bg)),
+                    .background(color = MaterialTheme.colorScheme.onSecondary),
                 reverseLayout = true,
             ) {
                 itemsIndexed(state.sortedMessages) { index, message ->
@@ -192,14 +193,14 @@ fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = colorResource(R.color.white))
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(start = 24.dp, end = 24.dp, bottom = 16.dp, top = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = colorResource(R.color.white))
+                .background(color = MaterialTheme.colorScheme.background)
                 .height(80.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
@@ -212,7 +213,7 @@ fun ChatTopBar(onBackClick: () -> Unit, onMoreClick: () -> Unit){
                 IconButton(R.drawable.back_icon, onClick = { onBackClick() })
                 Text(text = stringResource(R.string.message),
                     fontFamily = mulishFont(),
-                    color = colorResource(R.color.black),
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
@@ -234,15 +235,18 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ){
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = getterUser?.profileImageUrl
-                ),
-                contentDescription = "Avatar",
-                contentScale = ContentScale.Crop,
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(getterUser?.profileImageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Profile Avatar",
+                placeholder = painterResource(R.drawable.default_ava),
                 modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape))
+                    .size(ChatRoomTheme.dimens.avatarSize)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Column (
                 modifier = Modifier.weight(1f),
@@ -253,7 +257,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
                         fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold,
                         fontFamily = mulishFont(),
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -263,7 +267,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = mulishFont(),
-                        color = colorResource(R.color.unselected_item_color),
+                        color = MaterialTheme.colorScheme.tertiary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -274,7 +278,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
             IconButton(onClick = { onVideoClick() }) {
                 Icon(painter = painterResource(R.drawable.camera_icon),
                     contentDescription = "VideoCall",
-                    tint = colorResource(R.color.black),
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .width(24.dp)
                         .height(19.dp))
@@ -283,7 +287,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
             IconButton(onClick = { onPhoneClick() }) {
                 Icon(painter = painterResource(R.drawable.phone_icon),
                     contentDescription = "VideoCall",
-                    tint = colorResource(R.color.black),
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .width(21.dp)
                         .height(20.dp))

@@ -23,6 +23,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -97,7 +98,7 @@ fun MoreScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     thickness = 1.dp)
             }
         }
@@ -152,14 +153,14 @@ fun MoreItem(item: MoreScreenData,
             else {
                 Icon(painter = painterResource(item.icon),
                     contentDescription = stringResource(item.name),
-                    tint = colorResource(R.color.black),
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(text = stringResource(item.name),
                     fontFamily = mulishFont(),
                     fontWeight = FontWeight.Bold,
-                    color = colorResource(R.color.black),
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 16.sp
                 )
             }
@@ -210,13 +211,13 @@ fun LanguageMenu(language: String, onLangChange: (String) -> Unit){
         Button(
             onClick = {expanded = !expanded},
             colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.white)),
+                containerColor = MaterialTheme.colorScheme.background),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .wrapContentSize()
                 .border(
                     width = 1.dp,
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     shape = RoundedCornerShape(12.dp)
                 )
         ) {
@@ -224,17 +225,17 @@ fun LanguageMenu(language: String, onLangChange: (String) -> Unit){
                 else stringResource(R.string.language_ru),
                 fontFamily = mulishFont(),
                 fontSize = 14.sp,
-                color = colorResource(R.color.black),
+                color = MaterialTheme.colorScheme.secondary,
                 fontWeight = FontWeight.Bold
             )
             Icon(imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "ArrowDown",
-                tint = colorResource(R.color.black))
+                tint = MaterialTheme.colorScheme.secondary)
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = {expanded = !expanded},
-            containerColor = colorResource(R.color.white),
+            containerColor = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(12.dp)
         ) {
             DropdownMenuItem(
@@ -242,7 +243,7 @@ fun LanguageMenu(language: String, onLangChange: (String) -> Unit){
                     Text(stringResource(R.string.language_en),
                         fontFamily = mulishFont(),
                         fontSize = 14.sp,
-                        color = colorResource(R.color.black),
+                        color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Normal
                     )
                 },
@@ -256,7 +257,7 @@ fun LanguageMenu(language: String, onLangChange: (String) -> Unit){
                     Text(stringResource(R.string.language_ru),
                         fontFamily = mulishFont(),
                         fontSize = 14.sp,
-                        color = colorResource(R.color.black),
+                        color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Normal
                     )
                 },
@@ -274,7 +275,7 @@ fun IconArrowForward(){
     Icon(
         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = "Go to item",
-        tint = colorResource(R.color.black))
+        tint = MaterialTheme.colorScheme.secondary)
 }
 
 @Composable

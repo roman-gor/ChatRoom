@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -40,7 +41,7 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
     Row (
         modifier = modifier
             .fillMaxWidth()
-            .background(color = colorResource(R.color.white))
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 32.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -54,7 +55,7 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
             Icon(
                 painter = painterResource(R.drawable.plus),
                 contentDescription = "Plus",
-                tint = colorResource(R.color.selected_indicator_color),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = modifier.size(18.dp)
             )
         }
@@ -65,12 +66,12 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
             textStyle = TextStyle(
                 fontFamily = mulishFont(),
                 fontSize = 14.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.secondary
             ),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = colorResource(R.color.chat_bg),
-                unfocusedContainerColor = colorResource(R.color.chat_bg),
+                focusedContainerColor = MaterialTheme.colorScheme.onSecondary,
+                unfocusedContainerColor = MaterialTheme.colorScheme.onSecondary,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
             ),
@@ -79,7 +80,7 @@ fun BottomSendMessageView(onPlusClick: () -> Unit, onSendMessageClick: (String) 
                     text = stringResource(R.string.type_message_placeholder),
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
-                    color = colorResource(R.color.placeholder_message)
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         )

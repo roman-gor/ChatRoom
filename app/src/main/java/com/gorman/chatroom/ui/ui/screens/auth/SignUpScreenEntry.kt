@@ -53,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -69,6 +68,7 @@ import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -120,7 +120,7 @@ fun SignUpScreen(
         Text(text = stringResource(R.string.sign_up),
             fontFamily = mulishFont(),
             fontSize = 26.sp,
-            color = colorResource(R.color.selected_indicator_color),
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(32.dp))
@@ -133,9 +133,11 @@ fun SignUpScreen(
                 Text(text = stringResource(R.string.phone),
                     fontFamily = mulishFont(),
                     fontSize = 16.sp,
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 2.dp))
+                    modifier = Modifier.padding(
+                        horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                        vertical = ChatRoomTheme.dimens.paddingSmall))
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { number->
@@ -148,12 +150,14 @@ fun SignUpScreen(
                         fontSize = 14.sp
                     ),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = colorResource(R.color.black),
-                        focusedBorderColor = colorResource(R.color.unselected_item_color)
+                        focusedTextColor = MaterialTheme.colorScheme.secondary,
+                        focusedBorderColor = MaterialTheme.colorScheme.tertiary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 2.dp).fillMaxWidth(),
+                    modifier = Modifier.padding(
+                        horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                        vertical = ChatRoomTheme.dimens.paddingSmall).fillMaxWidth(),
                     singleLine = true
                 )
             }
@@ -216,13 +220,13 @@ fun ConfirmAndLoginButton(onLoginClick: () -> Unit, onStartClick: () -> Unit, al
             elevation = ButtonDefaults.buttonElevation(6.dp),
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.selected_indicator_color)
+                containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(text = stringResource(R.string.login),
                 fontFamily = mulishFont(),
                 fontSize = 14.sp,
-                color = colorResource(R.color.white),
+                color = MaterialTheme.colorScheme.background,
                 fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(50.dp))
@@ -264,9 +268,14 @@ fun ItemsAfterPhoneNumber(
             },
             placeholder = stringResource(R.string.enter_username),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth())
+            modifier = Modifier.padding(
+                horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                vertical = ChatRoomTheme.dimens.paddingLarge).fillMaxWidth())
         DatePickerDocked(onBirthdayChange = { onBirthdayChange(it) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp))
+            modifier = Modifier.fillMaxWidth()
+                .padding(
+                    horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                    vertical = ChatRoomTheme.dimens.paddingLarge))
         DefaultOutlinedTextField(
             value = email,
             onValueChange = {
@@ -275,11 +284,15 @@ fun ItemsAfterPhoneNumber(
             },
             placeholder = stringResource(R.string.email),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp).fillMaxWidth())
+            modifier = Modifier.padding(
+                horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                vertical = ChatRoomTheme.dimens.paddingLarge).fillMaxWidth())
         GenderDropDown(gender = gender, onGenderChange = {
             gender = it
             onGenderChange(it) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp))
+            modifier = Modifier.fillMaxWidth().padding(
+                horizontal = ChatRoomTheme.dimens.paddingExtraLarge,
+                vertical = ChatRoomTheme.dimens.paddingLarge))
     }
 }
 
@@ -295,15 +308,16 @@ fun DefaultOutlinedTextField(value: String, onValueChange: (String) -> Unit, pla
             fontSize = 14.sp
         ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = colorResource(R.color.black),
-            focusedBorderColor = colorResource(R.color.unselected_item_color)
+            focusedContainerColor = MaterialTheme.colorScheme.onSecondary,
+            focusedTextColor = MaterialTheme.colorScheme.secondary,
+            focusedBorderColor = MaterialTheme.colorScheme.tertiary
         ),
         placeholder = {
             if (placeholder != null) {
                 Text(text = placeholder,
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium)
             }
         },
@@ -341,7 +355,7 @@ fun DatePickerDocked(onBirthdayChange: (String) -> Unit, modifier: Modifier) {
                 Text(text = stringResource(R.string.birthday),
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium)
             },
             readOnly = true,
@@ -350,13 +364,13 @@ fun DatePickerDocked(onBirthdayChange: (String) -> Unit, modifier: Modifier) {
                     Icon(
                         painter = painterResource(R.drawable.calendar_icon),
                         contentDescription = "Select date",
-                        tint = colorResource(R.color.black)
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = colorResource(R.color.black),
-                focusedBorderColor = colorResource(R.color.unselected_item_color)
+                focusedTextColor = MaterialTheme.colorScheme.secondary,
+                focusedBorderColor = MaterialTheme.colorScheme.tertiary
             ),
             shape = RoundedCornerShape(12.dp),
             modifier = modifier
@@ -379,17 +393,17 @@ fun DatePickerDocked(onBirthdayChange: (String) -> Unit, modifier: Modifier) {
                         state = datePickerState,
                         showModeToggle = false,
                         colors = DatePickerDefaults.colors(
-                            containerColor = colorResource(R.color.white),
-                            todayDateBorderColor = colorResource(R.color.selected_indicator_color),
-                            dayInSelectionRangeContainerColor = colorResource(R.color.selected_indicator_color),
-                            selectedYearContainerColor = colorResource(R.color.selected_indicator_color),
-                            selectedDayContainerColor = colorResource(R.color.selected_indicator_color)
+                            containerColor = MaterialTheme.colorScheme.background,
+                            todayDateBorderColor = MaterialTheme.colorScheme.primary,
+                            dayInSelectionRangeContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedYearContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedDayContainerColor = MaterialTheme.colorScheme.primary
                         ),
                         title = {
                             Text(text = "Введите дату",
                                 fontFamily = mulishFont(),
                                 fontSize = 14.sp,
-                                color = colorResource(R.color.black),
+                                color = MaterialTheme.colorScheme.secondary,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(start = 16.dp, top = 16.dp))
                         },
@@ -399,7 +413,7 @@ fun DatePickerDocked(onBirthdayChange: (String) -> Unit, modifier: Modifier) {
                             } ?: "",
                                 fontFamily = mulishFont(),
                                 fontSize = 26.sp,
-                                color = colorResource(R.color.black),
+                                color = MaterialTheme.colorScheme.secondary,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(start = 16.dp, bottom = 16.dp))
                         }
@@ -437,7 +451,7 @@ fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit, modifier: M
                 Text(text = stringResource(R.string.gender),
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
-                    color = colorResource(R.color.unselected_item_color),
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium)
             },
             readOnly = true,
@@ -446,13 +460,13 @@ fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit, modifier: M
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Select date",
-                        tint = colorResource(R.color.black)
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = colorResource(R.color.black),
-                focusedBorderColor = colorResource(R.color.unselected_item_color)
+                focusedTextColor = MaterialTheme.colorScheme.secondary,
+                focusedBorderColor = MaterialTheme.colorScheme.tertiary
             ),
             shape = RoundedCornerShape(12.dp),
             modifier = modifier,
@@ -463,7 +477,7 @@ fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit, modifier: M
             shape = RoundedCornerShape(20.dp),
             offset = DpOffset(x = 150.dp, y = (-20).dp),
             modifier = Modifier.wrapContentHeight().width(200.dp),
-            containerColor = colorResource(R.color.white)
+            containerColor = MaterialTheme.colorScheme.background
         ) {
             DropdownMenuItem(
                 text = {
@@ -476,13 +490,13 @@ fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit, modifier: M
                             text = womanGender,
                             fontFamily = mulishFont(),
                             fontSize = 20.sp,
-                            color = colorResource(R.color.black),
+                            color = MaterialTheme.colorScheme.secondary,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(8.dp)
                         )
                         HorizontalDivider(
                             modifier = Modifier.fillMaxWidth(),
-                            color = colorResource(R.color.chat_bg)
+                            color = MaterialTheme.colorScheme.onSecondary
                         )
                     }
                 },
@@ -502,7 +516,7 @@ fun GenderDropDown(gender: String, onGenderChange: (String) -> Unit, modifier: M
                             text = manGender,
                             fontFamily = mulishFont(),
                             fontSize = 20.sp,
-                            color = colorResource(R.color.black),
+                            color = MaterialTheme.colorScheme.secondary,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(8.dp)
                         )

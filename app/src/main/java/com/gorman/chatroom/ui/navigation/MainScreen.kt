@@ -2,10 +2,10 @@ package com.gorman.chatroom.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +14,7 @@ import com.gorman.chatroom.ui.ui.screens.main.chats.ChatsScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.groups.GroupsScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.MoreScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.ProfileScreenEntry
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 
 @Composable
 fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit){
@@ -21,7 +22,7 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = { TopBar(navController = navController) },
         bottomBar = {
             BottomNavigationBar(

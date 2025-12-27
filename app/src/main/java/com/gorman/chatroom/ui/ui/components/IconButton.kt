@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +27,7 @@ fun IconButton(icon: Int, onClick: () -> Unit){
         elevation = CardDefaults.cardElevation(5.dp),
         shape = RoundedCornerShape(36.dp),
         colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.white)
+            containerColor = MaterialTheme.colorScheme.background
         )
     ) {
         Box(
@@ -38,7 +39,7 @@ fun IconButton(icon: Int, onClick: () -> Unit){
         ){
             Icon(painter = painterResource(icon),
                 contentDescription = "Back",
-                tint = colorResource(R.color.black))
+                tint = MaterialTheme.colorScheme.secondary)
         }
     }
 }

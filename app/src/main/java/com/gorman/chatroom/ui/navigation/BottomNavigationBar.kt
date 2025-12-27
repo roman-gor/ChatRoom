@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -37,7 +38,7 @@ fun BottomNavigationBar(
     Card (
         modifier = Modifier.fillMaxWidth()
             .padding(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         elevation = CardDefaults.cardElevation(5.dp),
         shape = RoundedCornerShape(24.dp)
     ){
@@ -56,11 +57,11 @@ fun BottomNavigationBar(
                         ) },
                     selected = currentRoute == item.bRoute,
                     colors = NavigationBarItemColors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.Black,
-                        selectedIndicatorColor = colorResource(R.color.selected_indicator_color),
-                        unselectedIconColor = colorResource(R.color.unselected_item_color),
-                        unselectedTextColor = colorResource(R.color.unselected_item_color),
+                        selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                        selectedTextColor = MaterialTheme.colorScheme.secondary,
+                        selectedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.tertiary,
+                        unselectedTextColor = MaterialTheme.colorScheme.tertiary,
                         disabledIconColor = Color.Transparent,
                         disabledTextColor = Color.Transparent
                     ),

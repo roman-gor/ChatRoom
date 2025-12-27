@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -31,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +46,7 @@ import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.AddFriendViewModel
 
 @Composable
@@ -83,7 +84,7 @@ fun AddFriendScreen(
     ){ innerPaddings ->
         Column (modifier = Modifier.fillMaxSize()
             .padding(innerPaddings)
-            .background(color = colorResource(R.color.white)),
+            .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally) {
             OutlinedTextField(
                 value = phoneNumber,
@@ -97,12 +98,12 @@ fun AddFriendScreen(
                     fontSize = 14.sp
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = colorResource(R.color.black),
-                    focusedBorderColor = colorResource(R.color.unselected_item_color)
+                    focusedTextColor = MaterialTheme.colorScheme.secondary,
+                    focusedBorderColor = MaterialTheme.colorScheme.tertiary
                 ),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(ChatRoomTheme.dimens.cornerRadius),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.padding(horizontal = 32.dp, vertical = 32.dp).fillMaxWidth(),
+                modifier = Modifier.padding(ChatRoomTheme.dimens.paddingExtraLarge).fillMaxWidth(),
                 singleLine = true
             )
             if (user?.userId != null && user.phone != currentUser?.phone && currentUser?.userId != null) {
@@ -124,7 +125,10 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId:
     val serialized = forChatDataMap.entries.joinToString(";") { "${it.key}=${it.value}" }
     Row (modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 32.dp, end = 32.dp, bottom = 8.dp),
+        .padding(
+            start = ChatRoomTheme.dimens.paddingExtraLarge,
+            end = ChatRoomTheme.dimens.paddingExtraLarge,
+            bottom = ChatRoomTheme.dimens.paddingMedium),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically) {
         Row (
@@ -139,7 +143,7 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId:
                 contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(size = 50.dp)
+                    .size(size = ChatRoomTheme.dimens.avatarSize)
                     .clip(CircleShape))
             Spacer(modifier = Modifier.width(12.dp))
             Column (
@@ -161,7 +165,7 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId:
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = mulishFont(),
-                        color = colorResource(R.color.unselected_item_color),
+                        color = MaterialTheme.colorScheme.tertiary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -172,7 +176,7 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId:
             IconButton(onClick = { onStartChatClick(serialized) }) {
                 Icon(painter = painterResource(R.drawable.start_chat),
                     contentDescription = "VideoCall",
-                    tint = colorResource(R.color.selected_indicator_color),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .width(22.dp)
                         .height(24.dp))
@@ -191,7 +195,7 @@ fun Placeholder(){
         Icon(painter = painterResource(R.drawable.background_addfriend_placeholder),
             contentDescription = "Background Placeholder",
             modifier = Modifier.width(287.dp).height(240.dp),
-            tint = colorResource(R.color.selected_indicator_color).copy(alpha = 0.1f))
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
         Spacer(modifier = Modifier.height(100.dp))
     }
 }

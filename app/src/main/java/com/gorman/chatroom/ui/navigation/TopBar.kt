@@ -21,6 +21,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.gorman.chatroom.R
 import com.gorman.chatroom.ui.ui.fonts.mulishFont
+import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
 @Composable
@@ -169,7 +170,7 @@ fun SearchTextField(
         textStyle = TextStyle(
             fontFamily = mulishFont(),
             fontSize = 14.sp,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.secondary
         ),
         modifier = modifier
             .height(43.dp)
@@ -178,8 +179,11 @@ fun SearchTextField(
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(24.dp))
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp), // Отступы здесь
+                    .padding(horizontal = ChatRoomTheme.dimens.paddingLarge),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -192,7 +196,7 @@ fun SearchTextField(
                             style = TextStyle(
                                 fontFamily = mulishFont(),
                                 fontSize = 14.sp,
-                                color = Color.Black.copy(alpha = 0.5f)
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
                             )
                         )
                     }
@@ -216,7 +220,7 @@ fun CloseIcon(onCloseClick: () -> Unit){
             )
             .size(42.dp)
             .background(
-                color = Color.White.copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.1f),
                 shape = CircleShape
             ),
         contentAlignment = Alignment.Center
@@ -279,7 +283,7 @@ fun RotatingPlusIcon(navController: NavHostController) {
         expanded = expanded,
         onDismissRequest = {expanded = !expanded},
         offset = DpOffset(x = 0.dp, y = 10.dp),
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.onSecondary,
         shape = RoundedCornerShape(12.dp)
     ) {
         items.forEach { item ->
@@ -289,6 +293,7 @@ fun RotatingPlusIcon(navController: NavHostController) {
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(start = 6.dp)) },
                 onClick = {
                     navController.navigate(item.aRoute)
@@ -298,14 +303,15 @@ fun RotatingPlusIcon(navController: NavHostController) {
                         painter = painterResource(item.aIcon),
                         contentDescription = stringResource(item.aTitle),
                         modifier = Modifier.size(24.dp),
-                        tint = colorResource(R.color.unselected_item_color)
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 },
                 modifier = Modifier
                     .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(8.dp)
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        shape = RoundedCornerShape(ChatRoomTheme.dimens.cornerRadius)
                     )
+                    .align(Alignment.CenterHorizontally)
                     .width(270.dp)
             )
         }

@@ -59,11 +59,16 @@ import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
+data class ChatEntryData(
+    val chatId: String,
+    val getterUserId: String
+)
+
 @Composable
 fun ChatsScreenEntry(
     chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
-    onItemClick: (String) -> Unit
+    onItemClick: (ChatEntryData) -> Unit
 ) {
     val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
     val uiState by chatsScreenViewModel.chatsUiState.collectAsStateWithLifecycle()
@@ -81,7 +86,6 @@ fun ChatsScreenEntry(
                 parseIso(it.lastMessage?.timestamp)
             }
             ChatsScreen(
-                userId = userId,
                 chatPreviews = sortedChats,
                 onItemClick = onItemClick,
                 onDeleteChat = { chatId -> chatsScreenViewModel.deleteChat(chatId) },
@@ -92,9 +96,8 @@ fun ChatsScreenEntry(
 
 @Composable
 fun ChatsScreen(
-    userId: String,
     chatPreviews: List<ChatPreviewData>,
-    onItemClick: (String) -> Unit,
+    onItemClick: (ChatEntryData) -> Unit,
     onDeleteChat: (String) -> Unit
 ){
     LazyColumn (
@@ -113,7 +116,6 @@ fun ChatsScreen(
                         onDeleteChat(item.chatId)
                 },
                 onItemClick = onItemClick,
-                userId = userId,
                 datetime = datetime
             )
             if (index < chatPreviews.size - 1)
@@ -129,8 +131,7 @@ fun ChatsScreen(
 fun DismissibleChatPreviewItem(
     item: ChatPreviewData,
     onDeleteChat: (String) -> Unit,
-    onItemClick: (String) -> Unit,
-    userId: String,
+    onItemClick: (ChatEntryData) -> Unit,
     datetime: String
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
@@ -169,7 +170,6 @@ fun DismissibleChatPreviewItem(
         ChatPreviewItem(
             item = item,
             onItemClick = onItemClick,
-            userId = userId,
             datetime = datetime
         )
     }
@@ -178,8 +178,7 @@ fun DismissibleChatPreviewItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChatPreviewItem(item: ChatPreviewData,
-                    onItemClick: (String) -> Unit,
-                    userId: String,
+                    onItemClick: (ChatEntryData) -> Unit,
                     datetime: String) {
     val user = item.user
     val lastMessage = item.lastMessage
@@ -190,8 +189,10 @@ fun ChatPreviewItem(item: ChatPreviewData,
             .clickable(
                 onClick = {
                     if (item.chatId != null && user?.userId != null) {
-                        val serialized = "getterUserId=${user.userId};currentUserId=${userId};chatId=${item.chatId}"
-                        onItemClick(serialized)
+                        onItemClick(ChatEntryData(
+                            chatId = item.chatId,
+                            getterUserId = user.userId
+                        ))
                     }
                 }
             )

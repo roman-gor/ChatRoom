@@ -14,7 +14,6 @@ import com.gorman.chatroom.ui.ui.screens.main.chats.ChatsScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.groups.GroupsScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.MoreScreenEntry
 import com.gorman.chatroom.ui.ui.screens.main.ProfileScreenEntry
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 
 @Composable
 fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit){
@@ -26,31 +25,40 @@ fun MainScreen(navController: NavHostController, onLangChange: (String) -> Unit)
         topBar = { TopBar(navController = navController) },
         bottomBar = {
             BottomNavigationBar(
-                items = Screen.bItems,
+                items = Destination.bottomNavItems,
                 navController = nestedNavController
             )
         }
     ) { innerPadding ->
         NavHost(
             navController = nestedNavController,
-            startDestination = Screen.BottomNavItem.Chats.bRoute,
+            startDestination = Destination.Chats,
             modifier = Modifier.padding(innerPadding)
         ) {
-            Screen.bItems.forEach { bItem ->
-                composable(bItem.bRoute) {
-                    when (bItem) {
-                        Screen.BottomNavItem.Chats -> ChatsScreenEntry(onItemClick = { mapId ->
-                            navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$mapId")
-                        })
-                        Screen.BottomNavItem.Groups -> GroupsScreenEntry(onItemClick = { mapId->
-                            navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$mapId")
-                        })
-                        Screen.BottomNavItem.Profile -> ProfileScreenEntry(onLogoutClick = {
-                            navController.navigate("login")
-                        })
-                        Screen.BottomNavItem.More -> MoreScreenEntry(onLangChange = onLangChange)
-                    }
-                }
+            composable<Destination.Chats> {
+                ChatsScreenEntry(onItemClick = {
+                    navController.navigate(Destination.ChatConversation(
+                            chatId = it.chatId,
+                            getterUserId = it.getterUserId
+                        )
+                    )
+                })
+            }
+            composable<Destination.Groups> {
+                GroupsScreenEntry(onItemClick = {
+                    navController.navigate(Destination.GroupConversation(
+                        groupId = it.groupId,
+                        groupName = it.groupName
+                    ))
+                })
+            }
+            composable<Destination.Profile> {
+                ProfileScreenEntry(onLogoutClick = {
+                    navController.navigate(Destination.Login)
+                })
+            }
+            composable<Destination.More> {
+                MoreScreenEntry(onLangChange = onLangChange)
             }
         }
     }

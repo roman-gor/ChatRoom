@@ -6,11 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.gorman.chatroom.R
 import com.gorman.chatroom.service.CallPermissionsWrapper
 import com.gorman.chatroom.ui.ui.components.ErrorLoading
@@ -34,7 +33,7 @@ fun AppNavigation(
 
     LaunchedEffect(isUserIdLoaded) {
         if (isUserIdLoaded) {
-            val startDestination = if (userId.isNotEmpty()) "main_screen" else "login"
+            val startDestination = if (userId.isNotEmpty()) Destination.MainGraph else Destination.Login
             navController.navigate(startDestination) {
                 popUpTo(navController.graph.startDestinationId) {
                     inclusive = true
@@ -43,83 +42,75 @@ fun AppNavigation(
         }
     }
 
-    NavHost(navController = navController, startDestination = "loading_placeholder") {
-        composable("loading_placeholder") {}
-        composable("sign_up") {
+    NavHost(navController = navController, startDestination = Destination.LoadingPlaceholder) {
+        composable<Destination.LoadingPlaceholder> {}
+        composable<Destination.SignUp> {
             SignUpScreenEntry(onStartClick = {
-                navController.navigate("main_screen"){
-                    popUpTo("sign_up") { inclusive = true }
+                navController.navigate(Destination.MainGraph){
+                    popUpTo(Destination.SignUp) { inclusive = true }
                 }
             }, onLoginClick = {
-                navController.navigate("login"){
-                    popUpTo("sign_up") { inclusive = true }
+                navController.navigate(Destination.Login){
+                    popUpTo(Destination.SignUp) { inclusive = true }
                 }
             })
         }
-        composable("login") {
+        composable<Destination.Login> {
             LoginScreenEntry (onStartClick = {
-                navController.navigate("main_screen"){
-                    popUpTo("login") { inclusive = true }
+                navController.navigate(Destination.MainGraph){
+                    popUpTo(Destination.Login) { inclusive = true }
                 }
             }, onSignUpClick = {
-                navController.navigate("sign_up"){
-                    popUpTo("login") { inclusive = true }
+                navController.navigate(Destination.SignUp){
+                    popUpTo(Destination.Login) { inclusive = true }
                 }
             })
         }
-        composable("main_screen") {
+        composable<Destination.MainGraph> {
             MainScreen(navController = navController, onLangChange = onLangChange)
         }
-        Screen.aItems.forEach { aItem ->
-            composable(aItem.aRoute) {
-                when (aItem) {
-                    Screen.AddScreenItem.Friend -> AddFriendScreenEntry (
-                        onBack = { navController.popBackStack() },
-                        onStartChatClick = {
-                            navController.navigate(Screen.ConversationItem.ChatConversation.cRoute + "/$it") {
-                                popUpTo("main_screen")
-                            }
-                        })
-                    Screen.AddScreenItem.Group -> CreateGroupScreenEntry(
-                        onBack = { navController.popBackStack() },
-                        onGroupStart = {
-                            navController.navigate(Screen.ConversationItem.GroupConversation.cRoute + "/$it")  {
-                                popUpTo("main_screen")
-                            }
-                        })
-                }
-            }
+        composable<Destination.AddFriend> {
+            AddFriendScreenEntry (
+                onBack = { navController.popBackStack() },
+                onStartChatClick = {
+                    navController.navigate(Destination.ChatConversation(getterUserId = it)) {
+                        popUpTo(Destination.MainGraph)
+                    }
+                })
         }
-        composable(Screen.ConversationItem.ChatConversation.cRoute + "/{map_id}") { backStackEntry ->
-            val mapId = backStackEntry.arguments?.getString("map_id") ?: ""
-            val restoredMap = mapId.split(";")
-                .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
-                .associate { it[0] to it[1] }
+        composable<Destination.AddGroup> {
+            CreateGroupScreenEntry(
+                onBack = { navController.popBackStack() },
+                onGroupStart = {
+                    navController.navigate(Destination.GroupConversation(
+                        groupName = it.groupName,
+                        memberList = it.membersList
+                    ))  {
+                        popUpTo(Destination.MainGraph)
+                    }
+                })
+        }
+        composable<Destination.ChatConversation> { backStackEntry ->
+            val args = backStackEntry.toRoute<Destination.ChatConversation>()
             ChatConversationScreenEntry(
-                mapId = restoredMap,
+                currentUserId = userId,
+                args = args,
                 onPlusClick = {},
                 onBackClick = { navController.popBackStack() },
                 onNavigateToCall = { id, isVideo ->
-                    navController.navigate("${Screen.ConversationItem.CallScreen.cRoute}/$id/$isVideo")
+                    navController.navigate(Destination.CallScreen(id, isVideo))
                 },
                 onMoreClick = {}
             )
         }
-        composable(
-            route = "${Screen.ConversationItem.CallScreen.cRoute}/{id}/{isVideo}",
-            arguments = listOf(
-                navArgument("id") { type = NavType.StringType },
-                navArgument("isVideo") { type = NavType.BoolType }
-            )
-        ) { backStackEntry ->
-            val targetId = backStackEntry.arguments?.getString("id") ?: ""
-            val isVideoCall = backStackEntry.arguments?.getBoolean("isVideo") ?: false
+        composable<Destination.CallScreen> { backStackEntry ->
+            val args = backStackEntry.toRoute<Destination.CallScreen>()
             CallPermissionsWrapper(
                 onPermissionsGranted = {
                     CallScreenEntry(
-                        targetId = targetId,
+                        targetId = args.id,
                         isCaller = true,
-                        isVideoCall = isVideoCall,
+                        isVideoCall = args.isVideo,
                         onEndCall = { navController.popBackStack() }
                     )
                 },
@@ -130,13 +121,11 @@ fun AppNavigation(
                 }
             )
         }
-        composable(Screen.ConversationItem.GroupConversation.cRoute + "/{map_id}") { backStackEntry ->
-            val mapId = backStackEntry.arguments?.getString("map_id") ?: ""
-            val restoredMap = mapId.split(";")
-                .mapNotNull { it -> it.split("=").takeIf { it.size == 2 } }
-                .associate { it[0] to it[1] }
+        composable<Destination.GroupConversation> { backStackEntry ->
+            val args = backStackEntry.toRoute<Destination.GroupConversation>()
             GroupConversationScreenEntry(
-                mapId = restoredMap,
+                args = args,
+                currentUserId = userId,
                 onVideoClick = {},
                 onPlusClick = {},
                 onPhoneClick = {},

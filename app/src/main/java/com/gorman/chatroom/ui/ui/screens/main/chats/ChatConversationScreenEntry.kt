@@ -41,6 +41,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.ui.navigation.Destination
 import com.gorman.chatroom.ui.states.ConversationUiState
 import com.gorman.chatroom.ui.ui.components.BottomSendMessageView
 import com.gorman.chatroom.ui.ui.components.DateItem
@@ -56,14 +57,14 @@ import java.time.ZoneId
 @Composable
 fun ChatConversationScreenEntry(
     chatConversationViewModel: ChatConversationViewModel = hiltViewModel(),
-    mapId: Map<String, String>,
+    currentUserId: String,
+    args: Destination.ChatConversation,
     onBackClick: () -> Unit,
     onMoreClick: () -> Unit,
     onPlusClick: () -> Unit,
     onNavigateToCall: (targetId: String, isVideoCall: Boolean) -> Unit,
 ) {
-    val currentUserId = mapId["currentUserId"]
-    val getterUserId = mapId["getterUserId"]
+    val getterUserId = args.getterUserId
     val chatId = chatConversationViewModel.chatId.value
     LaunchedEffect(Unit) {
         chatConversationViewModel.startCallEvent.collect { event->
@@ -73,10 +74,10 @@ fun ChatConversationScreenEntry(
         }
     }
     LaunchedEffect(chatId, currentUserId, getterUserId) {
-        if (!mapId["chatId"].isNullOrEmpty() && currentUserId != null) {
-            chatConversationViewModel.initializeChat(mapId["chatId"]!!, currentUserId)
-            Log.d("ConversationScreen", "Existing chat: chatId=${mapId["chatId"]} currentUserId=$currentUserId")
-        } else if (currentUserId != null && getterUserId != null && chatId.isNullOrEmpty()){
+        if (!args.chatId.isNullOrEmpty()) {
+            chatConversationViewModel.initializeChat(args.chatId, currentUserId)
+            Log.d("ConversationScreen", "Existing chat: chatId=${args.chatId} currentUserId=$currentUserId")
+        } else if (chatId.isNullOrEmpty()){
             chatConversationViewModel.setupNewConversation(currentUserId, getterUserId)
             Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUserId=$getterUserId")
         }
@@ -92,7 +93,6 @@ fun ChatConversationScreenEntry(
     }
     ChatConversationScreen(
         state = ConversationUiState(
-            mapId = mapId,
             getterUser = getterUser,
             getterUserId = getterUserId,
             currentUserId = currentUserId,
@@ -103,16 +103,16 @@ fun ChatConversationScreenEntry(
         onMoreClick = onMoreClick,
         onPlusClick = onPlusClick,
         onSendMessage = { message ->
-            if (chatId != null && currentUserId != null && getterUserId != null) {
+            if (chatId != null) {
                 chatConversationViewModel.sendMessage(
-                    chatId = chatId.ifBlank { mapId["chatId"]!! },
+                    chatId = chatId.ifBlank { args.chatId!! },
                     currentUserId = currentUserId,
                     getterId = getterUserId,
                     text = message)
             }
         },
         onStartCallClick = { isVideo ->
-            getterUserId?.let { chatConversationViewModel.startCall(it, isVideo) }
+            getterUserId.let { chatConversationViewModel.startCall(it, isVideo) }
         }
     )
 }

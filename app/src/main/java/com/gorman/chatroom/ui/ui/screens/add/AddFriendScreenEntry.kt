@@ -107,7 +107,7 @@ fun AddFriendScreen(
                 singleLine = true
             )
             if (user?.userId != null && user.phone != currentUser?.phone && currentUser?.userId != null) {
-                UserInfo(getterUser = user, onStartChatClick = onStartChatClick, userId = currentUser.userId)
+                UserInfo(getterUser = user, onStartChatClick = onStartChatClick)
             }
             else {
                 Placeholder()
@@ -117,12 +117,7 @@ fun AddFriendScreen(
 }
 
 @Composable
-fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId: String) {
-    val forChatDataMap = mapOf(
-        "currentUserId" to userId,
-        "getterUserId" to getterUser?.userId
-    )
-    val serialized = forChatDataMap.entries.joinToString(";") { "${it.key}=${it.value}" }
+fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit) {
     Row (modifier = Modifier
         .fillMaxWidth()
         .padding(
@@ -173,7 +168,7 @@ fun UserInfo(getterUser: UsersData?, onStartChatClick: (String) -> Unit, userId:
             }
         }
         Row {
-            IconButton(onClick = { onStartChatClick(serialized) }) {
+            IconButton(onClick = { onStartChatClick(getterUser?.userId ?: "") }) {
                 Icon(painter = painterResource(R.drawable.start_chat),
                     contentDescription = "VideoCall",
                     tint = MaterialTheme.colorScheme.primary,

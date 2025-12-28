@@ -53,11 +53,16 @@ import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
+data class GroupEntryData(
+    val groupName: String,
+    val groupId: String
+)
+
 @Composable
 fun GroupsScreenEntry(
     groupsViewModel: GroupsScreenViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
-    onItemClick: (String) -> Unit
+    onItemClick: (GroupEntryData) -> Unit
 ) {
     val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
     val uiState by groupsViewModel.groupUiState.collectAsStateWithLifecycle()
@@ -73,7 +78,6 @@ fun GroupsScreenEntry(
                 parseIso(it.lastMessage?.timestamp)
             }
             GroupsScreen(
-                userId = userId,
                 onItemClick = onItemClick,
                 sortedGroupsList = sortedGroupsList
             )
@@ -83,8 +87,7 @@ fun GroupsScreenEntry(
 
 @Composable
 fun GroupsScreen(
-    userId: String,
-    onItemClick: (String) -> Unit,
+    onItemClick: (GroupEntryData) -> Unit,
     sortedGroupsList: List<GroupPreviewData>
 ) {
     LazyColumn (modifier = Modifier.fillMaxSize(),
@@ -93,7 +96,6 @@ fun GroupsScreen(
             val datetime = formatMessageTimestamp(item.lastMessage?.timestamp)
             GroupPreviewItem(
                 item = item,
-                userId = userId,
                 datetime = datetime,
                 onItemClick = onItemClick)
             if (index < sortedGroupsList.size - 1)
@@ -107,9 +109,8 @@ fun GroupsScreen(
 
 @Composable
 fun GroupPreviewItem(item: GroupPreviewData?,
-                     userId: String,
                      datetime: String,
-                     onItemClick: (String) -> Unit){
+                     onItemClick: (GroupEntryData) -> Unit){
     val lastMessage = item?.lastMessage
     val unreadQuantity = item?.unreadQuantity
     val getterUsers = item?.users
@@ -124,9 +125,11 @@ fun GroupPreviewItem(item: GroupPreviewData?,
             .fillMaxWidth()
             .clickable(
                 onClick = {
-                    if (item?.groupId != null && getterUsers != null) {
-                        val serialized = "groupName=${item.groupName};currentUserId=${userId};groupId=${item.groupId}"
-                        onItemClick(serialized)
+                    if (item?.groupId != null && getterUsers != null && item.groupName != null) {
+                        onItemClick(GroupEntryData(
+                            groupName = item.groupName,
+                            groupId = item.groupId
+                        ))
                     }
                 }
             )

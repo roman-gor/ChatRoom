@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.serialization)
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
@@ -53,6 +54,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)

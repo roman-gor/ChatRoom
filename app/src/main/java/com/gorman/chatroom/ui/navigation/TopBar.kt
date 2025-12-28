@@ -241,7 +241,7 @@ fun CloseIcon(onCloseClick: () -> Unit){
 @Composable
 fun RotatingPlusIcon(navController: NavHostController) {
     var expanded by remember { mutableStateOf(false) }
-    val items = Screen.aItems
+    val items = Destination.addItems
     var selectedColor by remember { mutableStateOf(Color.Transparent) }
 
     val rotation by animateFloatAsState(
@@ -287,8 +287,9 @@ fun RotatingPlusIcon(navController: NavHostController) {
         shape = RoundedCornerShape(12.dp)
     ) {
         items.forEach { item ->
+            val route = item as Destination
             DropdownMenuItem(
-                text = { Text(text = stringResource(item.aTitle),
+                text = { Text(text = stringResource(item.title),
                     fontStyle = FontStyle.Normal,
                     fontFamily = mulishFont(),
                     fontSize = 14.sp,
@@ -296,12 +297,12 @@ fun RotatingPlusIcon(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(start = 6.dp)) },
                 onClick = {
-                    navController.navigate(item.aRoute)
+                    navController.navigate(route)
                     expanded = !expanded},
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(item.aIcon),
-                        contentDescription = stringResource(item.aTitle),
+                        painter = painterResource(item.icon),
+                        contentDescription = stringResource(item.title),
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.tertiary
                     )

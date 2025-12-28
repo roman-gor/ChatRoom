@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.gorman.chatroom.R
@@ -31,9 +32,9 @@ import com.gorman.chatroom.ui.ui.fonts.mulishFont
 @Composable
 fun BottomNavigationBar(
     navController: NavController,
-    items: List<Screen.BottomNavItem>) {
+    items: List<Destination.NavItem>) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentDestination = navBackStackEntry?.destination
 
     Card (
         modifier = Modifier.fillMaxWidth()
@@ -48,14 +49,15 @@ fun BottomNavigationBar(
             windowInsets = NavigationBarDefaults.windowInsets
         ) {
             items.forEach { item ->
+                val route = item as Destination
                 NavigationBarItem(
-                    icon = { Icon(painter = painterResource(item.bIcon), contentDescription = stringResource(item.bTitle)) },
+                    icon = { Icon(painter = painterResource(item.icon), contentDescription = stringResource(item.title)) },
                     label = {
-                        Text(text = stringResource(item.bTitle),
+                        Text(text = stringResource(item.title),
                             fontStyle = FontStyle.Normal,
                             fontFamily = mulishFont()
                         ) },
-                    selected = currentRoute == item.bRoute,
+                    selected = currentDestination?.hasRoute(route::class) ?: false,
                     colors = NavigationBarItemColors(
                         selectedIconColor = MaterialTheme.colorScheme.onPrimary,
                         selectedTextColor = MaterialTheme.colorScheme.secondary,
@@ -66,7 +68,7 @@ fun BottomNavigationBar(
                         disabledTextColor = Color.Transparent
                     ),
                     onClick = {
-                        navController.navigate(item.bRoute) {
+                        navController.navigate(route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }

@@ -57,4 +57,5 @@
     <string name="accept">Принять</string>
     <string name="decline">Отклонить</string>
     <string name="callPermissionsDenied">Для совершения звонка необходим доступ к камере и микрофону. Пожалуйста, предоставьте разрешения в настройках.</string>
+    <string name="unknown">Неизвестный</string>
 </resources>

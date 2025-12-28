@@ -16,9 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -43,7 +45,8 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             val viewModel: MoreScreenViewModel = hiltViewModel()
-            ChatRoomTheme {
+            val settingsState by viewModel.uiState.collectAsStateWithLifecycle()
+            ChatRoomTheme(darkTheme = settingsState.isDarkMode) {
                 CheckNotificationsPermission()
                 Surface (
                     modifier = Modifier.fillMaxSize(),

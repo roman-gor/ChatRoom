@@ -79,12 +79,17 @@ import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
+data class GroupData(
+    val groupName: String,
+    val membersList: String
+)
+
 @Composable
 fun CreateGroupScreenEntry(
     chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel =  hiltViewModel(),
     onBack: () -> Unit,
-    onGroupStart: (String) -> Unit
+    onGroupStart: (GroupData) -> Unit
 ) {
     val context = LocalContext.current
     val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
@@ -102,7 +107,6 @@ fun CreateGroupScreenEntry(
         is ChatsUiState.Success -> {
             CreateGroupScreen(
                 onBack = onBack,
-                userId = userId,
                 context = context,
                 chatsList = state.chats,
                 onGroupStart = onGroupStart
@@ -115,10 +119,9 @@ fun CreateGroupScreenEntry(
 @Composable
 fun CreateGroupScreen(
     onBack: () -> Unit,
-    userId: String,
     context: Context,
     chatsList: List<ChatPreviewData?>,
-    onGroupStart: (String) -> Unit
+    onGroupStart: (GroupData) -> Unit
 ){
     var groupName by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
@@ -237,8 +240,7 @@ fun CreateGroupScreen(
                     }
                     else {
                         val membersList = addList.mapNotNull { it?.userId }.joinToString(",")
-                        val serialized = "groupName=${groupName};currentUserId=${userId};getterUsers=$membersList"
-                        onGroupStart(serialized)
+                        onGroupStart(GroupData(groupName = groupName, membersList = membersList))
                     }
                 },
                     colors = ButtonDefaults.buttonColors(

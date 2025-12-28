@@ -40,7 +40,7 @@ object ChatRoomTheme {
 
 @Composable
 fun ChatRoomTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

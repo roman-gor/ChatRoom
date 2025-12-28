@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
 import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.chatroom.ui.navigation.Destination
 import com.gorman.chatroom.ui.states.GroupConversationUiState
 import com.gorman.chatroom.ui.ui.components.BottomSendMessageView
 import com.gorman.chatroom.ui.ui.components.DateItem
@@ -50,24 +51,24 @@ import kotlin.let
 @Composable
 fun GroupConversationScreenEntry(
     groupConversationViewModel: GroupConversationViewModel = hiltViewModel(),
-    mapId: Map<String, String>,
+    currentUserId: String,
+    args: Destination.GroupConversation,
     onBackClick: () -> Unit,
     onMoreClick: () -> Unit,
     onPhoneClick: () -> Unit,
     onVideoClick: () -> Unit,
     onPlusClick: () -> Unit
 ) {
-    val currentUserId = mapId["currentUserId"]
     val groupId = groupConversationViewModel.groupId.value
     val getterUsers = groupConversationViewModel.getterUsersData.value
     LaunchedEffect(groupId, currentUserId) {
-        if (!mapId["groupId"].isNullOrEmpty() && currentUserId != null) {
-            groupConversationViewModel.initializeGroup(mapId["groupId"]!!, currentUserId)
-            Log.d("ConversationScreen", "Existing group: groupId=${mapId["groupId"]} currentUserId=$currentUserId")
+        if (!args.groupId.isNullOrEmpty()) {
+            groupConversationViewModel.initializeGroup(args.groupId, currentUserId)
+            Log.d("ConversationScreen", "Existing group: groupId=${args.groupId} currentUserId=$currentUserId")
         }
-        else if (currentUserId != null && groupId.isNullOrEmpty() && !mapId["groupName"].isNullOrEmpty()){
-            val membersList = mapId["getterUsers"]?.split(",")?.map { it.trim() }!!
-            groupConversationViewModel.setupNewConversation(currentUserId, membersList, mapId["groupName"]!!)
+        else if (groupId.isNullOrEmpty() && args.groupName.isNotEmpty()){
+            val membersList = args.memberList?.split(",")?.map { it.trim() }!!
+            groupConversationViewModel.setupNewConversation(currentUserId, membersList, args.groupName)
             Log.d("ConversationScreen", "New chat: currentUserId=$currentUserId getterUsers=${getterUsers.size}")
         }
     }
@@ -84,7 +85,7 @@ fun GroupConversationScreenEntry(
     }
     GroupConversationScreen(
         state = GroupConversationUiState(
-            mapId = mapId,
+            args = args,
             userMap = userMap,
             getterUsers = getterUsers,
             sortedMessages = sortedMessages,
@@ -97,9 +98,9 @@ fun GroupConversationScreenEntry(
             if (isVideo) onVideoClick() else onPhoneClick()
         },
         onSendMessageClick = {
-            if (groupId != null && currentUserId != null && getterUsers.isNotEmpty()) {
+            if (groupId != null && getterUsers.isNotEmpty()) {
                 groupConversationViewModel.sendMessage(
-                    groupId = groupId.ifBlank { mapId["groupId"]!! },
+                    groupId = groupId.ifBlank { args.groupId!! },
                     currentUserId = currentUserId,
                     getterUsers = getterUsers,
                     text = it)
@@ -135,7 +136,7 @@ fun GroupConversationScreen(
                 .background(color = MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            InfoChat(onCallClick = onCallClick, getterUsers = state.getterUsers, groupName = state.mapId["groupName"])
+            InfoChat(onCallClick = onCallClick, getterUsers = state.getterUsers, groupName = state.args.groupName)
             LazyColumn (
                 modifier = Modifier
                     .weight(1f)
@@ -156,7 +157,7 @@ fun GroupConversationScreen(
                         state.currentUserId?.let {
                             val isFirstMessage = index == 0
                             val isLastMessage = index == state.sortedMessages.lastIndex
-                            val senderName = state.userMap[message.senderId]?.username ?: "Неизвестный"
+                            val senderName = state.userMap[message.senderId]?.username ?: stringResource(R.string.unknown)
                             MessageItem(
                                 message,
                                 state.currentUserId,

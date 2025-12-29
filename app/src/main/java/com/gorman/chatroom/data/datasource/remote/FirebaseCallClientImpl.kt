@@ -1,5 +1,6 @@
 package com.gorman.chatroom.data.datasource.remote
 
+import android.util.Log
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -33,7 +34,7 @@ class FirebaseCallClientImpl @Inject constructor(
                 val event = try {
                     gson.fromJson(snapshot.value.toString(), CallModel::class.java)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("FirebaseCallClient", "${e.message}")
                     null
                 }
 
@@ -45,7 +46,7 @@ class FirebaseCallClientImpl @Inject constructor(
                 val event = try {
                     gson.fromJson(snapshot.value.toString(), CallModel::class.java)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("FirebaseCallClient", "${e.message}")
                     null
                 }
                 if (event != null && event.type == CallModelType.IceCandidates) {

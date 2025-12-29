@@ -59,7 +59,7 @@ import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
-data class ChatEntryData(
+data class ChatsScreenEntry(
     val chatId: String,
     val getterUserId: String
 )
@@ -68,7 +68,7 @@ data class ChatEntryData(
 fun ChatsScreenEntry(
     chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
-    onItemClick: (ChatEntryData) -> Unit
+    onItemClick: (ChatsScreenEntry) -> Unit
 ) {
     val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
     val uiState by chatsScreenViewModel.chatsUiState.collectAsStateWithLifecycle()
@@ -97,7 +97,7 @@ fun ChatsScreenEntry(
 @Composable
 fun ChatsScreen(
     chatPreviews: List<ChatPreviewData>,
-    onItemClick: (ChatEntryData) -> Unit,
+    onItemClick: (ChatsScreenEntry) -> Unit,
     onDeleteChat: (String) -> Unit
 ){
     LazyColumn (
@@ -131,7 +131,7 @@ fun ChatsScreen(
 fun DismissibleChatPreviewItem(
     item: ChatPreviewData,
     onDeleteChat: (String) -> Unit,
-    onItemClick: (ChatEntryData) -> Unit,
+    onItemClick: (ChatsScreenEntry) -> Unit,
     datetime: String
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
@@ -178,7 +178,7 @@ fun DismissibleChatPreviewItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChatPreviewItem(item: ChatPreviewData,
-                    onItemClick: (ChatEntryData) -> Unit,
+                    onItemClick: (ChatsScreenEntry) -> Unit,
                     datetime: String) {
     val user = item.user
     val lastMessage = item.lastMessage
@@ -189,7 +189,7 @@ fun ChatPreviewItem(item: ChatPreviewData,
             .clickable(
                 onClick = {
                     if (item.chatId != null && user?.userId != null) {
-                        onItemClick(ChatEntryData(
+                        onItemClick(ChatsScreenEntry(
                             chatId = item.chatId,
                             getterUserId = user.userId
                         ))

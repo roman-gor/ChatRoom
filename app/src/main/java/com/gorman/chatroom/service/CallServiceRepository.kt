@@ -4,10 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class CallServiceRepository @Inject constructor(
-    private val context: Context
+    @param:ApplicationContext private val context: Context
 ){
     fun startService(username: String) {
         val intent = Intent(context, CallService::class.java).apply {

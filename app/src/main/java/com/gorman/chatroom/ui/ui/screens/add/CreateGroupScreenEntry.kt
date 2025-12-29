@@ -79,7 +79,7 @@ import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
-data class GroupData(
+data class CreateGroupScreenEntry(
     val groupName: String,
     val membersList: String
 )
@@ -89,7 +89,7 @@ fun CreateGroupScreenEntry(
     chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel =  hiltViewModel(),
     onBack: () -> Unit,
-    onGroupStart: (GroupData) -> Unit
+    onGroupStart: (CreateGroupScreenEntry) -> Unit
 ) {
     val context = LocalContext.current
     val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
@@ -121,7 +121,7 @@ fun CreateGroupScreen(
     onBack: () -> Unit,
     context: Context,
     chatsList: List<ChatPreviewData?>,
-    onGroupStart: (GroupData) -> Unit
+    onGroupStart: (CreateGroupScreenEntry) -> Unit
 ){
     var groupName by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
@@ -240,7 +240,7 @@ fun CreateGroupScreen(
                     }
                     else {
                         val membersList = addList.mapNotNull { it?.userId }.joinToString(",")
-                        onGroupStart(GroupData(groupName = groupName, membersList = membersList))
+                        onGroupStart(CreateGroupScreenEntry(groupName = groupName, membersList = membersList))
                     }
                 },
                     colors = ButtonDefaults.buttonColors(

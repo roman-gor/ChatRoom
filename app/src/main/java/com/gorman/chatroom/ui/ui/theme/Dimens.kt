@@ -4,7 +4,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-data class ChatRoomDimens(
+data class Dimens(
     val paddingSmall: Dp = 4.dp,
     val paddingMedium: Dp = 8.dp,
     val paddingLarge: Dp = 16.dp,
@@ -17,4 +17,4 @@ data class ChatRoomDimens(
     val cornerRadius: Dp = 12.dp
 )
 
-val LocalChatRoomDimens = staticCompositionLocalOf { ChatRoomDimens() }
+val LocalDimens = staticCompositionLocalOf { Dimens() }

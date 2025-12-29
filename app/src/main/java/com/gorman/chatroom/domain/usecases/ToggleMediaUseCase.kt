@@ -1,15 +1,16 @@
 package com.gorman.chatroom.domain.usecases
 
+import com.gorman.chatroom.service.CallServiceConstants
 import com.gorman.chatroom.service.CallServiceRepository
 import javax.inject.Inject
 
 class ToggleMediaUseCase @Inject constructor(
-    private val serviceRepository: CallServiceRepository // <-- Заменяем зависимость
+    private val serviceRepository: CallServiceRepository
 ) {
     operator fun invoke(type: String, muted: Boolean) {
         when (type) {
-            "audio" -> serviceRepository.toggleAudio(muted) // <-- Вызываем метод serviceRepository
-            "video" -> serviceRepository.toggleVideo(muted) // <-- Вызываем метод serviceRepository
+            CallServiceConstants.AUDIO.value -> serviceRepository.toggleAudio(muted)
+            CallServiceConstants.VIDEO.value -> serviceRepository.toggleVideo(muted)
         }
     }
 }

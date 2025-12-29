@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gorman.chatroom.R
+import com.gorman.chatroom.domain.models.MessageUiModel
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.navigation.Destination
 import com.gorman.chatroom.ui.states.GroupConversationUiState
@@ -159,12 +160,15 @@ fun GroupConversationScreen(
                             val isLastMessage = index == state.sortedMessages.lastIndex
                             val senderName = state.userMap[message.senderId]?.username ?: stringResource(R.string.unknown)
                             MessageItem(
-                                message,
-                                state.currentUserId,
-                                isFirstMessage,
-                                isLastMessage,
-                                senderName,
-                                true)
+                                MessageUiModel(
+                                    message,
+                                    state.currentUserId,
+                                    isFirstMessage,
+                                    isLastMessage,
+                                    senderName,
+                                    true
+                                )
+                            )
                         }
                     }
                     if (index == state.sortedMessages.lastIndex || messageDate != nextMessageDate) {

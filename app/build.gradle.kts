@@ -7,6 +7,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 android {
@@ -46,6 +47,8 @@ android {
 }
 
 dependencies {
+
+    lintChecks("com.slack.lint.compose:compose-lint-checks:1.4.2")
 
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.compose.runtime)

@@ -53,7 +53,7 @@ import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.GroupsScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 
-data class GroupEntryData(
+data class GroupsScreenEntry(
     val groupName: String,
     val groupId: String
 )
@@ -62,7 +62,7 @@ data class GroupEntryData(
 fun GroupsScreenEntry(
     groupsViewModel: GroupsScreenViewModel = hiltViewModel(),
     mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
-    onItemClick: (GroupEntryData) -> Unit
+    onItemClick: (GroupsScreenEntry) -> Unit
 ) {
     val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
     val uiState by groupsViewModel.groupUiState.collectAsStateWithLifecycle()
@@ -87,7 +87,7 @@ fun GroupsScreenEntry(
 
 @Composable
 fun GroupsScreen(
-    onItemClick: (GroupEntryData) -> Unit,
+    onItemClick: (GroupsScreenEntry) -> Unit,
     sortedGroupsList: List<GroupPreviewData>
 ) {
     LazyColumn (modifier = Modifier.fillMaxSize(),
@@ -110,7 +110,7 @@ fun GroupsScreen(
 @Composable
 fun GroupPreviewItem(item: GroupPreviewData?,
                      datetime: String,
-                     onItemClick: (GroupEntryData) -> Unit){
+                     onItemClick: (GroupsScreenEntry) -> Unit){
     val lastMessage = item?.lastMessage
     val unreadQuantity = item?.unreadQuantity
     val getterUsers = item?.users
@@ -126,7 +126,7 @@ fun GroupPreviewItem(item: GroupPreviewData?,
             .clickable(
                 onClick = {
                     if (item?.groupId != null && getterUsers != null && item.groupName != null) {
-                        onItemClick(GroupEntryData(
+                        onItemClick(GroupsScreenEntry(
                             groupName = item.groupName,
                             groupId = item.groupId
                         ))

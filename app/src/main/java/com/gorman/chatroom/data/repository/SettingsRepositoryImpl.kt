@@ -5,10 +5,14 @@ import androidx.datastore.preferences.core.edit
 import com.gorman.chatroom.data.SettingsKeys
 import com.gorman.chatroom.data.dataStore
 import com.gorman.chatroom.domain.repository.SettingsRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class SettingsRepositoryImpl(private val context: Context) : SettingsRepository {
+class SettingsRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context
+) : SettingsRepository {
     override val userIdFlow: Flow<String> = context.dataStore.data
         .map { prefs -> prefs[SettingsKeys.USER_ID] ?: "" }
 

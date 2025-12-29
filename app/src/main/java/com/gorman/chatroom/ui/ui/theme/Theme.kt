@@ -1,7 +1,6 @@
 package com.gorman.chatroom.ui.ui.theme
 
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -30,9 +29,9 @@ private val LightColorScheme = lightColorScheme(
 )
 
 object ChatRoomTheme {
-    val dimens: ChatRoomDimens
+    val dimens: Dimens
         @Composable
-        get() = LocalChatRoomDimens.current
+        get() = LocalDimens.current
     val types: androidx.compose.material3.Typography
         @Composable
         get() = LocalChatRoomTypes.current
@@ -44,7 +43,7 @@ fun ChatRoomTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val dimens = ChatRoomDimens()
+    val dimens = Dimens()
     val types = Typography
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -56,7 +55,7 @@ fun ChatRoomTheme(
         else -> LightColorScheme
     }
     CompositionLocalProvider(
-        LocalChatRoomDimens provides dimens,
+        LocalDimens provides dimens,
         LocalChatRoomTypes provides types
     ) {
         MaterialTheme(

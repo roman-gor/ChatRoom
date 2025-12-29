@@ -9,13 +9,31 @@ import android.view.WindowManager
 import com.google.gson.Gson
 import com.gorman.chatroom.domain.models.CallModel
 import com.gorman.chatroom.domain.models.CallModelType
-import org.webrtc.*
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.webrtc.AudioTrack
+import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraVideoCapturer
+import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.DefaultVideoEncoderFactory
+import org.webrtc.EglBase
+import org.webrtc.IceCandidate
+import org.webrtc.MediaConstraints
+import org.webrtc.MediaStream
+import org.webrtc.PeerConnection
+import org.webrtc.PeerConnectionFactory
+import org.webrtc.ScreenCapturerAndroid
+import org.webrtc.SessionDescription
+import org.webrtc.SurfaceTextureHelper
+import org.webrtc.SurfaceViewRenderer
+import org.webrtc.VideoCapturer
+import org.webrtc.VideoTrack
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.getValue
 
 @Singleton
 class WebRTCClient @Inject constructor(
-    private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val gson: Gson
 ) {
     var listener: Listener? = null
@@ -165,7 +183,7 @@ class WebRTCClient @Inject constructor(
             localAudioTrack = null
             peerConnection = null
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("WebRTCClient", "${e.message}")
         }
     }
 

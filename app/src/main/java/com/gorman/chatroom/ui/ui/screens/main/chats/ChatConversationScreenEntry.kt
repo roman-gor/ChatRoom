@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.gorman.chatroom.R
+import com.gorman.chatroom.domain.models.MessageUiModel
 import com.gorman.chatroom.domain.models.UsersData
 import com.gorman.chatroom.ui.navigation.Destination
 import com.gorman.chatroom.ui.states.ConversationUiState
@@ -171,12 +172,15 @@ fun ChatConversationScreen(
                             val isFirstMessage = index == 0
                             val isLastMessage = index == state.sortedMessages.lastIndex
                             MessageItem(
-                                message,
-                                state.currentUserId,
-                                isFirstMessage,
-                                isLastMessage,
-                                state.getterUser.username,
-                                false)
+                                MessageUiModel(
+                                    message,
+                                    state.currentUserId,
+                                    isFirstMessage,
+                                    isLastMessage,
+                                    state.getterUser.username,
+                                    false
+                                )
+                            )
                         }
                     }
                     if (index == state.sortedMessages.lastIndex || messageDate != nextMessageDate) {

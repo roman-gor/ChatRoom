@@ -119,7 +119,7 @@ class CallService: Service(), CallRepository.Listener {
                                 ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
                     )
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("CallService", "${e.message}")
                     return
                 }
             }

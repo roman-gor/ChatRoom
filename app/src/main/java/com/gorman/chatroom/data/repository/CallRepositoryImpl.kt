@@ -1,6 +1,7 @@
 package com.gorman.chatroom.data.repository
 
 import android.content.Intent
+import android.util.Log
 import com.google.gson.Gson
 import com.gorman.chatroom.data.datasource.remote.FirebaseCallClient
 import com.gorman.chatroom.domain.models.CallModel
@@ -65,7 +66,7 @@ class CallRepositoryImpl @Inject constructor(
                 try {
                     p0?.videoTracks?.get(0)?.addSink(remoteView)
                 } catch (e:Exception) {
-                    e.printStackTrace()
+                    Log.e("CallRepository", "${e.message}")
                 }
             }
             override fun onIceCandidate(p0: IceCandidate?) {

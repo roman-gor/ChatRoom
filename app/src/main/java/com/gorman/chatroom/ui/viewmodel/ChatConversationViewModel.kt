@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.gorman.chatroom.domain.models.CallStartEvent
 import com.gorman.chatroom.domain.models.MessagesData
 import com.gorman.chatroom.domain.models.UsersData
-import com.gorman.chatroom.domain.usecases.EndCallUseCase
 import com.gorman.chatroom.domain.usecases.FindUserByChatIdUseCase
 import com.gorman.chatroom.domain.usecases.GetMessagesUseCase
 import com.gorman.chatroom.domain.usecases.MarkMessagesAsReadUseCase
@@ -18,7 +17,6 @@ import com.gorman.chatroom.domain.usecases.StartCallUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -31,8 +29,7 @@ class ChatConversationViewModel @Inject constructor(
     private val findUserByChatIdUseCase: FindUserByChatIdUseCase,
     private val setupNewConversationUseCase: SetupNewConversationUseCase,
     private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
-    private val startCallUseCase: StartCallUseCase,
-    private val endCallUseCase: EndCallUseCase
+    private val startCallUseCase: StartCallUseCase
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())

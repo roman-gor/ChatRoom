@@ -1,6 +1,7 @@
 package com.gorman.chatroom.data.datasource.remote
 
 import android.util.Log
+import com.google.firebase.FirebaseException
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -38,7 +39,7 @@ class FirebaseDBImpl @Inject constructor(
                         try {
                             val chatSnapshot = database.child(FirebaseConstants.CHATS.value).child(chatId).get().await()
                             chatSnapshot.getValue(ChatsData::class.java)
-                        } catch (e: Exception) {
+                        } catch (e: FirebaseException) {
                             Log.e("Firebase", "Ошибка при загрузке чата $chatId: ${e.message}")
                             null
                         }
@@ -97,7 +98,7 @@ class FirebaseDBImpl @Inject constructor(
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при поиске пользователя: ${e.message}")
         } as UsersData
     }
@@ -122,7 +123,7 @@ class FirebaseDBImpl @Inject constructor(
             } else {
                 emptyList()
             }
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при поиске пользователей: ${e.message}")
             emptyList()
         }
@@ -132,7 +133,7 @@ class FirebaseDBImpl @Inject constructor(
         val userRef = database.child(FirebaseConstants.USERS.value).child(userId)
         try {
             userRef.setValue(user).await()
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.d("Firebase", "Не удалось добавить пользователя ${e.message}")
         }
     }
@@ -234,7 +235,7 @@ class FirebaseDBImpl @Inject constructor(
             )
             database.updateChildren(updates).await()
             Log.d("Firebase", "Данные о чате обновлены")
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при отправке данных ${e.message}")
             throw e
         }
@@ -267,7 +268,7 @@ class FirebaseDBImpl @Inject constructor(
             )
             database.updateChildren(updates).await()
             Log.d("Firebase", "Данные о группе обновлены")
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при отправке данных ${e.message}")
             throw e
         }
@@ -290,7 +291,7 @@ class FirebaseDBImpl @Inject constructor(
                 database.updateChildren(updates).await()
                 Log.d("Firebase", "Непрочитанные сообщения помечены как прочитанные")
             }
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при обновлении статуса сообщений: ${e.message}")
             throw e
         }
@@ -341,7 +342,7 @@ class FirebaseDBImpl @Inject constructor(
             val gettingUserChatIds = gettingUserChatsSnapshot.children.mapNotNull { it.key }.toSet()
 
             currentUserChatIds.intersect(gettingUserChatIds).firstOrNull()
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при проверке чата на существование ${e.message}")
         } as String?
     }
@@ -379,7 +380,7 @@ class FirebaseDBImpl @Inject constructor(
             )
             database.updateChildren(updates)
             chatId
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при создании чата: ${e.message}")
             null
         }
@@ -428,7 +429,7 @@ class FirebaseDBImpl @Inject constructor(
             }
             database.updateChildren(updates)
             groupId
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при создании группы: ${e.message}")
             null
         }
@@ -453,7 +454,7 @@ class FirebaseDBImpl @Inject constructor(
             )
             database.updateChildren(updates).await()
             Log.d("Firebase", "Чат $chatId успешно удален у всех участников")
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при удалении чата $chatId: ${e.message}")
             throw e
         }
@@ -467,7 +468,7 @@ class FirebaseDBImpl @Inject constructor(
             userRef.setValue(newUser).await()
             Log.d("Firebase", "Пользователь успешно создан: $newUser")
             true
-        } catch (e: Exception) {
+        } catch (e: FirebaseException) {
             Log.e("Firebase", "Ошибка при создании пользователя: ${e.message}")
             false
         }

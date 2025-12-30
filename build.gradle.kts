@@ -8,6 +8,7 @@ plugins {
     id("com.google.devtools.ksp") version "2.0.21-1.0.27" apply false
     id("com.google.gms.google-services") version "4.4.3" apply false
     id("io.gitlab.arturbosch.detekt") version "1.23.8" apply false
+    alias(libs.plugins.android.library) apply false
 }
 
 buildscript {

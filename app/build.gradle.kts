@@ -48,10 +48,9 @@ android {
 
 dependencies {
 
-    lintChecks("com.slack.lint.compose:compose-lint-checks:1.4.2")
+    lintChecks(libs.compose.lint.checks)
 
     implementation(libs.accompanist.permissions)
-    implementation(libs.androidx.compose.runtime)
     ksp(libs.hilt.compiler)
 
     implementation(libs.androidx.core.ktx)

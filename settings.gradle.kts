@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ChatRoom"
 include(":app")
- 
+include(":feature-chats")
+include(":core")

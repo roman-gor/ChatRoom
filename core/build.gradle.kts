@@ -49,6 +49,8 @@ dependencies {
     api(libs.coil.compose)
     api(libs.bundles.network)
     api(libs.kotlinx.serialization.json)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
     implementation(libs.bundles.hilt)
 
     ksp(libs.hilt.compiler)

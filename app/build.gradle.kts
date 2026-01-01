@@ -48,6 +48,10 @@ android {
 
 dependencies {
 
+    implementation(project(":core"))
+    implementation(project(":feature-chats"))
+    implementation(project(":feature-calls"))
+
     lintChecks(libs.compose.lint.checks)
 
     implementation(libs.accompanist.permissions)
@@ -63,15 +67,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.bundles.network)
     implementation(libs.bundles.hilt)
-
-    implementation(libs.api.webrtc)
-    implementation(libs.audioswitch)
-    implementation(libs.coil.compose)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)

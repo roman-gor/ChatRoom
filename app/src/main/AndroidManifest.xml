@@ -38,10 +38,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".service.CallServiceReceiver"
+        <receiver android:name="com.gorman.core.service.CallServiceReceiver"
             tools:ignore="Instantiatable" />
         <service
-            android:name=".service.CallService"
+            android:name="com.gorman.core.service.CallService"
             android:exported="false"
             android:foregroundServiceType="dataSync|camera|microphone|mediaProjection" >
         </service>

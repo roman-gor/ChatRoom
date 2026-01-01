@@ -1,6 +1,5 @@
 package com.gorman.chatroom.domain.usecases
 
-import com.gorman.chatroom.domain.repository.CallRepository
 import com.gorman.chatroom.service.CallServiceRepository
 import javax.inject.Inject
 

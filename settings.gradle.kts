@@ -23,3 +23,4 @@ rootProject.name = "ChatRoom"
 include(":app")
 include(":feature-chats")
 include(":core")
+include(":feature-calls")

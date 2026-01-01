@@ -1,6 +1,6 @@
 package com.gorman.core.ui.navigation
 
-import com.gorman.chatroom.R
+import com.gorman.core.R
 import kotlinx.serialization.Serializable
 
 @Serializable

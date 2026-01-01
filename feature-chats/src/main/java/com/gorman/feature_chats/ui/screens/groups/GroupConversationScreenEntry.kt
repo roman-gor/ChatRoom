@@ -33,17 +33,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.MessageUiModel
-import com.gorman.chatroom.domain.models.UsersData
-import com.gorman.chatroom.ui.navigation.Destination
-import com.gorman.chatroom.ui.states.GroupConversationUiState
-import com.gorman.chatroom.ui.ui.components.BottomSendMessageView
-import com.gorman.chatroom.ui.ui.components.DateItem
-import com.gorman.chatroom.ui.ui.components.MessageItem
-import com.gorman.chatroom.ui.ui.components.parseIso
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.viewmodel.GroupConversationViewModel
+import com.gorman.core.R
+import com.gorman.core.domain.models.MessageUiModel
+import com.gorman.core.domain.models.UsersData
+import com.gorman.core.ui.components.BottomSendMessageView
+import com.gorman.core.ui.components.DateItem
+import com.gorman.core.ui.components.IconButton
+import com.gorman.core.ui.components.MessageItem
+import com.gorman.core.ui.components.parseIso
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.navigation.Destination
+import com.gorman.feature_chats.ui.states.GroupConversationUiState
+import com.gorman.feature_chats.ui.viewmodels.GroupConversationViewModel
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.let
@@ -63,7 +64,8 @@ fun GroupConversationScreenEntry(
     val getterUsers = groupConversationViewModel.getterUsersData.value
     LaunchedEffect(groupId, currentUserId) {
         if (!args.groupId.isNullOrEmpty()) {
-            groupConversationViewModel.initializeGroup(args.groupId, currentUserId)
+            val groupId = args.groupId ?: ""
+            groupConversationViewModel.initializeGroup(groupId, currentUserId)
             Log.d("ConversationScreen", "Existing group: groupId=${args.groupId} currentUserId=$currentUserId")
         }
         else if (groupId.isNullOrEmpty() && args.groupName.isNotEmpty()){

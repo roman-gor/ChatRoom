@@ -1,7 +1,7 @@
 package com.gorman.chatroom.domain.usecases
 
-import com.gorman.chatroom.domain.models.UsersData
-import com.gorman.chatroom.domain.repository.FirebaseRepository
+import com.gorman.core.domain.models.UsersData
+import com.gorman.core.domain.repository.FirebaseRepository
 import javax.inject.Inject
 
 class UpdateUserDataUseCase @Inject constructor(

@@ -64,12 +64,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.UsersData
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
+import com.gorman.core.R
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
+import com.gorman.core.domain.models.UsersData
+import com.gorman.core.ui.components.LeadingIconMenu
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.theme.ChatRoomTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

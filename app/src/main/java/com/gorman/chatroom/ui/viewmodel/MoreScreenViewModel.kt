@@ -2,10 +2,10 @@ package com.gorman.chatroom.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.MoreScreenData
-import com.gorman.chatroom.domain.repository.SettingsRepository
+import com.gorman.core.R
 import com.gorman.chatroom.ui.states.MoreScreenUiState
+import com.gorman.core.domain.models.MoreScreenData
+import com.gorman.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

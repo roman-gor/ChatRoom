@@ -1,8 +1,8 @@
 package com.gorman.feature_chats.ui.states
 
-import com.gorman.chatroom.domain.models.MessagesData
-import com.gorman.chatroom.domain.models.UsersData
-import com.gorman.chatroom.ui.navigation.Destination
+import com.gorman.core.domain.models.MessagesData
+import com.gorman.core.domain.models.UsersData
+import com.gorman.core.ui.navigation.Destination
 
 data class GroupConversationUiState(
     val args: Destination.GroupConversation,

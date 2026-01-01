@@ -24,10 +24,6 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindCallRepository(impl: CallRepositoryImpl): CallRepository
-
-    @Binds
-    @Singleton
     abstract fun bindFirebaseDB(impl: FirebaseDBImpl): FirebaseDB
 
     @Binds

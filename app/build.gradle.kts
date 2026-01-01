@@ -54,25 +54,12 @@ dependencies {
 
     lintChecks(libs.compose.lint.checks)
 
-    implementation(libs.accompanist.permissions)
+    implementation(libs.play.services.auth)
+    implementation(libs.bundles.hilt)
     ksp(libs.hilt.compiler)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.kotlinx.serialization.json)
-
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.bundles.compose)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.bundles.hilt)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.bundles.firebase)
-
-    implementation(libs.play.services.auth)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

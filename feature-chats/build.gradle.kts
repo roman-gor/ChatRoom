@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.bundles.hilt)
     ksp(libs.hilt.compiler)
+
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

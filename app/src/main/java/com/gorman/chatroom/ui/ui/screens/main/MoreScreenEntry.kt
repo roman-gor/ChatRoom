@@ -42,11 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.MoreScreenData
+import com.gorman.core.R
 import com.gorman.chatroom.ui.states.MoreScreenUiState
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
 import com.gorman.chatroom.ui.viewmodel.MoreScreenViewModel
+import com.gorman.core.domain.models.MoreScreenData
+import com.gorman.core.ui.fonts.mulishFont
 
 @Composable
 fun MoreScreenEntry(

@@ -1,6 +1,6 @@
 package com.gorman.core.domain.models
 
-import com.gorman.chatroom.R
+import com.gorman.core.R
 
 data class Flag(
     val flagImage: Int,

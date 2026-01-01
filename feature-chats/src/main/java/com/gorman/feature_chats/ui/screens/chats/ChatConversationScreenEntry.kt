@@ -39,6 +39,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.gorman.core.R
+import com.gorman.core.domain.models.MessageUiModel
+import com.gorman.core.domain.models.UsersData
+import com.gorman.core.ui.components.BottomSendMessageView
+import com.gorman.core.ui.components.DateItem
+import com.gorman.core.ui.components.IconButton
+import com.gorman.core.ui.components.MessageItem
+import com.gorman.core.ui.components.parseIso
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.navigation.Destination
+import com.gorman.core.ui.theme.ChatRoomTheme
+import com.gorman.feature_chats.ui.states.ConversationUiState
 import com.gorman.feature_chats.ui.viewmodels.ChatConversationViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -64,7 +76,8 @@ fun ChatConversationScreenEntry(
     }
     LaunchedEffect(chatId, currentUserId, getterUserId) {
         if (!args.chatId.isNullOrEmpty()) {
-            chatConversationViewModel.initializeChat(args.chatId, currentUserId)
+            val chatId = args.chatId ?: ""
+            chatConversationViewModel.initializeChat(chatId, currentUserId)
             Log.d("ConversationScreen", "Existing chat: chatId=${args.chatId} currentUserId=$currentUserId")
         } else if (chatId.isNullOrEmpty()){
             chatConversationViewModel.setupNewConversation(currentUserId, getterUserId)
@@ -159,13 +172,14 @@ fun ChatConversationScreen(
                         state.currentUserId?.let {
                             val isFirstMessage = index == 0
                             val isLastMessage = index == state.sortedMessages.lastIndex
+                            val username = state.getterUser.username ?: ""
                             MessageItem(
                                 MessageUiModel(
                                     message,
                                     state.currentUserId,
                                     isFirstMessage,
                                     isLastMessage,
-                                    state.getterUser.username,
+                                    username,
                                     false
                                 )
                             )
@@ -234,7 +248,7 @@ fun InfoChat(onVideoClick: () -> Unit, onPhoneClick: () -> Unit, getterUser: Use
                     .build(),
                 contentDescription = "Profile Avatar",
                 placeholder = painterResource(R.drawable.default_ava),
-                modifier = size(ChatRoomTheme.dimens.avatarSize)
+                modifier = Modifier.size(ChatRoomTheme.dimens.avatarSize)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )

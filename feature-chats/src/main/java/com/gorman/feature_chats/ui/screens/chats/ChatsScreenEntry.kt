@@ -47,17 +47,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.ChatPreviewData
-import com.gorman.chatroom.ui.states.ChatsUiState
-import com.gorman.chatroom.ui.ui.components.ErrorLoading
-import com.gorman.chatroom.ui.ui.components.LoadingStub
-import com.gorman.chatroom.ui.ui.components.formatMessageTimestamp
-import com.gorman.chatroom.ui.ui.components.parseIso
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
-import com.gorman.chatroom.ui.viewmodel.ChatsScreenViewModel
-import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
+import com.gorman.core.R
+import com.gorman.core.domain.models.ChatPreviewData
+import com.gorman.core.ui.components.ErrorLoading
+import com.gorman.core.ui.components.LoadingStub
+import com.gorman.core.ui.components.formatMessageTimestamp
+import com.gorman.core.ui.components.parseIso
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.theme.ChatRoomTheme
+import com.gorman.feature_chats.ui.states.ChatsUiState
+import com.gorman.feature_chats.ui.viewmodels.ChatsScreenViewModel
 
 data class ChatsScreenEntry(
     val chatId: String,
@@ -67,10 +66,9 @@ data class ChatsScreenEntry(
 @Composable
 fun ChatsScreenEntry(
     chatsScreenViewModel: ChatsScreenViewModel = hiltViewModel(),
-    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
     onItemClick: (ChatsScreenEntry) -> Unit
 ) {
-    val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
+    val userId by chatsScreenViewModel.userId.collectAsStateWithLifecycle()
     val uiState by chatsScreenViewModel.chatsUiState.collectAsStateWithLifecycle()
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
@@ -112,8 +110,11 @@ fun ChatsScreen(
             DismissibleChatPreviewItem(
                 item = item,
                 onDeleteChat = {
-                    if (item.chatId != null)
-                        onDeleteChat(item.chatId)
+                    if (item.chatId != null) {
+                        item.chatId?.let {
+                            onDeleteChat(it)
+                        }
+                    }
                 },
                 onItemClick = onItemClick,
                 datetime = datetime
@@ -189,9 +190,11 @@ fun ChatPreviewItem(item: ChatPreviewData,
             .clickable(
                 onClick = {
                     if (item.chatId != null && user?.userId != null) {
+                        val chatId = item.chatId ?: ""
+                        val userId = user.userId ?: ""
                         onItemClick(ChatsScreenEntry(
-                            chatId = item.chatId,
-                            getterUserId = user.userId
+                            chatId = chatId,
+                            getterUserId = userId
                         ))
                     }
                 }
@@ -214,7 +217,7 @@ fun ChatPreviewItem(item: ChatPreviewData,
                         .build(),
                     contentDescription = "Profile Avatar",
                     placeholder = painterResource(R.drawable.default_ava),
-                    modifier = size(ChatRoomTheme.dimens.avatarSize)
+                    modifier = Modifier.size(ChatRoomTheme.dimens.avatarSize)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )

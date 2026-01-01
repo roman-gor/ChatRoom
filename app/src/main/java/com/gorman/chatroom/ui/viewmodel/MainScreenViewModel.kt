@@ -3,11 +3,11 @@ package com.gorman.chatroom.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.domain.usecases.FindUserByPhoneNumberUseCase
-import com.gorman.chatroom.domain.usecases.LoadNewUserUseCase
+import com.gorman.core.domain.usecases.FindUserByPhoneNumberUseCase
+import com.gorman.core.domain.usecases.LoadNewUserUseCase
 import com.gorman.core.domain.models.UsersData
 import com.gorman.core.domain.repository.SettingsRepository
-import com.gorman.core.service.CallServiceRepository
+import com.gorman.feature_calls.service.CallServiceRepository
 import com.gorman.feature_chats.ui.states.MessengerUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +44,7 @@ class MainScreenViewModel @Inject constructor(
 
     val userId: StateFlow<String> = settingsRepository.userIdFlow.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Companion.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(5000),
         initialValue = ""
     )
 

@@ -1,7 +1,7 @@
 package com.gorman.feature_chats.ui.states
 
-import com.gorman.chatroom.domain.models.MessagesData
-import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.core.domain.models.MessagesData
+import com.gorman.core.domain.models.UsersData
 
 data class ConversationUiState(
     val getterUser: UsersData?,

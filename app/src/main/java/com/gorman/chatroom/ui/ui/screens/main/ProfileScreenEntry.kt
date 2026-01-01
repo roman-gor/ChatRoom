@@ -58,20 +58,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.core.R
 import com.gorman.chatroom.ui.states.ProfileUiState
-import com.gorman.chatroom.ui.ui.components.ErrorLoading
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
-import com.gorman.chatroom.ui.ui.components.LoadingStub
-import com.gorman.chatroom.ui.ui.components.RoundedButton
 import com.gorman.chatroom.ui.ui.screens.auth.DatePickerDocked
 import com.gorman.chatroom.ui.ui.screens.auth.DefaultOutlinedTextField
 import com.gorman.chatroom.ui.ui.screens.auth.GenderDropDown
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.ProfileScreenViewModel
+import com.gorman.core.domain.models.UsersData
+import com.gorman.core.ui.components.ErrorLoading
+import com.gorman.core.ui.components.LeadingIconMenu
+import com.gorman.core.ui.components.LoadingStub
+import com.gorman.core.ui.components.RoundedButton
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.theme.ChatRoomTheme
 
 @Composable
 fun ProfileScreenEntry(

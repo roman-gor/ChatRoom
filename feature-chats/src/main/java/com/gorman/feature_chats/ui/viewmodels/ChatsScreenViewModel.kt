@@ -3,6 +3,7 @@ package com.gorman.feature_chats.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.core.domain.models.ChatPreviewData
+import com.gorman.core.domain.repository.SettingsRepository
 import com.gorman.feature_chats.domain.usecases.DeleteChatUseCase
 import com.gorman.feature_chats.domain.usecases.FindUserByChatIdUseCase
 import com.gorman.feature_chats.domain.usecases.GetLastMessageUseCase
@@ -22,11 +23,23 @@ class ChatsScreenViewModel @Inject constructor(
     private val findUserByChatIdUseCase: FindUserByChatIdUseCase,
     private val getLastMessageUseCase: GetLastMessageUseCase,
     private val getUnreadMessagesQuantityUseCase: GetUnreadMessagesQuantityUseCase,
-    private val deleteChatUseCase: DeleteChatUseCase
+    private val deleteChatUseCase: DeleteChatUseCase,
+    private val settingsRepository: SettingsRepository
 ): ViewModel() {
 
     private val _chatsUiState = MutableStateFlow<ChatsUiState>(ChatsUiState.Idle)
     val chatsUiState = _chatsUiState.asStateFlow()
+
+    private val _userId = MutableStateFlow("")
+    val userId = _userId.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.userIdFlow.collect {
+                _userId.value = it
+            }
+        }
+    }
 
     fun loadAllChats(userId: String) {
         viewModelScope.launch {

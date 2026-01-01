@@ -26,9 +26,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.gorman.chatroom.ui.navigation.AppNavigation
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MoreScreenViewModel
+import com.gorman.core.ui.theme.ChatRoomTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 

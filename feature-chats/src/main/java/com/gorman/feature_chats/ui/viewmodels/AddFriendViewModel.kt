@@ -3,8 +3,8 @@ package com.gorman.feature_chats.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.core.domain.models.UsersData
+import com.gorman.core.domain.usecases.FindUserByPhoneNumberUseCase
 import com.gorman.feature_chats.domain.usecases.CurrentUserDataUseCase
-import com.gorman.feature_chats.domain.usecases.FindUserByPhoneNumberUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

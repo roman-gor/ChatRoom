@@ -10,17 +10,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.gorman.chatroom.R
-import com.gorman.chatroom.service.CallPermissionsWrapper
-import com.gorman.chatroom.ui.ui.components.ErrorLoading
-import com.gorman.chatroom.ui.ui.screens.add.AddFriendScreenEntry
-import com.gorman.chatroom.ui.ui.screens.add.CreateGroupScreenEntry
+import com.gorman.core.R
+import com.gorman.feature_chats.ui.screens.add.AddFriendScreenEntry
+import com.gorman.chatroom.ui.ui.screens.CreateGroupScreenEntry
 import com.gorman.chatroom.ui.ui.screens.auth.LoginScreenEntry
 import com.gorman.chatroom.ui.ui.screens.auth.SignUpScreenEntry
-import com.gorman.chatroom.ui.ui.screens.call.CallScreenEntry
-import com.gorman.chatroom.ui.ui.screens.main.chats.ChatConversationScreenEntry
-import com.gorman.chatroom.ui.ui.screens.main.groups.GroupConversationScreenEntry
+import com.gorman.feature_calls.ui.screens.call.CallScreenEntry
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
+import com.gorman.core.ui.components.ErrorLoading
+import com.gorman.core.ui.navigation.Destination
+import com.gorman.feature_calls.service.CallPermissionsWrapper
+import com.gorman.feature_chats.ui.screens.chats.ChatConversationScreenEntry
+import com.gorman.feature_chats.ui.screens.groups.GroupConversationScreenEntry
 
 @Composable
 fun AppNavigation(

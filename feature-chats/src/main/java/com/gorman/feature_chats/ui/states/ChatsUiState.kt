@@ -1,6 +1,6 @@
 package com.gorman.feature_chats.ui.states
 
-import com.gorman.chatroom.domain.models.ChatPreviewData
+import com.gorman.core.domain.models.ChatPreviewData
 
 sealed class ChatsUiState {
     object Loading: ChatsUiState()

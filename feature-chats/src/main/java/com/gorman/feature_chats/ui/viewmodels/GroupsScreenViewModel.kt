@@ -3,6 +3,7 @@ package com.gorman.feature_chats.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gorman.core.domain.models.GroupPreviewData
+import com.gorman.core.domain.repository.SettingsRepository
 import com.gorman.feature_chats.domain.usecases.FindUserByGroupIdUseCase
 import com.gorman.feature_chats.domain.usecases.GetMessagesUseCase
 import com.gorman.feature_chats.domain.usecases.GetUnreadMessagesQuantityUseCase
@@ -21,11 +22,23 @@ class GroupsScreenViewModel @Inject constructor(
     private val getMessagesUseCase: GetMessagesUseCase,
     private val findUserByGroupIdUseCase: FindUserByGroupIdUseCase,
     private val getUnreadMessagesQuantityUseCase: GetUnreadMessagesQuantityUseCase,
-    private val getUserGroupsUseCase: GetUserGroupsUseCase
+    private val getUserGroupsUseCase: GetUserGroupsUseCase,
+    private val settingsRepository: SettingsRepository
 ): ViewModel() {
 
     private val _groupUiState = MutableStateFlow<GroupsUiState>(GroupsUiState.Idle)
     val groupUiState = _groupUiState.asStateFlow()
+
+    private val _userId = MutableStateFlow("")
+    val userId = _userId.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            settingsRepository.userIdFlow.collect {
+                _userId.value = it
+            }
+        }
+    }
 
     fun loadAllGroups(userId: String) {
         viewModelScope.launch {

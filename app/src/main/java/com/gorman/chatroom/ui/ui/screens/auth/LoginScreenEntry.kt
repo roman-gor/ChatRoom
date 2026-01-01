@@ -44,11 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gorman.chatroom.R
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
-import com.gorman.chatroom.ui.ui.components.LeadingIconMenu
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
+import com.gorman.core.R
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
+import com.gorman.core.ui.components.LeadingIconMenu
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.theme.ChatRoomTheme
 
 @Composable
 fun LoginScreenEntry(

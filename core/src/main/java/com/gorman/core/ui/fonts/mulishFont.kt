@@ -2,7 +2,7 @@ package com.gorman.core.ui.fonts
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import com.gorman.chatroom.R
+import com.gorman.core.R
 
 fun mulishFont(): FontFamily
 {

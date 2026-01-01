@@ -27,8 +27,7 @@ class ChatConversationViewModel @Inject constructor(
     private val sendMessageUseCase: SendMessageUseCase,
     private val findUserByChatIdUseCase: FindUserByChatIdUseCase,
     private val setupNewConversationUseCase: SetupNewConversationUseCase,
-    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase,
-    private val startCallUseCase: StartCallUseCase
+    private val markMessagesAsReadUseCase: MarkMessagesAsReadUseCase
 ): ViewModel() {
 
     private val _messages = MutableStateFlow<List<MessagesData>>(emptyList())
@@ -85,13 +84,7 @@ class ChatConversationViewModel @Inject constructor(
 
     fun startCall(targetId: String, isVideoCall: Boolean) {
         viewModelScope.launch {
-            val success = startCallUseCase(targetId, isVideoCall)
-            if (success) {
-                _startCallEvent.emit(CallStartEvent(targetId, isVideoCall))
-            }
-            else {
-                Log.e("ChatConversationViewModel", "Ошибка при запуске звонка")
-            }
+            _startCallEvent.emit(CallStartEvent(targetId, isVideoCall))
         }
     }
 }

@@ -2,11 +2,11 @@ package com.gorman.chatroom.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.UsersData
-import com.gorman.chatroom.domain.usecases.CurrentUserDataUseCase
+import com.gorman.core.R
 import com.gorman.chatroom.domain.usecases.UpdateUserDataUseCase
 import com.gorman.chatroom.ui.states.ProfileUiState
+import com.gorman.core.domain.models.UsersData
+import com.gorman.feature_chats.domain.usecases.CurrentUserDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

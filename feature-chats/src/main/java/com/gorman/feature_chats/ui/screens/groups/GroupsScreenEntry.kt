@@ -40,18 +40,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.gorman.chatroom.R
-import com.gorman.chatroom.domain.models.GroupPreviewData
-import com.gorman.chatroom.ui.states.GroupsUiState
-import com.gorman.chatroom.ui.ui.components.ErrorLoading
-import com.gorman.chatroom.ui.ui.components.LoadingStub
-import com.gorman.chatroom.ui.ui.components.formatMessageTimestamp
-import com.gorman.chatroom.ui.ui.components.parseIso
-import com.gorman.chatroom.ui.ui.fonts.mulishFont
+import com.gorman.core.R
 import com.gorman.feature_chats.ui.screens.chats.TextField
-import com.gorman.chatroom.ui.ui.theme.ChatRoomTheme
-import com.gorman.chatroom.ui.viewmodel.GroupsScreenViewModel
-import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
+import com.gorman.core.domain.models.GroupPreviewData
+import com.gorman.core.ui.components.ErrorLoading
+import com.gorman.core.ui.components.LoadingStub
+import com.gorman.core.ui.components.formatMessageTimestamp
+import com.gorman.core.ui.components.parseIso
+import com.gorman.core.ui.fonts.mulishFont
+import com.gorman.core.ui.theme.ChatRoomTheme
+import com.gorman.feature_chats.ui.states.GroupsUiState
+import com.gorman.feature_chats.ui.viewmodels.GroupsScreenViewModel
+import kotlin.collections.sortedByDescending
 
 data class GroupsScreenEntry(
     val groupName: String,
@@ -61,10 +61,9 @@ data class GroupsScreenEntry(
 @Composable
 fun GroupsScreenEntry(
     groupsViewModel: GroupsScreenViewModel = hiltViewModel(),
-    mainScreenViewModel: MainScreenViewModel = hiltViewModel(),
     onItemClick: (GroupsScreenEntry) -> Unit
 ) {
-    val userId by mainScreenViewModel.userId.collectAsStateWithLifecycle()
+    val userId by groupsViewModel.userId.collectAsStateWithLifecycle()
     val uiState by groupsViewModel.groupUiState.collectAsStateWithLifecycle()
     LaunchedEffect(userId) {
         groupsViewModel.loadAllGroups(userId)
@@ -126,9 +125,11 @@ fun GroupPreviewItem(item: GroupPreviewData?,
             .clickable(
                 onClick = {
                     if (item?.groupId != null && getterUsers != null && item.groupName != null) {
+                        val name = item.groupName ?: ""
+                        val groupId = item.groupId ?: ""
                         onItemClick(GroupsScreenEntry(
-                            groupName = item.groupName,
-                            groupId = item.groupId
+                            groupName = name,
+                            groupId = groupId
                         ))
                     }
                 }
@@ -216,7 +217,7 @@ fun OverlappingAvatars(
                     .build(),
                 contentDescription = "Profile Avatar",
                 placeholder = painterResource(R.drawable.default_ava),
-                modifier = size(avatarSize)
+                modifier = Modifier.size(avatarSize)
                     .clip(CircleShape)
                     .border(2.dp, Color.White, CircleShape),
                 contentScale = ContentScale.Crop
@@ -224,7 +225,7 @@ fun OverlappingAvatars(
         }
         if (remainingUsersCount > 0) {
             Box(
-                modifier = size(avatarSize)
+                modifier = Modifier.size(avatarSize)
                     .clip(CircleShape)
                     .border(1.dp, MaterialTheme.colorScheme.secondary, CircleShape)
                     .background(MaterialTheme.colorScheme.onSecondary),

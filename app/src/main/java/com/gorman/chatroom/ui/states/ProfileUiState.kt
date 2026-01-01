@@ -1,6 +1,6 @@
 package com.gorman.chatroom.ui.states
 
-import com.gorman.chatroom.domain.models.UsersData
+import com.gorman.core.domain.models.UsersData
 
 sealed class ProfileUiState {
     object Loading: ProfileUiState()

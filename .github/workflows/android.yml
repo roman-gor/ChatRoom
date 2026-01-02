@@ -47,20 +47,22 @@ jobs:
         run: chmod +x gradlew
 
       - name: Decode Google Services JSON
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-            echo "Error: GOOGLE_SERVICES_JSON secret is empty!"
+          echo "Secret length: ${#GOOGLE_SERVICES_JSON}"
+
+          if [ -z "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo "Error: Secret GOOGLE_SERVICES_JSON is empty or not found!"
             exit 1
           fi
-          mkdir -p app
-          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
-          if [ ! -s app/google-services.json ]; then
-            echo "Error: app/google-services.json is empty or was not created!"
-            exit 1
-          fi
-          echo "File successfully created. Size: $(wc -c < app/google-services.json) bytes"
+
+          printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
+
+          echo "Checking file location:"
+          ls -l app/google-services.json
+
+          echo "First 10 characters of file (should be '{'): "
+          head -c 10 app/google-services.json
+        shell: bash
 
 
       - name: Build Debug APK

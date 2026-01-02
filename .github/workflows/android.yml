@@ -48,17 +48,20 @@ jobs:
 
       - name: Decode Google Services JSON
         env:
-          GOOGLE_SERVICES_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          APP_PATH="./app/google-services.json"
-          echo "$GOOGLE_SERVICES_BASE64" | base64 -d > $APP_PATH
-          cp $APP_PATH ./google-services.json
-          mkdir -p ./app/src/
-          cp $APP_PATH ./app/src/google-services.json
-          echo "Current directory: $(pwd)"
-          echo "Searching for google-services.json:"
-          find . -name "google-services.json"
-      
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "Error: GOOGLE_SERVICES_JSON secret is empty!"
+            exit 1
+          fi
+          mkdir -p app
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+          if [ ! -s app/google-services.json ]; then
+            echo "Error: app/google-services.json is empty or was not created!"
+            exit 1
+          fi
+          echo "File successfully created. Size: $(wc -c < app/google-services.json) bytes"
+
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug

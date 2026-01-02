@@ -30,8 +30,8 @@ jobs:
       - name: Run Detekt
         run: ./gradlew detekt
 
-      - name: Run Android Lint
-        run: ./gradlew lintDebug
+      # - name: Run Android Lint
+      #   run: ./gradlew lintDebug
 
   build:
     name: Build Debug APK

@@ -47,11 +47,19 @@ jobs:
         run: chmod +x gradlew
 
       - name: Decode Google Services JSON
+        if: ${{ secrets.GOOGLE_SERVICES_JSON != '' }}
         env:
           GOOGLE_SERVICES_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          echo $GOOGLE_SERVICES_BASE64 | base64 --decode > app/google-services.json
-
+          mkdir -p app/
+          echo "$GOOGLE_SERVICES_BASE64" | base64 --decode > app/google-services.json
+          if [ -f app/google-services.json ]; then
+            echo "google-services.json created successfully"
+          else
+            echo "Failed to create google-services.json"
+            exit 1
+          fi
+          
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 

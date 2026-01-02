@@ -50,12 +50,13 @@ jobs:
         env:
           GOOGLE_SERVICES_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          mkdir -p app/
-          echo "$GOOGLE_SERVICES_BASE64" | base64 -d > app/google-services.json
-          echo "Checking if file exists..."
-          ls -l app/google-services.json
-          if [ ! -s app/google-services.json ]; then
-            echo "Error: google-services.json is missing or empty!"
+          DEST_PATH="$GITHUB_WORKSPACE/app/google-services.json"
+          echo "$GOOGLE_SERVICES_BASE64" | base64 -d > "$DEST_PATH"
+          echo "Checking file at: $DEST_PATH"
+          if [ -f "$DEST_PATH" ]; then
+            echo "File exists. Size: $(stat -c%s "$DEST_PATH") bytes."
+          else
+            echo "Error: File was NOT created at $DEST_PATH"
             exit 1
           fi
 

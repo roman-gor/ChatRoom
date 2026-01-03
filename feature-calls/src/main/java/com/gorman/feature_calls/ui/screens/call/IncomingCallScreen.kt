@@ -18,12 +18,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gorman.core.R
+import com.gorman.feature_calls.ui.viewmodel.CallViewModel
 
 @Composable
 fun IncomingCallScreen(
     onAccept: () -> Unit,
-    onDecline: () -> Unit
+    onDecline: () -> Unit,
+    callViewModel: CallViewModel = hiltViewModel()
 ) {
     Box(
         modifier = Modifier
@@ -41,7 +44,10 @@ fun IncomingCallScreen(
             )
 
             Button(
-                onClick = onAccept,
+                onClick = {
+                    callViewModel.acceptCall()
+                    onAccept()
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
@@ -53,7 +59,10 @@ fun IncomingCallScreen(
             Spacer(Modifier.height(20.dp))
 
             Button(
-                onClick = onDecline,
+                onClick = {
+                    callViewModel.declineCall()
+                    onDecline()
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier
                     .fillMaxWidth(0.7f)

@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.gorman.core.R
 import com.gorman.feature_chats.ui.screens.add.AddFriendScreenEntry
@@ -20,15 +20,16 @@ import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import com.gorman.core.ui.components.ErrorLoading
 import com.gorman.core.ui.navigation.Destination
 import com.gorman.feature_calls.service.CallPermissionsWrapper
+import com.gorman.feature_calls.ui.screens.call.IncomingCallScreen
 import com.gorman.feature_chats.ui.screens.chats.ChatConversationScreenEntry
 import com.gorman.feature_chats.ui.screens.groups.GroupConversationScreenEntry
 
 @Composable
 fun AppNavigation(
+    navController: NavHostController,
     onLangChange: (String) -> Unit,
     mainScreenViewModel: MainScreenViewModel = hiltViewModel()
 ){
-    val navController = rememberNavController()
     val userId = mainScreenViewModel.userId.collectAsStateWithLifecycle().value
     val isUserIdLoaded by mainScreenViewModel.isUserIdLoaded.collectAsStateWithLifecycle()
 
@@ -99,7 +100,11 @@ fun AppNavigation(
                 onPlusClick = {},
                 onBackClick = { navController.popBackStack() },
                 onNavigateToCall = { id, isVideo ->
-                    navController.navigate(Destination.CallScreen(id, isVideo))
+                    navController.navigate(Destination.CallScreen(
+                        id = id, 
+                        isVideo = isVideo, 
+                        isCaller = true
+                    ))
                 },
                 onMoreClick = {}
             )
@@ -110,7 +115,7 @@ fun AppNavigation(
                 onPermissionsGranted = {
                     CallScreenEntry(
                         targetId = args.id,
-                        isCaller = true,
+                        isCaller = args.isCaller,
                         isVideoCall = args.isVideo,
                         onEndCall = { navController.popBackStack() }
                     )
@@ -132,6 +137,23 @@ fun AppNavigation(
                 onPhoneClick = {},
                 onBackClick = { navController.popBackStack() },
                 onMoreClick = {}
+            )
+        }
+        composable<Destination.IncomingCall> { backStackEntry ->
+            val args = backStackEntry.toRoute<Destination.IncomingCall>()
+            IncomingCallScreen(
+                onAccept = {
+                    navController.navigate(Destination.CallScreen(
+                        id = args.senderId,
+                        isVideo = args.isVideo,
+                        isCaller = false
+                    )) {
+                        popUpTo<Destination.IncomingCall> { inclusive = true }
+                    }
+                },
+                onDecline = {
+                    navController.popBackStack()
+                }
             )
         }
     }

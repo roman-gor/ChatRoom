@@ -54,8 +54,15 @@ sealed class Destination {
         val groupName: String,
         val memberList: String? = null
     ): Destination()
+
     @Serializable data class CallScreen(
         val id: String,
+        val isVideo: Boolean,
+        val isCaller: Boolean
+    ): Destination()
+
+    @Serializable data class IncomingCall(
+        val senderId: String,
         val isVideo: Boolean
     ): Destination()
 
@@ -63,5 +70,4 @@ sealed class Destination {
         val bottomNavItems: List<NavItem> = listOf(Chats, Groups, Profile, More)
         val addItems: List<NavItem> = listOf(AddFriend, AddGroup)
     }
-
 }

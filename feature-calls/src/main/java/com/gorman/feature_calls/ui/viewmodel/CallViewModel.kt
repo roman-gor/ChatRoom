@@ -80,4 +80,16 @@ class CallViewModel @Inject constructor(
         _isScreenSharing.value = !isScreenSharing.value
         serviceRepository.toggleScreenShare(isScreenSharing.value)
     }
+
+    fun acceptCall() {
+        viewModelScope.launch {
+            serviceRepository.acceptCall()
+        }
+    }
+
+    fun declineCall() {
+        viewModelScope.launch {
+            serviceRepository.sendEndCall()
+        }
+    }
 }

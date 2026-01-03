@@ -1,6 +1,7 @@
 package com.gorman.chatroom
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.LocaleManager
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -28,7 +30,11 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.gorman.chatroom.ui.navigation.AppNavigation
 import com.gorman.chatroom.ui.viewmodel.MainScreenViewModel
 import com.gorman.chatroom.ui.viewmodel.MoreScreenViewModel
+import com.gorman.core.domain.models.CallModel
+import com.gorman.core.domain.models.CallModelType
+import com.gorman.core.ui.navigation.Destination
 import com.gorman.core.ui.theme.ChatRoomTheme
+import com.gorman.feature_calls.service.CallService
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 
@@ -46,16 +52,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel: MoreScreenViewModel = hiltViewModel()
             val settingsState by viewModel.uiState.collectAsStateWithLifecycle()
+            val navController = rememberNavController()
+            CallService.listener = object : CallService.Listener {
+                override fun onCallReceived(model: CallModel) {
+                    val isVideo = model.type == CallModelType.StartVideoCall
+                    navController.navigate(Destination.IncomingCall(
+                        senderId = model.sender ?: "",
+                        isVideo = isVideo
+                    ))
+                }
+            }
             ChatRoomTheme(darkTheme = settingsState.isDarkMode) {
                 CheckNotificationsPermission()
                 Surface (
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    AppNavigation(onLangChange = { newLang ->
-                        viewModel.changeLanguage(newLang)
-                        setLocaleAndRestart(newLang, this)
-                    })
+                    AppNavigation(
+                        navController = navController,
+                        onLangChange = { newLang ->
+                            viewModel.changeLanguage(newLang)
+                            setLocaleAndRestart(newLang, this)
+                        }
+                    )
                 }
             }
         }
@@ -82,6 +101,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("ComposeUnstableReceiver")
     @OptIn(ExperimentalPermissionsApi::class)
     @Composable
     private fun CheckNotificationsPermission() {

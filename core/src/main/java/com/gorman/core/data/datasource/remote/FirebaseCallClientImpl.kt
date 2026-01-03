@@ -26,6 +26,7 @@ class FirebaseCallClientImpl @Inject constructor(
     override fun subscribeForLatestEvent(listener: FirebaseCallClient.Listener) {
         if (clientId == null) return
         val myRef = db.child(FirebaseConstants.SIGNALING_PATH.value).child(clientId!!)
+        
         myRef.child(FirebaseConstants.LATEST_EVENT.value).addValueEventListener(object : MyEventListener() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 super.onDataChange(snapshot)
@@ -34,22 +35,27 @@ class FirebaseCallClientImpl @Inject constructor(
                 val event = try {
                     gson.fromJson(snapshot.value.toString(), CallModel::class.java)
                 } catch (e: Exception) {
-                    Log.e("FirebaseCallClient", "${e.message}")
+                    Log.e("FirebaseCallClient", "Error parsing event: ${e.message}")
                     null
                 }
 
-                event?.let { listener.onLatestEventReceived(it) }
+                if (event != null && event.sender != clientId) {
+                    snapshot.ref.removeValue()
+                    listener.onLatestEventReceived(event)
+                }
             }
         })
+
         myRef.child(FirebaseConstants.CANDIDATES.value).addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 val event = try {
                     gson.fromJson(snapshot.value.toString(), CallModel::class.java)
                 } catch (e: Exception) {
-                    Log.e("FirebaseCallClient", "${e.message}")
+                    Log.e("FirebaseCallClient", "Error parsing candidate: ${e.message}")
                     null
                 }
-                if (event != null && event.type == CallModelType.IceCandidates) {
+                
+                if (event != null && event.sender != clientId && event.type == CallModelType.IceCandidates) {
                     listener.onLatestEventReceived(event)
                 }
             }
@@ -72,14 +78,16 @@ class FirebaseCallClientImpl @Inject constructor(
                 .push()
                 .setValue(convertedMessage)
         } else {
-            if (message.type == CallModelType.Offer) {
+            if (message.type == CallModelType.Offer ||
+                message.type == CallModelType.StartVideoCall || 
+                message.type == CallModelType.StartAudioCall) {
                 targetRef.child(FirebaseConstants.CANDIDATES.value).removeValue()
-                targetRef.child(FirebaseConstants.LATEST_EVENT.value).removeValue()
             }
 
             targetRef.child(FirebaseConstants.LATEST_EVENT.value)
                 .setValue(convertedMessage)
         }
+        
         task.addOnCompleteListener { result ->
             if (continuation.isActive) {
                 continuation.resume(result.isSuccessful)

@@ -30,28 +30,32 @@ class CallRepositoryImpl @Inject constructor(
     override var listener: CallRepository.Listener? = null
     private var remoteView: SurfaceViewRenderer? = null
     private var localView: SurfaceViewRenderer? = null
+    private var currentUsername: String? = null
 
     override fun initWebRTCAndFirebase(username: String) {
+        this.currentUsername = username
         firebaseClient.setClientId(username)
         firebaseClient.subscribeForLatestEvent(object : FirebaseCallClient.Listener {
             override fun onLatestEventReceived(event: CallModel) {
+                if (event.sender == currentUsername) return
+                
                 listener?.onLatestEventReceived(event)
                 when (event.type) {
-                    CallModelType.Offer ->{
+                    CallModelType.Offer -> {
                         webRTCClient.onRemoteSessionReceived(
                             SessionDescription(SessionDescription.Type.OFFER, event.data.toString())
                         )
                         target?.let { webRTCClient.answer(it) }
                     }
-                    CallModelType.Answer ->{
+                    CallModelType.Answer -> {
                         webRTCClient.onRemoteSessionReceived(
                             SessionDescription(SessionDescription.Type.ANSWER, event.data.toString())
                         )
                     }
-                    CallModelType.IceCandidates ->{
+                    CallModelType.IceCandidates -> {
                         val candidate: IceCandidate? = try {
                             gson.fromJson(event.data.toString(), IceCandidate::class.java)
-                        }catch (_ :Exception){ null }
+                        } catch (_: Exception) { null }
                         candidate?.let { webRTCClient.addIceCandidateToPeer(it) }
                     }
                     CallModelType.EndCall -> listener?.endCall()
@@ -65,7 +69,7 @@ class CallRepositoryImpl @Inject constructor(
                 super.onAddStream(p0)
                 try {
                     p0?.videoTracks?.get(0)?.addSink(remoteView)
-                } catch (e:Exception) {
+                } catch (e: Exception) {
                     Log.e("CallRepository", "${e.message}")
                 }
             }
@@ -96,9 +100,11 @@ class CallRepositoryImpl @Inject constructor(
     }
 
     override suspend fun sendConnectionRequest(target: String, isVideoCall: Boolean): Boolean {
+        this.target = target
         val message = CallModel(
             type = if (isVideoCall) CallModelType.StartVideoCall else CallModelType.StartAudioCall,
-            target = target
+            target = target,
+            sender = currentUsername ?: ""
         )
         return firebaseClient.sendMessageToOtherClient(message)
     }
@@ -135,7 +141,7 @@ class CallRepositoryImpl @Inject constructor(
 
     override fun onTransferEventToSocket(data: CallModel) {
         CoroutineScope(Dispatchers.IO).launch {
-            firebaseClient.sendMessageToOtherClient(data)
+            firebaseClient.sendMessageToOtherClient(data.copy(sender = currentUsername))
         }
     }
 
@@ -144,9 +150,9 @@ class CallRepositoryImpl @Inject constructor(
     }
 
     override fun toggleScreenShare(isStarting: Boolean) {
-        if (isStarting){
+        if (isStarting) {
             webRTCClient.startScreenCapturing()
-        }else{
+        } else {
             webRTCClient.stopScreenCapturing()
         }
     }

@@ -19,6 +19,12 @@ import com.gorman.core.domain.models.isValid
 import com.gorman.feature_calls.data.datasource.webrtc.CallAudioManager
 import com.gorman.feature_calls.domain.repository.CallRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
@@ -32,7 +38,8 @@ class CallService: Service(), CallRepository.Listener {
     private lateinit var notificationManager: NotificationManager
     private lateinit var callAudioManager: CallAudioManager
     private var isPreviousCallStateVideo = true
-
+    
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     companion object {
         var listener: Listener? = null
@@ -209,12 +216,18 @@ class CallService: Service(), CallRepository.Listener {
                 Log.e(TAG, "Error upgrading foreground service", e)
             }
         }
+        
         if (::callRepository.isInitialized && target != null && localSurfaceView != null && remoteSurfaceView != null) {
             callRepository.setTarget(target)
-            callRepository.initLocalSurfaceView(localSurfaceView!!, isVideoCall)
-            callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
-            if (!isCaller) {
-                callRepository.startCall()
+            serviceScope.launch {
+                delay(500)
+                withContext(Dispatchers.Main) {
+                    callRepository.initLocalSurfaceView(localSurfaceView!!, isVideoCall)
+                    callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
+                    if (!isCaller) {
+                        callRepository.startCall()
+                    }
+                }
             }
         }
     }

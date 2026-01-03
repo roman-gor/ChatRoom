@@ -10,6 +10,7 @@ import com.google.gson.Gson
 import com.gorman.core.domain.models.CallModel
 import com.gorman.core.domain.models.CallModelType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraVideoCapturer
@@ -18,7 +19,6 @@ import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.ScreenCapturerAndroid
@@ -26,6 +26,7 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoCapturer
+import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,9 +60,9 @@ class WebRTCClient @Inject constructor(
             .createIceServer()
     )
 
-    private val localVideoSource by lazy { peerConnectionFactory.createVideoSource(false) }
-    private val localAudioSource by lazy { peerConnectionFactory.createAudioSource(MediaConstraints()) }
-    
+    private var localVideoSource: VideoSource? = null
+    private var localAudioSource: AudioSource? = null
+
     private var videoCapturer: CameraVideoCapturer? = null 
     private var surfaceTextureHelper: SurfaceTextureHelper? = null
 
@@ -79,7 +80,7 @@ class WebRTCClient @Inject constructor(
 
     private var permissionIntent: Intent? = null
     private var screenCapturer: VideoCapturer? = null
-    private val localScreenVideoSource by lazy { peerConnectionFactory.createVideoSource(false) }
+    private var localScreenVideoSource: VideoSource? = null
     private var localScreenShareVideoTrack: VideoTrack? = null
 
     init {
@@ -180,23 +181,28 @@ class WebRTCClient @Inject constructor(
 
     fun closeConnection() {
         try {
-            localVideoTrack?.setEnabled(false)
-            
             videoCapturer?.stopCapture()
             videoCapturer?.dispose()
             videoCapturer = null
 
-            screenCapturer?.stopCapture()
-            screenCapturer?.dispose()
-            screenCapturer = null
+            localVideoTrack?.dispose()
+            localVideoTrack = null
+
+            localAudioTrack?.dispose()
+            localAudioTrack = null
+
+            localVideoSource?.dispose()
+            localVideoSource = null
+            localAudioSource?.dispose()
+            localAudioSource = null
+
+            localScreenVideoSource?.dispose()
+            localScreenVideoSource = null
 
             surfaceTextureHelper?.dispose()
             surfaceTextureHelper = null
 
             peerConnection?.close()
-
-            localVideoTrack = null
-            localAudioTrack = null
             peerConnection = null
         } catch (e: Exception) {
             Log.e("WebRTCClient", "Error closing connection: ${e.message}")
@@ -238,6 +244,7 @@ class WebRTCClient @Inject constructor(
     }
 
     private fun startLocalStreaming(localView: SurfaceViewRenderer, isVideoCall: Boolean) {
+        localAudioSource = peerConnectionFactory.createAudioSource(MediaConstraints())
         localAudioTrack = peerConnectionFactory.createAudioTrack(localTrackId + "_audio", localAudioSource)
         peerConnection?.addTrack(localAudioTrack, listOf(localStreamId))
 
@@ -247,14 +254,19 @@ class WebRTCClient @Inject constructor(
     }
 
     private fun startCapturingCamera(localView: SurfaceViewRenderer) {
+        if (peerConnection == null) {
+            Log.e("WebRTCClient", "PeerConnection is NULL! Cannot add video track.")
+            return
+        }
         surfaceTextureHelper?.dispose()
-        surfaceTextureHelper = SurfaceTextureHelper.create(
-            "CaptureThread", eglBaseContext
-        )
+        surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", eglBaseContext)
+
+        localVideoSource = peerConnectionFactory.createVideoSource(false)
 
         videoCapturer = getVideoCapturer(context)
+
         videoCapturer?.initialize(
-            surfaceTextureHelper, context, localVideoSource.capturerObserver
+            surfaceTextureHelper, context, localVideoSource!!.capturerObserver
         )
 
         videoCapturer?.startCapture(720, 480, 20)
@@ -292,9 +304,10 @@ class WebRTCClient @Inject constructor(
             "ScreenCaptureThread", eglBaseContext
         )
 
+        localScreenVideoSource = peerConnectionFactory.createVideoSource(false)
         screenCapturer = createScreenCapturer()
         screenCapturer!!.initialize(
-            surfaceTextureHelper, context, localScreenVideoSource.capturerObserver
+            surfaceTextureHelper, context, localScreenVideoSource!!.capturerObserver
         )
         screenCapturer!!.startCapture(screenWidthPixels, screenHeightPixels, 15)
 

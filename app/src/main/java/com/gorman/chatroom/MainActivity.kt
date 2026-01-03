@@ -62,6 +62,15 @@ class MainActivity : ComponentActivity() {
                     ))
                 }
             }
+            CallService.endCallListener = object : CallService.EndCallListener {
+                override fun onCallEnded() {
+                    runOnUiThread {
+                        navController.navigate(Destination.MainGraph) {
+                            popUpTo<Destination.MainGraph> { inclusive = true }
+                        }
+                    }
+                }
+            }
             ChatRoomTheme(darkTheme = settingsState.isDarkMode) {
                 CheckNotificationsPermission()
                 Surface (
@@ -78,6 +87,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CallService.listener = null
+        CallService.endCallListener = null
     }
 
     private fun setLocaleAndRestart(lang: String, context: Context) {

@@ -19,12 +19,6 @@ import com.gorman.core.domain.models.isValid
 import com.gorman.feature_calls.data.datasource.webrtc.CallAudioManager
 import com.gorman.feature_calls.domain.repository.CallRepository
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
@@ -35,11 +29,11 @@ class CallService: Service(), CallRepository.Listener {
     @Inject lateinit var callRepository: CallRepository
     private var isServiceRunning = false
 
+    private var savedUsername: String? = null
+
     private lateinit var notificationManager: NotificationManager
     private lateinit var callAudioManager: CallAudioManager
     private var isPreviousCallStateVideo = true
-    
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     companion object {
         var listener: Listener? = null
@@ -110,15 +104,19 @@ class CallService: Service(), CallRepository.Listener {
     }
 
     private fun handleStartService(incomingIntent: Intent) {
+        val username = incomingIntent.getStringExtra("username")
+        if (username != null) {
+            savedUsername = username
+        }
         if (!isServiceRunning) {
             isServiceRunning = true
-            val username = incomingIntent.getStringExtra("username")
             startServiceWithNotification()
             callAudioManager.start()
-            if (::callRepository.isInitialized && username != null) {
-                callRepository.listener = this
-                callRepository.initWebRTCAndFirebase(username)
-            }
+        }
+        savedUsername?.let { name ->
+            callRepository.listener = this
+            callRepository.initWebRTCAndFirebase(name)
+            Log.d(TAG, "WebRTC Client re-initialized for user: $name")
         }
     }
 
@@ -200,6 +198,9 @@ class CallService: Service(), CallRepository.Listener {
         val isVideoCall = incomingIntent.getBooleanExtra("isVideoCall", true)
         val target = incomingIntent.getStringExtra("target")
         this.isPreviousCallStateVideo = isVideoCall
+        savedUsername?.let { name ->
+            callRepository.initWebRTCAndFirebase(name)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 val serviceType = if (isVideoCall) {
@@ -216,17 +217,17 @@ class CallService: Service(), CallRepository.Listener {
                 Log.e(TAG, "Error upgrading foreground service", e)
             }
         }
-        
-        if (::callRepository.isInitialized && target != null && localSurfaceView != null && remoteSurfaceView != null) {
+
+        val localView = localSurfaceView
+        val remoteView = remoteSurfaceView
+
+        if (::callRepository.isInitialized && target != null && localView != null && remoteView != null) {
             callRepository.setTarget(target)
-            serviceScope.launch {
-                delay(500)
-                withContext(Dispatchers.Main) {
-                    callRepository.initLocalSurfaceView(localSurfaceView!!, isVideoCall)
-                    callRepository.initRemoteSurfaceView(remoteSurfaceView!!)
-                    if (!isCaller) {
-                        callRepository.startCall()
-                    }
+            localView.post {
+                callRepository.initLocalSurfaceView(localView, isVideoCall)
+                callRepository.initRemoteSurfaceView(remoteView)
+                if (!isCaller) {
+                    callRepository.startCall()
                 }
             }
         }
@@ -282,6 +283,9 @@ class CallService: Service(), CallRepository.Listener {
                 CallModelType.StartVideoCall,
                 CallModelType.StartAudioCall -> {
                     listener?.onCallReceived(data)
+                }
+                CallModelType.EndCall -> {
+                    endCall()
                 }
                 else -> Unit
             }

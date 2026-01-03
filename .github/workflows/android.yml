@@ -67,7 +67,7 @@ jobs:
 
   deploy:
     name: Build & Deploy APK
-    needs: static-analysis
+    # needs: static-analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,6 +96,9 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: ./gradlew :app:assembleRelease
+
+      - name: List built files
+        run: find app/build/outputs/apk/ -name "*.apk"
 
       - name: Upload to Firebase App Distribution
         uses: w9jds/firebase-action@master

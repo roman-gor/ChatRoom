@@ -34,8 +34,8 @@ jobs:
       #   run: ./gradlew lintDebug
 
   build:
-    name: Build Debug APK
-    # needs: static-analysis
+    name: Build APK
+    needs: static-analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,25 +51,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Decode Google Services JSON
+        env:
+          GOOGLE_SERVICES_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          echo "Secret length: ${#GOOGLE_SERVICES_JSON}"
-
-          if [ -z "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
-            echo "Error: Secret GOOGLE_SERVICES_JSON is empty or not found!"
-            exit 1
-          fi
-
-          printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
-
-          echo "Checking file location:"
-          ls -l app/google-services.json
-
-          echo "First 10 characters of file (should be '{'): "
-          head -c 10 app/google-services.json
-        shell: bash
+          echo $GOOGLE_SERVICES_BASE64 | base64 --decode > app/google-services.json
 
 
-      - name: Build Debug APK
+      - name: Build APK
         run: ./gradlew assembleDebug
 
       - name: Upload APK
